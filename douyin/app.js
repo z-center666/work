@@ -2967,7 +2967,7 @@ function registerServiceWorker() {
     location.hostname === '127.0.0.1';
   if (!secure) return;
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
 }
 
