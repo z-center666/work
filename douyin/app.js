@@ -2940,7 +2940,10 @@ function bindEvents() {
       addTagsFromInput();
     }
   });
-  el.tagDoneBtn.addEventListener('click', closeTagEditor);
+  el.tagDoneBtn.addEventListener('click', () => {
+    if (el.tagInput.value.trim()) addTagsFromInput();
+    closeTagEditor();
+  });
   el.autoTagBtn.addEventListener('click', async () => {
     const item = findItem(state.tagEditorId);
     if (!item) return;

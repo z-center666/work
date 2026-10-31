@@ -2,7 +2,7 @@
 
 /* 视频收藏 Service Worker：只缓存应用外壳，不缓存视频与接口请求。 */
 
-const VERSION = 'douyin-pocket-v3';
+const VERSION = 'douyin-pocket-v4';
 const SHELL = [
   './',
   './index.html',
