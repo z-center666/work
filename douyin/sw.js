@@ -1,8 +1,8 @@
 'use strict';
 
-/* 抖藏 Service Worker：只缓存应用外壳，不缓存视频与接口请求。 */
+/* 视频收藏 Service Worker：只缓存应用外壳，不缓存视频与接口请求。 */
 
-const VERSION = 'douyin-pocket-v1';
+const VERSION = 'douyin-pocket-v2';
 const SHELL = [
   './',
   './index.html',

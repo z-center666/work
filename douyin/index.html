@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>抖藏 · 手机收藏</title>
-<meta name="description" content="把抖音收藏的视频收进手机：本地保存、下载视频、提取文案和总结，可选同步飞书。">
+<title>视频收藏 · 手机端</title>
+<meta name="description" content="把喜欢的视频收进手机：本地保存、下载视频、提取文案和总结，可选同步飞书。">
 <meta name="theme-color" content="#0B0B0F" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F4F6" media="(prefers-color-scheme: light)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="抖藏">
+<meta name="apple-mobile-web-app-title" content="视频收藏">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -24,8 +24,8 @@
         <svg viewBox="0 0 24 24"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2a.8.8 0 0 1-1.25.66L12 16.6l-5.25 3.76a.8.8 0 0 1-1.25-.66V5.5a1 1 0 0 1 1-1Z"/></svg>
       </span>
       <span class="brand-text">
-        <span class="brand-name">抖藏</span>
-        <span class="brand-sub">手机收藏</span>
+        <span class="brand-name">视频收藏</span>
+        <span class="brand-sub">手机端</span>
       </span>
     </div>
     <div class="topbar-actions">
@@ -42,12 +42,12 @@
         <h2 id="addTitle">添加收藏</h2>
         <span class="soft-tag" id="storageTag">仅存本机</span>
       </div>
-      <textarea id="linkInput" rows="2" placeholder="粘贴抖音分享链接或整段分享口令…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <textarea id="linkInput" rows="2" placeholder="粘贴视频分享链接（可一次多条）或整段分享口令…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
       <div class="add-row">
         <button type="button" class="ghost-btn" id="pasteBtn">从剪贴板粘贴</button>
         <button type="button" class="primary-btn" id="addBtn">存入收藏</button>
       </div>
-      <p class="hint" id="addHint">点「存入收藏」会顺便读取标题和封面；文案和总结稍后再提取，不影响先收进来。</p>
+      <p class="hint" id="addHint">一次可以粘贴多条链接，会逐条读取标题和封面。点「存入收藏」先收进来，文案和总结稍后再提取。</p>
     </section>
 
     <section class="list-head" aria-label="收藏列表">
@@ -71,7 +71,7 @@
         <svg viewBox="0 0 24 24"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2a.8.8 0 0 1-1.25.66L12 16.6l-5.25 3.76a.8.8 0 0 1-1.25-.66V5.5a1 1 0 0 1 1-1Z"/></svg>
       </div>
       <h3>还没有收藏</h3>
-      <p>在抖音里复制分享链接，粘贴到上面即可。安卓手机也可以在抖音分享面板里直接选「抖藏」。</p>
+      <p>在抖音、快手等 App 里复制分享链接，粘贴到上面即可；多条链接可以一次粘贴。安卓手机也可以在分享面板里直接选「视频收藏」。</p>
     </section>
 
     <footer class="page-foot">
@@ -152,13 +152,51 @@
         <details class="steps">
           <summary>飞书自动化怎么建</summary>
           <ol>
-            <li>打开多维表格「抖音收藏」，右上角点「自动化」→ 新建。</li>
+            <li>打开存放收藏的多维表格，右上角点「自动化」→ 新建。</li>
             <li>触发条件选「接收到 Webhook 时」，复制生成的地址。</li>
             <li>添加操作「新增记录」，目标选这张表，把 Webhook 的字段分别映射到：标题、视频链接、描述文案、口播文案、视频总结、作者、封面、处理状态、收藏时间、同步时间。</li>
             <li>字段名保持中文；收藏时间和同步时间传的是毫秒时间戳，处理状态只能是「处理中 / 已完成 / 失败」。</li>
             <li>保存并启用自动化，再回到这里点「发送测试」。</li>
           </ol>
           <p class="hint">示例 JSON 里的字段就是实际发送的内容，可以直接对照映射。想避免重复记录，可以在自动化里先按「视频链接」查找记录：找到就更新，找不到再新增。</p>
+        </details>
+      </section>
+
+      <section class="setting-group">
+        <h3>从飞书加载</h3>
+        <p class="hint">飞书接口不允许网页直接读取。搭一个免费的 Cloudflare Worker 中转后，每次打开应用就会自动把表格里的链接合并到本机；不搭也不影响本机使用。</p>
+        <label class="field">
+          <span class="field-name">中转地址</span>
+          <input id="feishuReadUrl" type="url" inputmode="url" placeholder="https://…workers.dev/records" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">
+          <span class="field-name">中转口令</span>
+          <input id="feishuReadToken" type="password" placeholder="与 Worker 里的 RELAY_TOKEN 一致" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">
+          <span class="field-name">打开应用时</span>
+          <select id="autoPullFeishu">
+            <option value="open">自动从飞书加载</option>
+            <option value="off">不自动加载</option>
+          </select>
+        </label>
+        <div class="setting-actions wrap">
+          <button type="button" class="ghost-btn small" id="pullFeishuBtn">立即从飞书加载</button>
+          <button type="button" class="ghost-btn small" id="testFeishuBtn">测试连接</button>
+        </div>
+        <p class="hint" id="feishuReadState">还没有配置中转。</p>
+        <details class="steps">
+          <summary>Cloudflare Worker 怎么搭（一次性）</summary>
+          <ol>
+            <li>在飞书开放平台创建「企业自建应用」，权限里添加「查看多维表格」（<code>bitable:app:readonly</code>），创建版本并发布，等管理员通过。</li>
+            <li>打开这张多维表格，点右上角「…」→「添加文档应用」，把刚建的应用加进来，权限选可阅读。</li>
+            <li>记下应用的 App ID、App Secret；从多维表格地址里记下 <code>/base/</code> 后面的 app_token，以及 <code>?table=</code> 后面的 table_id。</li>
+            <li>打开 Cloudflare 控制台 → Workers &amp; Pages → 创建 Worker，把中转代码整段粘贴进去并部署。</li>
+            <li>在 Worker 的变量里添加 FEISHU_APP_ID、FEISHU_APP_SECRET、FEISHU_APP_TOKEN、FEISHU_TABLE_ID、RELAY_TOKEN（自己设一个长口令）。App Secret 只放这里，不要填到网页里。</li>
+            <li>把 Worker 地址加上 <code>/records</code> 填到上面的「中转地址」，口令填到「中转口令」，点「测试连接」。</li>
+          </ol>
+          <p class="hint"><button type="button" class="link-btn" id="copyWorkerBtn">复制中转代码</button>　<a class="link-btn" href="./relay/worker.js" target="_blank" rel="noopener">打开代码文件 ↗</a></p>
+          <p class="hint">如果以后换了访问地址，在 Worker 里加一个 ALLOW_ORIGIN 变量，填新的网页地址。</p>
         </details>
       </section>
 
@@ -181,8 +219,8 @@
           <summary>安卓：用系统分享直接存入</summary>
           <ol>
             <li>用 Chrome 打开本页，菜单里选「安装应用」或「添加到主屏幕」。</li>
-            <li>在抖音点分享 → 更多 → 选「抖藏」。</li>
-            <li>第一次可能需要在系统分享面板里把「抖藏」固定到常用。</li>
+            <li>在抖音点分享 → 更多 → 选「视频收藏」。</li>
+            <li>第一次可能需要在系统分享面板里把「视频收藏」固定到常用。</li>
           </ol>
         </details>
       </section>
@@ -208,7 +246,7 @@
 
       <section class="setting-group about">
         <h3>关于</h3>
-        <p class="hint">抖藏是纯手机端页面：解析、转写、总结都在浏览器里完成，不需要电脑在线。图文和视频版权归原作者所有，请仅作个人收藏。</p>
+        <p class="hint">视频收藏是纯手机端页面：解析、转写、总结都在浏览器里完成，不需要电脑在线。图文和视频版权归原作者所有，请仅作个人收藏。</p>
         <p class="hint" id="versionLine">版本 1.0 · 本机存储</p>
       </section>
     </div>

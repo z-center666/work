@@ -324,6 +324,10 @@ svg {
   font-size: 13px;
   text-decoration: none;
   padding: 8px 2px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .link-btn:active { color: var(--text); }

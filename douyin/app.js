@@ -1,7 +1,7 @@
 'use strict';
 
 /* =========================================================
-   抖藏 · 纯手机端收藏 PWA
+   视频收藏 · 纯手机端收藏 PWA
    - 收藏与文案都存本机 localStorage
    - 解析：第三方公开接口；下载：浏览器直连
    - 转写/总结：硅基流动（用户自己的免费 Key）
@@ -13,6 +13,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const LS_ITEMS = 'douyin.pocket.items.v1';
 const LS_SETTINGS = 'douyin.pocket.settings.v1';
 const MAX_ITEMS = 500;
+const MAX_BATCH_ADD = 100;
 const PARSE_URL_TTL = 6 * 60 * 60 * 1000;
 
 const PLATFORMS = {
@@ -32,7 +33,12 @@ const DEFAULT_SETTINGS = {
   webhook: '',
   webhookToken: '',
   autoSync: 'off',
-  iosSave: 'share'
+  iosSave: 'share',
+  feishuReadUrl: '',
+  feishuReadToken: '',
+  autoPullFeishu: 'open',
+  feishuPulledAt: 0,
+  feishuLastSummary: ''
 };
 
 const ASR_ENDPOINT = 'https://api.siliconflow.cn/v1/audio/transcriptions';
@@ -137,7 +143,7 @@ function formatFileStamp(timestamp) {
   return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
 }
 
-function sanitizeFilename(value, fallback = '抖音视频') {
+function sanitizeFilename(value, fallback = '视频') {
   const cleaned = String(value || '')
     .replace(/[\\/:*?"<>|\r\n\t]/g, ' ')
     .replace(/#/g, ' ')
@@ -176,6 +182,29 @@ function extractUrl(text) {
   const bare = cleaned.match(/(?:v\.douyin\.com|v\.kuaishou\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|v\.m\.chenzhongtech\.com)\/[^\s"'<>，。；、）】》]+/i);
   if (bare) return normalizeUrl(bare[0]);
   return '';
+}
+
+function extractUrls(text) {
+  if (!text) return [];
+  const cleaned = String(text).replace(/[\u200b-\u200f\ufeff]/g, '');
+  const seen = new Set();
+  const urls = [];
+  const push = candidate => {
+    const url = normalizeUrl(candidate);
+    if (!url) return;
+    const key = linkKey(url);
+    if (seen.has(key)) return;
+    seen.add(key);
+    urls.push(url);
+  };
+
+  const fullRe = /https?:\/\/[^\s"'<>，。；、）】》]+/gi;
+  let match;
+  while ((match = fullRe.exec(cleaned))) push(match[0]);
+
+  const bareRe = /(?:v\.douyin\.com|v\.kuaishou\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|v\.m\.chenzhongtech\.com)\/[^\s"'<>，。；、）】》]+/gi;
+  while ((match = bareRe.exec(cleaned))) push(match[0]);
+  return urls;
 }
 
 function detectPlatform(url) {
@@ -306,6 +335,7 @@ function loadSettings() {
   state.settings = { ...DEFAULT_SETTINGS, ...(saved && typeof saved === 'object' ? saved : {}) };
   if (!['off', 'add', 'text'].includes(state.settings.autoSync)) state.settings.autoSync = 'off';
   if (!['share', 'download'].includes(state.settings.iosSave)) state.settings.iosSave = 'share';
+  if (!['open', 'off'].includes(state.settings.autoPullFeishu)) state.settings.autoPullFeishu = 'open';
 }
 
 function persistSettings() {
@@ -480,7 +510,7 @@ async function parseLink(rawText) {
   }
 
   if (platform === 'unknown') {
-    throw new AppError('没有识别到支持的平台，请粘贴抖音、快手或小红书的分享链接');
+    throw new AppError('没有识别到视频链接，请粘贴抖音、快手、小红书等平台的分享链接');
   }
 
   return parseWithBugpk(url, platform);
@@ -523,7 +553,7 @@ async function downloadBlob(url, { onProgress } = {}) {
     if (error && error.name === 'AbortError') {
       throw new AppError('下载超时，请检查网络后重试');
     }
-    throw new AppError('浏览器无法直接下载这个视频地址，可点「打开原文」后用抖音保存');
+    throw new AppError('浏览器无法直接下载这个视频地址，可点「打开原文」后在原 App 里保存');
   }
 
   try {
@@ -943,7 +973,7 @@ async function downloadItem(item, progress) {
   });
 
   progress('正在保存…');
-  const filename = sanitizeFilename(item.title || '抖音视频') + '.mp4';
+  const filename = sanitizeFilename(item.title || '视频') + '.mp4';
   const mode = await saveBlob(blob, filename, item.title || filename, 'video/mp4');
   const text = mode === 'shared' ? '已打开系统保存面板'
     : mode === 'cancelled' ? '已取消保存'
@@ -1051,7 +1081,7 @@ async function extractItem(item, progress, force) {
 function buildPayload(item, isTest = false) {
   const now = Date.now();
   return {
-    标题: item.title || (isTest ? '抖藏 · 同步测试' : '抖音收藏'),
+    标题: item.title || (isTest ? '视频收藏 · 同步测试' : '视频收藏'),
     视频链接: item.url || pageUrl(),
     描述文案: item.desc || '',
     口播文案: item.transcript || '',
@@ -1249,6 +1279,13 @@ function cacheEls() {
   el.phoneModeHint = $('#phoneModeHint');
   el.testWebhookBtn = $('#testWebhookBtn');
   el.copySampleBtn = $('#copySampleBtn');
+  el.feishuReadUrl = $('#feishuReadUrl');
+  el.feishuReadToken = $('#feishuReadToken');
+  el.autoPullFeishu = $('#autoPullFeishu');
+  el.pullFeishuBtn = $('#pullFeishuBtn');
+  el.testFeishuBtn = $('#testFeishuBtn');
+  el.copyWorkerBtn = $('#copyWorkerBtn');
+  el.feishuReadState = $('#feishuReadState');
   el.iosSave = $('#iosSave');
   el.exportBtn = $('#exportBtn');
   el.importBtn = $('#importBtn');
@@ -1557,21 +1594,8 @@ function updateDataState() {
 
 /* ---------------- 添加 ---------------- */
 
-function addFromText(rawText, source = 'paste') {
-  const url = extractUrl(rawText);
-  if (!url) {
-    showToast('没有识别到链接，请粘贴完整的分享链接');
-    return null;
-  }
-  const key = linkKey(url);
-  const existing = state.items.find(item => linkKey(item.url) === key);
-  if (existing) {
-    showToast('这条已经在收藏里');
-    flashCard(existing.id);
-    return existing;
-  }
-
-  const item = {
+function createItem(url, source) {
+  return {
     id: genId(),
     url,
     platform: detectPlatform(url),
@@ -1592,16 +1616,55 @@ function addFromText(rawText, source = 'paste') {
     syncError: '',
     error: ''
   };
+}
 
-  state.items.unshift(item);
+function addFromText(rawText, source = 'paste') {
+  const urls = extractUrls(rawText);
+  if (!urls.length) {
+    showToast('没有识别到链接，请粘贴完整的视频分享链接');
+    return [];
+  }
+
+  const knownKeys = new Set(state.items.map(item => linkKey(item.url)));
+  const added = [];
+  let skipped = 0;
+  let ignored = 0;
+  let overflow = 0;
+
+  for (const url of urls) {
+    if (added.length >= MAX_BATCH_ADD) { overflow += 1; continue; }
+    if (detectPlatform(url) === 'unknown') { ignored += 1; continue; }
+    const key = linkKey(url);
+    if (knownKeys.has(key)) { skipped += 1; continue; }
+    knownKeys.add(key);
+    added.push(createItem(url, source));
+  }
+
+  if (!added.length) {
+    if (skipped) {
+      showToast('这些链接都已经在收藏里');
+      const first = state.items.find(item => urls.some(url => linkKey(url) === linkKey(item.url)));
+      if (first) flashCard(first.id);
+    } else {
+      showToast('没有识别到视频链接，请粘贴抖音、快手、小红书等平台的分享链接');
+    }
+    return [];
+  }
+
+  state.items.unshift(...added);
   if (state.items.length > MAX_ITEMS) state.items = state.items.slice(0, MAX_ITEMS);
   persistItems();
   el.linkInput.value = '';
   renderItems();
-  flashCard(item.id);
-  showToast('已存入本机');
-  enqueueTask(item.id, 'parse', { autoSync: true });
-  return item;
+  flashCard(added[0].id);
+  added.forEach(item => enqueueTask(item.id, 'parse', { autoSync: true }));
+
+  let message = added.length > 1 ? `已加入 ${added.length} 条` : '已存入本机';
+  if (skipped) message += `，${skipped} 条已存在`;
+  if (ignored) message += `，忽略 ${ignored} 个非视频链接`;
+  if (overflow) message += `，一次最多 ${MAX_BATCH_ADD} 条`;
+  showToast(message);
+  return added;
 }
 
 /* ---------------- 剪贴板 ---------------- */
@@ -1640,7 +1703,11 @@ function fillSettingsForm() {
   el.webhookToken.value = state.settings.webhookToken || '';
   el.autoSync.value = state.settings.autoSync || 'off';
   el.iosSave.value = state.settings.iosSave || 'share';
+  el.feishuReadUrl.value = state.settings.feishuReadUrl || '';
+  el.feishuReadToken.value = state.settings.feishuReadToken || '';
+  el.autoPullFeishu.value = state.settings.autoPullFeishu || 'open';
   updateKeyState();
+  updateFeishuReadState();
   updateDataState();
 }
 
@@ -1653,8 +1720,12 @@ function syncSettingsFromForm() {
   state.settings.webhookToken = el.webhookToken.value.trim();
   state.settings.autoSync = el.autoSync.value;
   state.settings.iosSave = el.iosSave.value;
+  state.settings.feishuReadUrl = el.feishuReadUrl.value.trim();
+  state.settings.feishuReadToken = el.feishuReadToken.value.trim();
+  state.settings.autoPullFeishu = el.autoPullFeishu.value;
   persistSettings();
   updateKeyState();
+  updateFeishuReadState();
 }
 
 function updateKeyState() {
@@ -1742,10 +1813,10 @@ async function testWebhook() {
   el.testWebhookBtn.textContent = '发送中…';
   const item = {
     id: 'test',
-    title: '抖藏 · 同步测试',
+    title: '视频收藏 · 同步测试',
     url: pageUrl(),
-    desc: '这是一条来自抖藏的测试记录，可以直接删除。',
-    author: '抖藏',
+    desc: '这是一条来自视频收藏的测试记录，可以直接删除。',
+    author: '视频收藏',
     cover: '',
     transcript: '',
     summary: '',
@@ -1757,6 +1828,239 @@ async function testWebhook() {
   if (result.state === 'done') showToast('已发送，表格里应新增一条测试记录', 4200);
   else if (result.state === 'unconfirmed') showToast('已发送，但浏览器读不到返回，请到表格确认', 4600);
   else showToast(result.message, 4600);
+}
+
+/* ---------------- 从飞书加载 ---------------- */
+
+function plainText(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) {
+    return value.map(plainText).filter(Boolean).join('');
+  }
+  if (typeof value === 'object') {
+    return plainText(value.text) || plainText(value.name) || plainText(value.link) ||
+      plainText(value.url) || '';
+  }
+  return '';
+}
+
+function httpUrl(value) {
+  const text = plainText(value);
+  return /^https?:\/\//i.test(text) ? text : '';
+}
+
+function pickField(fields, names) {
+  if (!fields || typeof fields !== 'object') return '';
+  for (const name of names) {
+    if (!Object.prototype.hasOwnProperty.call(fields, name)) continue;
+    const value = plainText(fields[name]);
+    if (value) return value;
+  }
+  return '';
+}
+
+function toTimestamp(value) {
+  if (value === null || value === undefined || value === '') return 0;
+  if (typeof value === 'number') return value > 1e12 ? value : (value > 1e9 ? value * 1000 : 0);
+  if (typeof value === 'string' && /^\d+$/.test(value.trim())) return toTimestamp(Number(value));
+  const time = Date.parse(value);
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function normalizePulledRecord(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const fields = raw.fields && typeof raw.fields === 'object' ? raw.fields : raw;
+  const url = extractUrl(
+    pickField(fields, ['视频链接', '链接', 'url', 'URL', 'link']) ||
+    pickField(raw, ['视频链接', '链接', 'url', 'URL', 'link'])
+  );
+  if (!url) return null;
+  return {
+    url,
+    title: pickField(fields, ['标题', 'title', '名称']) || pickField(raw, ['title']),
+    desc: pickField(fields, ['描述文案', '描述', 'desc', 'description']) || pickField(raw, ['desc']),
+    transcript: pickField(fields, ['口播文案', '文案', 'transcript']) || pickField(raw, ['transcript']),
+    summary: pickField(fields, ['视频总结', '总结', 'summary']) || pickField(raw, ['summary']),
+    author: pickField(fields, ['作者', 'author']) || pickField(raw, ['author']),
+    cover: httpUrl(pickField(fields, ['封面', 'cover']) || pickField(raw, ['cover'])),
+    savedAt: toTimestamp(raw.savedAt || raw.addedAt || fields['收藏时间']),
+    syncedAt: toTimestamp(raw.syncedAt || fields['同步时间'])
+  };
+}
+
+async function fetchFeishuRecords() {
+  const url = String(state.settings.feishuReadUrl || '').trim();
+  if (!url) throw new AppError('还没有填写飞书中转地址');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+  try {
+    const headers = {};
+    if (state.settings.feishuReadToken) {
+      headers.Authorization = 'Bearer ' + state.settings.feishuReadToken;
+    }
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+      credentials: 'omit',
+      mode: 'cors',
+      signal: controller.signal
+    });
+    if (response.status === 401 || response.status === 403) {
+      throw new AppError('中转口令不正确，请和 Worker 里的 RELAY_TOKEN 核对');
+    }
+    if (!response.ok) {
+      throw new AppError('读取飞书失败，请检查中转地址是否带 /records');
+    }
+    const data = await response.json();
+    const list = Array.isArray(data)
+      ? data
+      : (Array.isArray(data.records) ? data.records : (Array.isArray(data.items) ? data.items : []));
+    return list;
+  } catch (error) {
+    if (error && error.name === 'AbortError') throw new AppError('读取飞书超时，请稍后再试');
+    if (error instanceof AppError) throw error;
+    throw new AppError('无法连接飞书中转，请检查网络和 Worker 的跨域设置');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function mergeFeishuRecords(list) {
+  const addedItems = [];
+  let updated = 0;
+  let skipped = 0;
+
+  for (const raw of list) {
+    const remote = normalizePulledRecord(raw);
+    if (!remote) { skipped += 1; continue; }
+    const key = linkKey(remote.url);
+    const existing = state.items.find(item => linkKey(item.url) === key);
+
+    if (!existing) {
+      const item = createItem(remote.url, 'feishu');
+      item.title = remote.title;
+      item.desc = remote.desc;
+      item.author = remote.author;
+      item.cover = remote.cover;
+      item.transcript = remote.transcript;
+      item.summary = remote.summary;
+      item.addedAt = remote.savedAt || Date.now();
+      item.updatedAt = Date.now();
+      item.syncState = 'done';
+      item.syncedAt = remote.syncedAt || Date.now();
+      addedItems.push(item);
+      continue;
+    }
+
+    let changed = false;
+    for (const field of ['title', 'desc', 'author', 'cover', 'transcript', 'summary']) {
+      if (!existing[field] && remote[field]) {
+        existing[field] = remote[field];
+        changed = true;
+      }
+    }
+    if (existing.syncState !== 'done') {
+      existing.syncState = 'done';
+      existing.syncedAt = remote.syncedAt || Date.now();
+      changed = true;
+    }
+    if (changed) {
+      touch(existing);
+      updated += 1;
+    }
+  }
+
+  if (addedItems.length) {
+    state.items.unshift(...addedItems);
+    if (state.items.length > MAX_ITEMS) state.items = state.items.slice(0, MAX_ITEMS);
+  }
+  if (addedItems.length || updated) {
+    persistItems();
+    renderItems();
+  }
+  return { added: addedItems.length, updated, skipped };
+}
+
+function updateFeishuReadState(text) {
+  if (!el.feishuReadState) return;
+  if (text) {
+    el.feishuReadState.textContent = text;
+    return;
+  }
+  if (!state.settings.feishuReadUrl) {
+    el.feishuReadState.textContent = '还没有配置中转。';
+    return;
+  }
+  const at = Number(state.settings.feishuPulledAt) || 0;
+  const summary = state.settings.feishuLastSummary || '';
+  el.feishuReadState.textContent = at
+    ? `上次加载：${new Date(at).toLocaleString('zh-CN', { hour12: false })}${summary ? ' · ' + summary : '。'}`
+    : '中转已填写，还没有加载过。';
+}
+
+let feishuPulling = false;
+
+async function pullFeishu(options = {}) {
+  const silent = !!options.silent;
+  if (feishuPulling) return null;
+  if (!String(state.settings.feishuReadUrl || '').trim()) {
+    if (!silent) showToast('先填写飞书中转地址');
+    return null;
+  }
+  feishuPulling = true;
+  if (el.pullFeishuBtn) {
+    el.pullFeishuBtn.disabled = true;
+    el.pullFeishuBtn.textContent = '加载中…';
+  }
+  if (!silent) updateFeishuReadState('正在读取飞书…');
+  try {
+    const list = await fetchFeishuRecords();
+    const result = mergeFeishuRecords(list);
+    const message = `已从飞书读取 ${list.length} 条：新增 ${result.added}，更新 ${result.updated}。`;
+    state.settings.feishuPulledAt = Date.now();
+    state.settings.feishuLastSummary = message;
+    persistSettings();
+    updateFeishuReadState(message);
+    if (!silent) showToast(`飞书加载完成：新增 ${result.added} 条，更新 ${result.updated} 条`, 3600);
+    return result;
+  } catch (error) {
+    const message = safeMessage(error);
+    updateFeishuReadState(message);
+    if (!silent) showToast(message, 4200);
+    return null;
+  } finally {
+    feishuPulling = false;
+    if (el.pullFeishuBtn) {
+      el.pullFeishuBtn.disabled = false;
+      el.pullFeishuBtn.textContent = '立即从飞书加载';
+    }
+  }
+}
+
+async function testFeishuRead() {
+  syncSettingsFromForm();
+  if (!state.settings.feishuReadUrl) {
+    showToast('先填写飞书中转地址');
+    return;
+  }
+  el.testFeishuBtn.disabled = true;
+  el.testFeishuBtn.textContent = '测试中…';
+  updateFeishuReadState('正在测试连接…');
+  try {
+    const list = await fetchFeishuRecords();
+    updateFeishuReadState(`连接正常，表格里有 ${list.length} 条记录。`);
+    showToast(`连接正常，读到 ${list.length} 条记录`, 3200);
+  } catch (error) {
+    const message = safeMessage(error);
+    updateFeishuReadState(message);
+    showToast(message, 4200);
+  } finally {
+    el.testFeishuBtn.disabled = false;
+    el.testFeishuBtn.textContent = '测试连接';
+  }
 }
 
 async function copySample() {
@@ -1786,8 +2090,8 @@ async function exportBackup() {
     items: state.items
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const name = `抖藏备份_${formatFileStamp(Date.now())}.json`;
-  const mode = await saveBlob(blob, name, '抖藏备份', 'application/json');
+  const name = `视频收藏备份_${formatFileStamp(Date.now())}.json`;
+  const mode = await saveBlob(blob, name, '视频收藏备份', 'application/json');
   if (mode === 'cancelled') showToast('已取消导出');
   else if (mode === 'shared') showToast('已打开保存面板');
   else showToast('备份已导出');
@@ -1799,7 +2103,7 @@ async function importBackup(file) {
   try {
     data = JSON.parse(await file.text());
   } catch (_) {
-    showToast('备份文件无法读取，请选择抖藏导出的 JSON 文件');
+    showToast('备份文件无法读取，请选择视频收藏导出的 JSON 文件');
     return;
   }
   const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : null);
@@ -1866,7 +2170,7 @@ function bindEvents() {
     const text = el.linkInput.value;
     if (!text.trim()) {
       el.linkInput.focus();
-      showToast('先粘贴一条抖音分享链接');
+      showToast('先粘贴一条视频分享链接');
       return;
     }
     addFromText(text, 'paste');
@@ -1913,6 +2217,14 @@ function bindEvents() {
   });
 
   el.syncAllBtn.addEventListener('click', syncAll);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    const settings = state.settings;
+    if (settings.autoPullFeishu !== 'open' || !settings.feishuReadUrl) return;
+    if (Date.now() - (Number(settings.feishuPulledAt) || 0) < 5 * 60 * 1000) return;
+    pullFeishu({ silent: true });
+  });
 
   el.settingsBtn.addEventListener('click', () => openSettings(false));
 
@@ -1984,6 +2296,21 @@ function bindEvents() {
   el.testKeyBtn.addEventListener('click', testKey);
   el.testWebhookBtn.addEventListener('click', testWebhook);
   el.copySampleBtn.addEventListener('click', copySample);
+  el.pullFeishuBtn.addEventListener('click', () => {
+    syncSettingsFromForm();
+    pullFeishu();
+  });
+  el.testFeishuBtn.addEventListener('click', testFeishuRead);
+  el.copyWorkerBtn.addEventListener('click', async () => {
+    try {
+      const response = await fetch('./relay/worker.js', { cache: 'no-store' });
+      if (!response.ok) throw new Error('读取失败');
+      const ok = await copyText(await response.text());
+      showToast(ok ? '中转代码已复制，去 Cloudflare 粘贴' : '复制失败，请打开代码文件手动复制', 3600);
+    } catch (_) {
+      showToast('读取中转代码失败，请打开代码文件手动复制');
+    }
+  });
   el.exportBtn.addEventListener('click', exportBackup);
   el.importBtn.addEventListener('click', () => el.importFile.click());
   el.importFile.addEventListener('change', () => {
@@ -2055,10 +2382,10 @@ function applyPlatformHints() {
       ? '当前是主屏幕 App：iOS 的主屏幕 App 与 Safari 存储互不相通，快捷指令写入的是 Safari。请用本页的「从剪贴板粘贴」添加；API Key 也需要在本 App 里单独填写。'
       : '当前在 Safari：快捷指令会打开同一个页面，添加的数据能直接看到。若之后添加到主屏幕，二者存储不会自动互通，可用导出/导入迁移。';
     if (standalone) {
-      el.addHint.textContent = '在抖音复制分享链接后，点「从剪贴板粘贴」存入；主屏幕 App 与 Safari 的数据不互通。';
+      el.addHint.textContent = '在抖音等 App 复制分享链接后，点「从剪贴板粘贴」存入；主屏幕 App 与 Safari 的数据不互通。';
     }
   } else {
-    el.phoneModeHint.textContent = '安卓：在 Chrome 里安装到主屏幕后，抖音分享面板可以直接选「抖藏」，数据互通。';
+    el.phoneModeHint.textContent = '安卓：在 Chrome 里安装到主屏幕后，分享面板可以直接选「视频收藏」，数据互通。';
   }
 }
 
@@ -2079,8 +2406,11 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.0 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.1 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
+  if (state.settings.autoPullFeishu === 'open' && state.settings.feishuReadUrl) {
+    setTimeout(() => pullFeishu({ silent: true }), 900);
+  }
   registerServiceWorker();
 }
 
