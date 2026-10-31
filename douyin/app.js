@@ -16,14 +16,21 @@ const MAX_ITEMS = 500;
 const MAX_BATCH_ADD = 100;
 const PARSE_URL_TTL = 6 * 60 * 60 * 1000;
 
+const XHS_HINT = '小红书需要在笔记页点右上角分享 → 复制链接，粘贴带 xsec_token 的完整链接；口令里的短链接不带凭证，会解析失败';
+
+/* 每个平台按顺序尝试解析接口，前一个失败会自动换下一个
+   short_videos 是聚合接口，覆盖 20+ 平台，作为兜底 */
 const PLATFORMS = {
-  douyin: { name: '抖音', api: 'douyin' },
-  kuaishou: { name: '快手', api: 'kuaishou' },
-  xhs: { name: '小红书', api: 'xhs' },
-  bilibili: { name: '哔哩哔哩', api: 'bilibili' },
-  wechat: { name: '视频号', api: '' },
-  direct: { name: '视频直链', api: '' },
-  unknown: { name: '未识别', api: '' }
+  douyin: { name: '抖音', apis: ['douyin', 'short_videos'] },
+  kuaishou: { name: '快手', apis: ['kuaishou', 'ksjx', 'short_videos'] },
+  xhs: { name: '小红书', apis: ['xhs', 'xhsjx', 'short_videos'] },
+  bilibili: { name: '哔哩哔哩', apis: ['bilibili', 'short_videos'] },
+  wechat: { name: '视频号', apis: ['wxsph', 'short_videos'] },
+  weibo: { name: '微博', apis: ['weibo', 'weibo_v', 'short_videos'] },
+  toutiao: { name: '今日头条', apis: ['toutiao', 'short_videos'] },
+  ixigua: { name: '西瓜视频', apis: ['short_videos'] },
+  direct: { name: '视频直链', apis: [] },
+  unknown: { name: '未识别', apis: ['short_videos'] }
 };
 
 const DEFAULT_SETTINGS = {
@@ -278,7 +285,7 @@ function extractUrl(text) {
   const full = cleaned.match(/https?:\/\/[^\s"'<>，。；、）】》]+/i);
   if (full) return normalizeUrl(full[0]);
 
-  const bare = cleaned.match(/(?:v\.douyin\.com|v\.kuaishou\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|v\.m\.chenzhongtech\.com)\/[^\s"'<>，。；、）】》]+/i);
+  const bare = cleaned.match(/(?:v\.douyin\.com|v\.kuaishou\.com|v\.m\.chenzhongtech\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|video\.weibo\.com|m\.weibo\.cn|weibo\.com|m\.toutiao\.com|toutiao\.com|ixigua\.com)\/[^\s"'<>，。；、）】》]+/i);
   if (bare) return normalizeUrl(bare[0]);
   return '';
 }
@@ -301,7 +308,7 @@ function extractUrls(text) {
   let match;
   while ((match = fullRe.exec(cleaned))) push(match[0]);
 
-  const bareRe = /(?:v\.douyin\.com|v\.kuaishou\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|v\.m\.chenzhongtech\.com)\/[^\s"'<>，。；、）】》]+/gi;
+  const bareRe = /(?:v\.douyin\.com|v\.kuaishou\.com|v\.m\.chenzhongtech\.com|xhslink\.com|www\.xiaohongshu\.com|xiaohongshu\.com|channels\.weixin\.qq\.com|weixin\.qq\.com\/sph|b23\.tv|bilibili\.com|video\.weibo\.com|m\.weibo\.cn|weibo\.com|m\.toutiao\.com|toutiao\.com|ixigua\.com)\/[^\s"'<>，。；、）】》]+/gi;
   while ((match = bareRe.exec(cleaned))) push(match[0]);
   return urls;
 }
@@ -314,6 +321,9 @@ function detectPlatform(url) {
   if (/(^|\.)kuaishou\.com$/.test(host) || host.endsWith('chenzhongtech.com') || host.endsWith('kwai.com') || host.endsWith('gifshow.com')) return 'kuaishou';
   if (host === 'xhslink.com' || host.endsWith('xiaohongshu.com')) return 'xhs';
   if (host === 'channels.weixin.qq.com' || (host.endsWith('weixin.qq.com') && /\/sph|finder|channels/i.test(url))) return 'wechat';
+  if (host.endsWith('weibo.com') || host.endsWith('weibo.cn')) return 'weibo';
+  if (host.endsWith('toutiao.com')) return 'toutiao';
+  if (host.endsWith('ixigua.com')) return 'ixigua';
   if (host.endsWith('bilibili.com') || host === 'b23.tv') return 'bilibili';
   if (/\.(mp4|mov|m4v|webm)(\?|$)/i.test(url) || /mime_type=video/i.test(url)) return 'direct';
   return 'unknown';
@@ -367,9 +377,11 @@ function zhError(message) {
     return '小红书需要带 xsec_token 的完整链接：在小红书里打开笔记，复制完整链接后粘贴';
   }
   if (/rate.?limit|too many|throttl/i.test(text)) return '请求过于频繁，请稍后再试';
+  if (/链接格式错误|无法提取ID|parse note id|cannot parse/i.test(text)) return '链接格式不完整，请粘贴 App 里分享出来的完整链接';
   if (/cookie|login|log in|session|unauthor/i.test(text)) return '该平台需要登录态，公开接口暂时不可用';
   if (/not found|deleted|removed|不存在/i.test(text)) return '作品不存在或已被删除';
   if (/timeout|timed out/i.test(text)) return '解析超时，请稍后重试';
+  if (/签名流|dr[my]\b|受版权|受限/i.test(text)) return '该平台的视频有访问限制，暂时无法解析';
   if (/unsupported|not support|invalid url/i.test(text)) return '该链接暂不支持解析';
   if (/param|required|missing/i.test(text)) return '链接格式不完整，请粘贴完整的分享链接';
   if (/network|failed to fetch|load failed/i.test(text)) return '网络连接失败，请检查网络后重试';
@@ -525,7 +537,7 @@ function pickAuthor(data) {
     name = firstString(raw.nickname, raw.name, raw.title, raw.user_name, raw.userName);
     avatar = firstString(raw.avatar, raw.avatar_url, raw.avatarUrl, raw.head_url, raw.headUrl);
   }
-  if (!name) name = firstString(data.nickname, data.author_name, data.authorName, data.user_name, data.userName);
+  if (!name) name = firstString(data.nickname, data.author_name, data.authorName, data.user_name, data.userName, data.auther);
   if (!avatar) avatar = firstString(data.avatar, data.author_avatar, data.authorAvatar);
   return { name, avatar: normalizeUrl(avatar) };
 }
@@ -572,18 +584,43 @@ function mapBugpkMessage(message) {
   const msg = zhError(message);
   if (!msg) return '解析失败，请稍后重试';
   if (/源异常/.test(msg)) return '解析接口暂时异常，请稍后重试';
+  if (/^解析失败/.test(msg)) return '解析失败，请确认作品是公开的，或稍后再试';
   return msg;
 }
 
-async function parseWithBugpk(url, platform) {
-  const api = (PLATFORMS[platform] || {}).api;
-  if (!api) throw new AppError(platform === 'wechat' ? '视频号需要微信登录态，暂时无法解析' : '该平台暂不支持解析');
-  const endpoint = `https://api.bugpk.com/api/${api}?url=${encodeURIComponent(url)}`;
-  const json = await requestJson(endpoint, { timeout: 40000 });
-  if (!json || Number(json.code) !== 200) {
-    throw new AppError(mapBugpkMessage(json && json.msg), json && json.code);
+async function parseWithApis(url, platform) {
+  const apis = ((PLATFORMS[platform] || {}).apis || []).slice();
+  const label = platform === 'unknown' ? '这个链接' : platformName(platform);
+  if (!apis.length) throw new AppError(`${label}暂时无法解析`);
+
+  let firstError = null;
+  let tokenError = null;
+  for (const api of apis) {
+    const endpoint = `https://api.bugpk.com/api/${api}?url=${encodeURIComponent(url)}`;
+    try {
+      const json = await requestJson(endpoint, { timeout: 28000 });
+      if (!json || Number(json.code) !== 200) {
+        const rawMsg = String((json && json.msg) || '');
+        if (/xsec_token|xsec-token/i.test(rawMsg)) {
+          tokenError = new AppError(XHS_HINT);
+        }
+        if (!firstError) firstError = new AppError(mapBugpkMessage(rawMsg), json && json.code);
+        continue;
+      }
+      return normalizeParsed(json.data, platform, url);
+    } catch (error) {
+      if (error instanceof AppError && /图文作品/.test(error.message)) throw error;
+      if (!firstError) {
+        firstError = error instanceof AppError ? error : new AppError(safeMessage(error));
+      }
+    }
   }
-  return normalizeParsed(json.data, platform, url);
+  if (tokenError) throw tokenError;
+  const firstMsg = String((firstError && firstError.message) || '');
+  if (platform === 'xhs' && /链接格式|完整链接|凭证|xsec_token/i.test(firstMsg)) {
+    throw new AppError(XHS_HINT);
+  }
+  throw firstError || new AppError(`${label}解析失败，请稍后重试`);
 }
 
 async function parseLink(rawText) {
@@ -609,11 +646,7 @@ async function parseLink(rawText) {
     };
   }
 
-  if (platform === 'unknown') {
-    throw new AppError('没有识别到视频链接，请粘贴抖音、快手、小红书等平台的分享链接');
-  }
-
-  return parseWithBugpk(url, platform);
+  return parseWithApis(url, platform);
 }
 
 async function ensureParsed(item, progress, force = false) {
@@ -1685,7 +1718,7 @@ function showToast(text, duration = 2600) {
 
 function itemMetaText(item) {
   const parts = [];
-  if (item.platform && item.platform !== 'douyin') parts.push(platformName(item.platform));
+  if (item.platform && item.platform !== 'douyin' && item.platform !== 'unknown') parts.push(platformName(item.platform));
   if (item.author) parts.push(item.author);
   const duration = formatDuration(item.duration);
   if (duration) parts.push(duration);
@@ -2091,7 +2124,7 @@ function addFromText(rawText, source = 'paste') {
 
   for (const url of urls) {
     if (added.length >= MAX_BATCH_ADD) { overflow += 1; continue; }
-    if (detectPlatform(url) === 'unknown') { ignored += 1; continue; }
+    if (/\.(jpg|jpeg|png|gif|webp|pdf|docx?|xlsx?|zip|mp3)(\?|$)/i.test(url)) { ignored += 1; continue; }
     const key = linkKey(url);
     if (knownKeys.has(key)) { skipped += 1; continue; }
     knownKeys.add(key);
@@ -2104,7 +2137,7 @@ function addFromText(rawText, source = 'paste') {
       const first = state.items.find(item => urls.some(url => linkKey(url) === linkKey(item.url)));
       if (first) flashCard(first.id);
     } else {
-      showToast('没有识别到视频链接，请粘贴抖音、快手、小红书等平台的分享链接');
+      showToast('没有识别到视频链接，请粘贴抖音、快手、小红书、B站等平台的分享链接');
     }
     return [];
   }
@@ -2947,7 +2980,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.2 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.3 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
