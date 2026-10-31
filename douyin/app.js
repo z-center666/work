@@ -53,6 +53,7 @@ const state = {
   items: [],
   settings: { ...DEFAULT_SETTINGS },
   filter: 'all',
+  tagFilter: '',
   query: '',
   expanded: new Set(),
   queue: [],
@@ -60,7 +61,11 @@ const state = {
   busyId: '',
   notes: new Map(),
   syncing: new Set(),
-  syncAllRunning: false
+  syncAllRunning: false,
+  tagging: new Set(),
+  tagQueue: [],
+  tagRunning: false,
+  tagEditorId: ''
 };
 
 const el = {};
@@ -95,6 +100,38 @@ function readableText(...values) {
   if (!text) return '';
   if (/^[.。·…\s\-—_~]+$/.test(text)) return '';
   return text;
+}
+
+const MAX_TAGS = 8;
+const TAG_MAX_LENGTH = 12;
+
+function normalizeTag(value) {
+  return String(value || '')
+    .replace(/^#+/, '')
+    .replace(/^(?:[-–—*•·]\s*|\d+[.)、]\s*)/, '')
+    .replace(/\s+/g, ' ')
+    .replace(/[，。；、,;:：!！?？'"“”‘’()（）【】\[\]<>《》]/g, '')
+    .trim()
+    .slice(0, TAG_MAX_LENGTH);
+}
+
+function normalizeTags(value) {
+  const list = Array.isArray(value)
+    ? value
+    : String(value || '').split(/[,，、;；\n\r#]+/);
+  const seen = new Set();
+  const tags = [];
+  for (const entry of list) {
+    const source = typeof entry === 'string' ? entry : (entry && (entry.text || entry.name)) || '';
+    const tag = normalizeTag(source);
+    if (!tag) continue;
+    const key = tag.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    tags.push(tag);
+    if (tags.length >= MAX_TAGS) break;
+  }
+  return tags;
 }
 
 function genId() {
@@ -300,6 +337,8 @@ function normalizeItem(raw) {
     videoUrlAt: Number(raw.videoUrlAt) || 0,
     transcript: typeof raw.transcript === 'string' ? raw.transcript : '',
     summary: typeof raw.summary === 'string' ? raw.summary : '',
+    tags: normalizeTags(raw.tags || raw['标签'] || ''),
+    autoTags: normalizeTags(raw.autoTags || ''),
     addedAt,
     updatedAt: Number(raw.updatedAt) || addedAt,
     source: firstString(raw.source) || 'paste',
@@ -870,6 +909,298 @@ async function summarizeItem(item, progress) {
   persistItems();
 }
 
+/* ---------------- 标签 ---------------- */
+
+const TAG_PROMPT = '你是短视频收藏的分类助手。请根据标题、描述和总结，为这条视频给出 1 到 3 个中文标签。' +
+  '每个标签 2 到 6 个字，概括主题、领域或用途；不要用「视频」「内容」「其他」「收藏」这类空泛词。' +
+  '只输出 JSON 字符串数组，例如 ["人工智能","产品设计"]，不要输出解释、编号或代码块。';
+
+function parseTagResponse(raw) {
+  let text = String(raw || '').trim();
+  if (!text) return [];
+  text = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
+  const bracket = text.match(/\[[\s\S]*?\]/);
+  if (bracket) {
+    try {
+      const data = JSON.parse(bracket[0]);
+      if (Array.isArray(data)) return normalizeTags(data);
+    } catch (_) {}
+  }
+  return normalizeTags(text.replace(/^[\[\(（【]|[\]\)）】]$/g, ''));
+}
+
+async function requestTags(item, key, model) {
+  const material = [
+    item.title ? '标题：' + item.title : '',
+    item.author ? '作者：' + item.author : '',
+    item.desc ? '描述：' + item.desc.slice(0, 600) : '',
+    item.summary ? '总结：' + item.summary.slice(0, 800) : '',
+    item.transcript ? '文案节选：' + item.transcript.slice(0, 1200) : ''
+  ].filter(Boolean).join('\n');
+  if (!material.trim()) throw new AppError('还没有标题或文案，暂时无法自动打标签');
+  const raw = await requestChat([
+    { role: 'system', content: TAG_PROMPT },
+    { role: 'user', content: material }
+  ], key, model, 120);
+  return parseTagResponse(raw).filter(tag => tag !== '视频');
+}
+
+function tagMaterialReady(item) {
+  return !!(item && (item.title || item.desc || item.summary || item.transcript));
+}
+
+const TAG_RULES = [
+  ['人工智能', /(\bai\b|人工智能|大模型|chatgpt|deepseek|智能体|agent|机器学习|算法|提示词)/i],
+  ['科技数码', /(科技|数码|手机|电脑|芯片|苹果|华为|小米|评测|编程|代码|软件)/i],
+  ['财经投资', /(财经|股票|基金|投资|理财|经济|房价|商业|创业|赚钱)/i],
+  ['职场成长', /(职场|面试|简历|工作|管理|效率|副业|沟通)/i],
+  ['学习方法', /(学习|教育|考试|课程|知识|读书|考研|英语)/i],
+  ['美食烹饪', /(美食|做饭|做菜|家常菜|菜谱|厨房|餐厅|探店|好吃|咖啡)/i],
+  ['旅行攻略', /(旅行|旅游|攻略|景点|酒店|自驾|城市|出行)/i],
+  ['健身运动', /(健身|减脂|减肥|运动|跑步|瑜伽|训练|增肌)/i],
+  ['健康养生', /(健康|养生|睡眠|医生|中医|营养|心理)/i],
+  ['穿搭美妆', /(穿搭|时尚|美妆|护肤|口红|发型|衣服|搭配)/i],
+  ['影视娱乐', /(电影|影视|电视剧|综艺|剧情|解说|演员|动漫)/i],
+  ['音乐现场', /(音乐|歌曲|唱歌|乐器|现场|演唱会)/i],
+  ['游戏电竞', /(游戏|电竞|手游|主机|steam|王者荣耀)/i],
+  ['汽车出行', /(汽车|车型|试驾|电车|新能源|驾驶)/i],
+  ['母婴育儿', /(母婴|育儿|宝宝|孩子|亲子|怀孕)/i],
+  ['宠物日常', /(宠物|猫咪|狗狗|铲屎|萌宠)/i],
+  ['家居生活', /(家居|装修|收纳|好物|生活技巧|清洁)/i],
+  ['摄影影像', /(摄影|拍照|相机|镜头|剪辑|调色|vlog)/i],
+  ['情感关系', /(情感|恋爱|婚姻|分手|相亲|夫妻)/i],
+  ['搞笑段子', /(搞笑|喜剧|段子|沙雕|幽默)/i]
+];
+
+function guessTagsLocally(item) {
+  const text = [
+    item.title,
+    item.desc,
+    item.summary,
+    (item.transcript || '').slice(0, 2000)
+  ].filter(Boolean).join('\n');
+  if (!text.trim()) return [];
+  const hits = [];
+  for (const [tag, re] of TAG_RULES) {
+    if (re.test(text)) hits.push(tag);
+    if (hits.length >= 2) break;
+  }
+  return hits;
+}
+
+function applyAutoTags(item, fresh) {
+  const previous = item.autoTags || [];
+  item.tags = normalizeTags([...item.tags.filter(tag => !previous.includes(tag)), ...fresh]);
+  item.autoTags = fresh.filter(tag => item.tags.includes(tag));
+  touch(item);
+  persistItems();
+  renderItems();
+  if (state.tagEditorId === item.id) renderTagEditor();
+}
+
+async function autoTagItem(item, options = {}) {
+  if (!item) return false;
+  const key = String(state.settings.asrKey || '').trim();
+  if (!tagMaterialReady(item)) {
+    if (options.notify) showToast('还没有标题或文案，先解析或提取文案再打标签');
+    return false;
+  }
+  if (state.tagging.has(item.id)) return false;
+
+  if (!key) {
+    const local = guessTagsLocally(item);
+    if (local.length) {
+      applyAutoTags(item, local);
+      if (options.notify) {
+        state.notes.set(item.id, { text: '已按关键词打标签：' + local.join('、'), until: Date.now() + 6000 });
+        renderTagEditor();
+        renderTagManager();
+        updateCard(item);
+      }
+      return true;
+    }
+    if (options.notify) {
+      closeTagEditor();
+      openSettings(true);
+      showToast('先在设置里填写硅基流动 API Key，才能自动打标签');
+    }
+    return false;
+  }
+
+  const model = String(state.settings.chatModel || '').trim() || 'Qwen/Qwen2.5-7B-Instruct';
+  state.tagging.add(item.id);
+  if (options.notify) setNote(item, '正在生成标签…', 30000);
+  try {
+    const fresh = await requestTags(item, key, model);
+    if (!fresh.length) throw new AppError('没有生成合适的标签');
+    applyAutoTags(item, fresh);
+    if (options.notify) {
+      state.notes.set(item.id, { text: '已生成标签：' + item.autoTags.join('、'), until: Date.now() + 6000 });
+      renderTagEditor();
+      renderTagManager();
+    }
+    return true;
+  } catch (error) {
+    if (options.notify) showToast(safeMessage(error), 4200);
+    return false;
+  } finally {
+    state.tagging.delete(item.id);
+    updateCard(item);
+  }
+}
+
+function scheduleAutoTag(item) {
+  if (!tagMaterialReady(item) || item.tags.length) return;
+  if (state.tagQueue.includes(item.id)) return;
+  if (state.tagQueue.length >= 20) return;
+  state.tagQueue.push(item.id);
+  pumpTagQueue();
+}
+
+async function pumpTagQueue() {
+  if (state.tagRunning) return;
+  state.tagRunning = true;
+  try {
+    while (state.tagQueue.length) {
+      const id = state.tagQueue.shift();
+      const item = findItem(id);
+      if (!item || item.tags.length) continue;
+      await autoTagItem(item);
+    }
+  } finally {
+    state.tagRunning = false;
+  }
+}
+
+function tagCounts() {
+  const map = new Map();
+  for (const item of state.items) {
+    for (const tag of item.tags || []) map.set(tag, (map.get(tag) || 0) + 1);
+  }
+  return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+}
+
+function allTagNames() {
+  return tagCounts().map(([name]) => name);
+}
+
+function setItemTags(item, tags) {
+  item.tags = normalizeTags(tags);
+  item.autoTags = (item.autoTags || []).filter(tag => item.tags.includes(tag));
+  touch(item);
+  persistItems();
+  renderItems();
+  renderTagEditor();
+  renderTagManager();
+}
+
+function addItemTag(item, raw) {
+  if (!item) return;
+  const names = normalizeTags(raw);
+  if (!names.length) {
+    showToast('输入一个标签再添加');
+    return;
+  }
+  const before = item.tags.length;
+  setItemTags(item, [...item.tags, ...names]);
+  if (item.tags.length === before) showToast('这个标签已经有了');
+}
+
+function removeItemTag(item, name) {
+  if (!item) return;
+  setItemTags(item, item.tags.filter(tag => tag !== name));
+}
+
+function renameTagGlobal(oldName, raw) {
+  const newName = normalizeTags(raw)[0] || '';
+  if (!newName) {
+    showToast('标签名不能为空');
+    renderTagManager();
+    return;
+  }
+  if (newName === oldName) return;
+  let changed = 0;
+  for (const item of state.items) {
+    if (!item.tags.includes(oldName)) continue;
+    item.tags = normalizeTags(item.tags.map(tag => tag === oldName ? newName : tag));
+    item.autoTags = (item.autoTags || [])
+      .map(tag => tag === oldName ? newName : tag)
+      .filter(tag => item.tags.includes(tag));
+    touch(item);
+    changed += 1;
+  }
+  if (!changed) return;
+  if (state.tagFilter === oldName) state.tagFilter = newName;
+  persistItems();
+  renderItems();
+  renderTagManager();
+  showToast(`已把「${oldName}」改名为「${newName}」`);
+}
+
+function deleteTagGlobal(name) {
+  const count = (tagCounts().find(([tag]) => tag === name) || [])[1] || 0;
+  if (!confirm(`删除标签「${name}」？会从 ${count} 条收藏里移除。`)) return;
+  for (const item of state.items) {
+    if (!item.tags.includes(name)) continue;
+    item.tags = item.tags.filter(tag => tag !== name);
+    item.autoTags = (item.autoTags || []).filter(tag => tag !== name);
+    touch(item);
+  }
+  if (state.tagFilter === name) state.tagFilter = '';
+  persistItems();
+  renderItems();
+  renderTagManager();
+  showToast('标签已删除');
+}
+
+let bulkTagRunning = false;
+
+async function autoTagMissing() {
+  if (bulkTagRunning) return;
+  const hasKey = !!String(state.settings.asrKey || '').trim();
+  const targets = state.items.filter(item => !item.tags.length && tagMaterialReady(item)).slice(0, 20);
+  if (!targets.length) {
+    showToast('没有需要打标签的收藏');
+    return;
+  }
+  bulkTagRunning = true;
+  el.autoTagAllBtn.disabled = true;
+  let done = 0;
+  for (let i = 0; i < targets.length; i += 1) {
+    el.autoTagAllBtn.textContent = `自动打标签 ${i + 1}/${targets.length}`;
+    if (await autoTagItem(targets[i])) done += 1;
+  }
+  el.autoTagAllBtn.disabled = false;
+  el.autoTagAllBtn.textContent = '给未打标签的收藏自动打标签';
+  bulkTagRunning = false;
+  renderTagManager();
+  if (!done) {
+    showToast(hasKey ? '这些收藏暂时没有可用标签' : '没有匹配到关键词，填写密钥可以更准确', 4200);
+  } else {
+    showToast(hasKey ? `已为 ${done} 条收藏生成标签` : `已按关键词为 ${done} 条收藏打标签`, 3600);
+  }
+}
+
+function deleteItem(item) {
+  if (!item) return;
+  if (!confirm('删除这条收藏？本机记录会被移除，飞书表格里的记录不受影响。')) return;
+  state.items = state.items.filter(entry => entry.id !== item.id);
+  state.expanded.delete(item.id);
+  state.notes.delete(item.id);
+  state.tagQueue = state.tagQueue.filter(id => id !== item.id);
+  if (state.tagFilter && !state.items.some(entry => (entry.tags || []).includes(state.tagFilter))) {
+    state.tagFilter = '';
+  }
+  if (state.tagEditorId === item.id) {
+    state.tagEditorId = '';
+    closeSheetNode(el.tagSheetWrap);
+  }
+  persistItems();
+  renderItems();
+  renderTagManager();
+  showToast('已删除');
+}
+
 /* ---------------- 任务队列 ---------------- */
 
 function isItemBusy(id) {
@@ -927,6 +1258,7 @@ async function pumpQueue() {
           if (job.autoSync && state.settings.autoSync === 'add' && state.settings.webhook) {
             syncItem(item, { silent: true });
           }
+          scheduleAutoTag(item);
         } else if (job.type === 'download') {
           await downloadItem(item, progress);
         } else if (job.type === 'extract') {
@@ -1001,6 +1333,7 @@ async function extractItem(item, progress, force) {
       await summarizeItem(item, progress);
       state.notes.set(item.id, { text: '总结已生成', until: Date.now() + 4500 });
       state.expanded.add(item.id);
+      scheduleAutoTag(item);
       persistItems();
       renderItems();
       return;
@@ -1015,6 +1348,7 @@ async function extractItem(item, progress, force) {
     if (!item.desc) throw new AppError('这个作品没有视频或文字，无法提取文案');
     await summarizeItem(item, progress);
     state.expanded.add(item.id);
+    scheduleAutoTag(item);
     persistItems();
     renderItems();
     return;
@@ -1068,6 +1402,7 @@ async function extractItem(item, progress, force) {
   }
 
   state.notes.set(item.id, { text: '文案和总结完成', until: Date.now() + 5000 });
+  scheduleAutoTag(item);
   renderItems();
   showToast('文案和总结完成');
 
@@ -1088,6 +1423,7 @@ function buildPayload(item, isTest = false) {
     视频总结: item.summary || '',
     作者: item.author || '',
     封面: item.cover || '',
+    标签: (item.tags || []).join('、'),
     处理状态: (item.transcript || item.summary) ? '已完成' : '处理中',
     收藏时间: Number(item.addedAt) || now,
     同步时间: now
@@ -1256,14 +1592,37 @@ async function syncAll() {
 function cacheEls() {
   el.itemList = $('#itemList');
   el.emptyState = $('#emptyState');
+  el.emptyTitle = $('#emptyTitle');
+  el.emptyText = $('#emptyText');
   el.listHint = $('#listHint');
   el.storageTag = $('#storageTag');
+  el.openListBtn = $('#openListBtn');
+  el.collectionSummary = $('#collectionSummary');
   el.linkInput = $('#linkInput');
   el.addBtn = $('#addBtn');
   el.pasteBtn = $('#pasteBtn');
   el.addHint = $('#addHint');
   el.searchInput = $('#searchInput');
   el.filterChips = $('#filterChips');
+  el.tagChips = $('#tagChips');
+  el.listSheetWrap = $('#listSheetWrap');
+  el.listCount = $('#listCount');
+  el.listBody = $('#listBody');
+  el.manageTagsBtn = $('#manageTagsBtn');
+  el.tagSheetWrap = $('#tagSheetWrap');
+  el.tagItemTitle = $('#tagItemTitle');
+  el.tagEditorList = $('#tagEditorList');
+  el.tagEditorHint = $('#tagEditorHint');
+  el.tagInput = $('#tagInput');
+  el.tagAddBtn = $('#tagAddBtn');
+  el.tagSuggest = $('#tagSuggest');
+  el.tagSuggestTitle = $('#tagSuggestTitle');
+  el.autoTagBtn = $('#autoTagBtn');
+  el.tagDoneBtn = $('#tagDoneBtn');
+  el.manageSheetWrap = $('#manageSheetWrap');
+  el.manageTagList = $('#manageTagList');
+  el.manageTagHint = $('#manageTagHint');
+  el.autoTagAllBtn = $('#autoTagAllBtn');
   el.syncAllBtn = $('#syncAllBtn');
   el.settingsBtn = $('#settingsBtn');
   el.sheetWrap = $('#sheetWrap');
@@ -1321,6 +1680,9 @@ function statusInfo(item) {
   }
   if (state.queue.some(job => job.itemId === item.id)) {
     return { text: '排队中…', isError: false };
+  }
+  if (state.tagging.has(item.id)) {
+    return { text: '正在生成标签…', isError: false };
   }
   const note = state.notes.get(item.id);
   if (note && note.until > Date.now()) return { text: note.text, isError: false };
@@ -1380,11 +1742,29 @@ function buildCard(item) {
 
   const tags = document.createElement('div');
   tags.className = 'item-tags';
+  for (const name of item.tags || []) {
+    const tag = document.createElement('button');
+    tag.type = 'button';
+    tag.className = 'topic-tag';
+    tag.dataset.act = 'filter-tag';
+    tag.dataset.tag = name;
+    tag.textContent = name;
+    tags.appendChild(tag);
+  }
+  const editTags = document.createElement('button');
+  editTags.type = 'button';
+  editTags.className = 'tag-edit-btn';
+  editTags.dataset.act = 'edit-tags';
+  editTags.textContent = item.tags && item.tags.length ? '编辑标签' : '+ 标签';
+  tags.appendChild(editTags);
+
+  const statusTags = document.createElement('div');
+  statusTags.className = 'item-tags';
   const addTag = text => {
     const tag = document.createElement('span');
     tag.className = 'tag';
     tag.textContent = text;
-    tags.appendChild(tag);
+    statusTags.appendChild(tag);
   };
   if (item.transcript) addTag('有文案');
   else addTag('待整理');
@@ -1392,7 +1772,7 @@ function buildCard(item) {
   else if (item.syncState === 'unconfirmed') addTag('同步待确认');
   else if (item.syncState === 'error') addTag('同步失败');
 
-  info.append(title, meta, tags);
+  info.append(title, meta, tags, statusTags);
   main.append(cover, info);
 
   const actions = document.createElement('div');
@@ -1411,7 +1791,14 @@ function buildCard(item) {
   extractBtn.textContent = extractLabel(item);
   extractBtn.disabled = isItemBusy(item.id);
 
-  actions.append(downloadBtn, extractBtn);
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'action-btn icon';
+  deleteBtn.dataset.act = 'delete';
+  deleteBtn.setAttribute('aria-label', '删除收藏');
+  deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M8 7l.7 11.2A1.8 1.8 0 0 0 10.5 20h3a1.8 1.8 0 0 0 1.8-1.8L16 7M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/></svg>';
+
+  actions.append(downloadBtn, extractBtn, deleteBtn);
 
   const status = document.createElement('p');
   status.className = 'item-status';
@@ -1535,11 +1922,30 @@ function visibleItems() {
     if (state.filter === 'pending' && item.transcript) return false;
     if (state.filter === 'text' && !item.transcript) return false;
     if (state.filter === 'unsynced' && item.syncState === 'done') return false;
+    if (state.tagFilter && !(item.tags || []).includes(state.tagFilter)) return false;
     if (!query) return true;
     const haystack = [item.title, item.desc, item.author, item.transcript, item.summary]
+      .concat(item.tags || [])
       .filter(Boolean).join('\n').toLowerCase();
     return haystack.includes(query);
   });
+}
+
+function renderTagChips() {
+  if (!el.tagChips) return;
+  const entries = tagCounts();
+  el.tagChips.hidden = !entries.length;
+  el.tagChips.replaceChildren();
+  for (const [name, count] of entries) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip tag-chip' + (state.tagFilter === name ? ' is-active' : '');
+    chip.dataset.tag = name;
+    chip.setAttribute('role', 'tab');
+    chip.setAttribute('aria-selected', state.tagFilter === name ? 'true' : 'false');
+    chip.textContent = `${name} ${count}`;
+    el.tagChips.appendChild(chip);
+  }
 }
 
 function renderItems() {
@@ -1549,19 +1955,40 @@ function renderItems() {
   el.itemList.replaceChildren(fragment);
 
   const total = state.items.length;
-  el.emptyState.hidden = total > 0;
+  const tagTotal = tagCounts().length;
   el.storageTag.textContent = total ? `本机 ${total} 条` : '仅存本机';
+  if (el.collectionSummary) {
+    el.collectionSummary.textContent = total
+      ? `${total} 条收藏${tagTotal ? ` · ${tagTotal} 个标签` : ''}`
+      : '还没有收藏，先粘贴链接';
+  }
+  if (el.listCount) el.listCount.textContent = total ? String(total) : '';
+
+  renderTagChips();
+
+  const noMatch = total > 0 && !list.length;
+  el.emptyState.hidden = total > 0 && list.length > 0;
+  if (el.emptyTitle && el.emptyText) {
+    if (noMatch) {
+      el.emptyTitle.textContent = '没有符合条件的收藏';
+      el.emptyText.textContent = '换个关键词，或者取消标签和状态筛选再试。';
+    } else {
+      el.emptyTitle.textContent = '还没有收藏';
+      el.emptyText.textContent = '在抖音、快手等 App 里复制分享链接，粘贴到主页面即可；多条链接可以一次粘贴。';
+    }
+  }
 
   if (!total) {
     el.listHint.textContent = '';
-  } else if (!list.length) {
-    el.listHint.textContent = '没有符合条件的收藏';
+  } else if (noMatch) {
+    el.listHint.textContent = `共 ${total} 条，当前筛选没有结果`;
   } else {
     const withText = state.items.filter(item => item.transcript).length;
     const synced = state.items.filter(item => item.syncState === 'done').length;
     const parts = [`${total} 条收藏`, `${withText} 条有文案`];
     if (synced) parts.push(`${synced} 条已同步`);
     if (list.length !== total) parts.unshift(`筛选出 ${list.length} 条`);
+    if (state.tagFilter) parts.push(`标签「${state.tagFilter}」`);
     el.listHint.textContent = parts.join(' · ');
   }
   updateDataState();
@@ -1574,7 +2001,17 @@ function updateCard(item) {
   old.replaceWith(fresh);
 }
 
+function pulseListEntry() {
+  if (!el.openListBtn) return;
+  el.openListBtn.classList.remove('is-pulse');
+  void el.openListBtn.offsetWidth;
+  el.openListBtn.classList.add('is-pulse');
+  setTimeout(() => el.openListBtn.classList.remove('is-pulse'), 900);
+}
+
 function flashCard(id) {
+  pulseListEntry();
+  if (!el.listSheetWrap || el.listSheetWrap.hidden) return;
   const card = el.itemList.querySelector(`[data-id="${id}"]`);
   if (!card) return;
   card.classList.add('is-flash');
@@ -1608,6 +2045,8 @@ function createItem(url, source) {
     videoUrlAt: 0,
     transcript: '',
     summary: '',
+    tags: [],
+    autoTags: [],
     addedAt: Date.now(),
     updatedAt: Date.now(),
     source,
@@ -1738,10 +2177,165 @@ function updateKeyState() {
   }
 }
 
+function anySheetOpen() {
+  return [el.listSheetWrap, el.tagSheetWrap, el.manageSheetWrap, el.sheetWrap]
+    .some(node => node && !node.hidden);
+}
+
+function syncBodyLock() {
+  document.body.style.overflow = anySheetOpen() ? 'hidden' : '';
+}
+
+function openSheetNode(node) {
+  if (!node) return;
+  node.hidden = false;
+  syncBodyLock();
+}
+
+function closeSheetNode(node) {
+  if (!node) return;
+  node.hidden = true;
+  syncBodyLock();
+}
+
+function openList() {
+  renderItems();
+  openSheetNode(el.listSheetWrap);
+}
+
+function closeList() {
+  closeSheetNode(el.tagSheetWrap);
+  closeSheetNode(el.manageSheetWrap);
+  closeSheetNode(el.listSheetWrap);
+  state.tagEditorId = '';
+}
+
+function renderTagEditor() {
+  const item = findItem(state.tagEditorId);
+  if (!item) {
+    closeSheetNode(el.tagSheetWrap);
+    return;
+  }
+  el.tagItemTitle.textContent = item.title || item.url;
+  el.tagEditorList.replaceChildren();
+  if (!item.tags.length) {
+    const empty = document.createElement('span');
+    empty.className = 'tag-empty';
+    empty.textContent = '还没有标签，可以手动添加或点下面的「自动生成标签」。';
+    el.tagEditorList.appendChild(empty);
+  }
+  for (const name of item.tags) {
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    const text = document.createElement('span');
+    text.className = 'tag-pill-text';
+    text.textContent = '#' + name;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'tag-pill-remove';
+    remove.dataset.tag = name;
+    remove.setAttribute('aria-label', `移除标签 ${name}`);
+    remove.textContent = '×';
+    remove.addEventListener('click', () => removeItemTag(item, name));
+    pill.append(text, remove);
+    el.tagEditorList.appendChild(pill);
+  }
+
+  const existing = allTagNames().filter(name => !item.tags.includes(name)).slice(0, 12);
+  el.tagSuggestTitle.hidden = !existing.length;
+  el.tagSuggest.hidden = !existing.length;
+  el.tagSuggest.replaceChildren();
+  for (const name of existing) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tag-suggest-chip';
+    btn.textContent = '+ ' + name;
+    btn.addEventListener('click', () => addItemTag(item, name));
+    el.tagSuggest.appendChild(btn);
+  }
+}
+
+function openTagEditor(id) {
+  const item = findItem(id);
+  if (!item) return;
+  state.tagEditorId = id;
+  el.tagInput.value = '';
+  renderTagEditor();
+  openSheetNode(el.tagSheetWrap);
+}
+
+function closeTagEditor() {
+  state.tagEditorId = '';
+  closeSheetNode(el.tagSheetWrap);
+}
+
+function addTagsFromInput() {
+  const item = findItem(state.tagEditorId);
+  if (!item) return;
+  addItemTag(item, el.tagInput.value);
+  el.tagInput.value = '';
+}
+
+function renderTagManager() {
+  if (!el.manageTagList) return;
+  const entries = tagCounts();
+  el.manageTagList.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement('p');
+    empty.className = 'tag-empty';
+    empty.textContent = '还没有任何标签。可以先给收藏手动打标，或使用下面的自动打标签。';
+    el.manageTagList.appendChild(empty);
+  }
+  if (el.manageTagHint) {
+    el.manageTagHint.textContent = entries.length
+      ? `共 ${entries.length} 个标签。` 
+      : '';
+  }
+  for (const [name, count] of entries) {
+    const row = document.createElement('div');
+    row.className = 'manage-tag-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = name;
+    input.maxLength = 24;
+    input.setAttribute('aria-label', `标签 ${name}，可改名`);
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        input.blur();
+      }
+    });
+    input.addEventListener('blur', () => {
+      const next = input.value.trim();
+      if (next && next !== name) renameTagGlobal(name, next);
+      else input.value = name;
+    });
+    const counter = document.createElement('span');
+    counter.className = 'manage-tag-count';
+    counter.textContent = `${count} 条`;
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'manage-tag-del';
+    del.setAttribute('aria-label', `删除标签 ${name}`);
+    del.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M8 7l.7 11.2A1.8 1.8 0 0 0 10.5 20h3a1.8 1.8 0 0 0 1.8-1.8L16 7M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/></svg>';
+    del.addEventListener('click', () => deleteTagGlobal(name));
+    row.append(input, counter, del);
+    el.manageTagList.appendChild(row);
+  }
+}
+
+function openTagManager() {
+  renderTagManager();
+  openSheetNode(el.manageSheetWrap);
+}
+
+function closeTagManager() {
+  closeSheetNode(el.manageSheetWrap);
+}
+
 function openSettings(focusKey = false) {
   fillSettingsForm();
-  el.sheetWrap.hidden = false;
-  document.body.style.overflow = 'hidden';
+  openSheetNode(el.sheetWrap);
   if (focusKey) {
     setTimeout(() => {
       el.asrKey.focus();
@@ -1752,8 +2346,7 @@ function openSettings(focusKey = false) {
 
 function closeSettings() {
   syncSettingsFromForm();
-  el.sheetWrap.hidden = true;
-  document.body.style.overflow = '';
+  closeSheetNode(el.sheetWrap);
 }
 
 async function testKey() {
@@ -1861,6 +2454,21 @@ function pickField(fields, names) {
   return '';
 }
 
+function plainListText(value) {
+  if (Array.isArray(value)) return value.map(plainText).filter(Boolean).join('、');
+  return plainText(value);
+}
+
+function pickListField(fields, names) {
+  if (!fields || typeof fields !== 'object') return '';
+  for (const name of names) {
+    if (!Object.prototype.hasOwnProperty.call(fields, name)) continue;
+    const value = plainListText(fields[name]);
+    if (value) return value;
+  }
+  return '';
+}
+
 function toTimestamp(value) {
   if (value === null || value === undefined || value === '') return 0;
   if (typeof value === 'number') return value > 1e12 ? value : (value > 1e9 ? value * 1000 : 0);
@@ -1885,6 +2493,7 @@ function normalizePulledRecord(raw) {
     summary: pickField(fields, ['视频总结', '总结', 'summary']) || pickField(raw, ['summary']),
     author: pickField(fields, ['作者', 'author']) || pickField(raw, ['author']),
     cover: httpUrl(pickField(fields, ['封面', 'cover']) || pickField(raw, ['cover'])),
+    tags: pickListField(fields, ['标签', 'tags']) || pickListField(raw, ['tags']),
     savedAt: toTimestamp(raw.savedAt || raw.addedAt || fields['收藏时间']),
     syncedAt: toTimestamp(raw.syncedAt || fields['同步时间'])
   };
@@ -1947,6 +2556,7 @@ function mergeFeishuRecords(list) {
       item.cover = remote.cover;
       item.transcript = remote.transcript;
       item.summary = remote.summary;
+      item.tags = normalizeTags(remote.tags || '');
       item.addedAt = remote.savedAt || Date.now();
       item.updatedAt = Date.now();
       item.syncState = 'done';
@@ -1961,6 +2571,10 @@ function mergeFeishuRecords(list) {
         existing[field] = remote[field];
         changed = true;
       }
+    }
+    if (!existing.tags.length && remote.tags) {
+      existing.tags = normalizeTags(remote.tags);
+      changed = existing.tags.length > 0;
     }
     if (existing.syncState !== 'done') {
       existing.syncState = 'done';
@@ -2129,6 +2743,7 @@ async function importBackup(file) {
       existing.videoUrlAt = existing.videoUrlAt || incoming.videoUrlAt;
       existing.transcript = existing.transcript || incoming.transcript;
       existing.summary = existing.summary || incoming.summary;
+      existing.tags = normalizeTags([...(existing.tags || []), ...(incoming.tags || [])]);
       if (incoming.syncState === 'done' && existing.syncState !== 'done') {
         existing.syncState = 'done';
         existing.syncedAt = incoming.syncedAt || existing.syncedAt;
@@ -2158,6 +2773,11 @@ function clearAll() {
   state.items = [];
   state.expanded.clear();
   state.notes.clear();
+  state.tagQueue = [];
+  state.tagFilter = '';
+  state.tagEditorId = '';
+  closeSheetNode(el.tagSheetWrap);
+  closeSheetNode(el.manageSheetWrap);
   try { localStorage.removeItem(LS_ITEMS); } catch (_) {}
   renderItems();
   showToast('已清空本机收藏');
@@ -2227,6 +2847,17 @@ function bindEvents() {
   });
 
   el.settingsBtn.addEventListener('click', () => openSettings(false));
+  el.openListBtn.addEventListener('click', openList);
+  el.manageTagsBtn.addEventListener('click', openTagManager);
+
+  el.tagChips.addEventListener('click', event => {
+    const chip = event.target.closest('.tag-chip');
+    if (!chip) return;
+    const name = chip.dataset.tag || '';
+    state.tagFilter = state.tagFilter === name ? '' : name;
+    renderItems();
+    el.listBody.scrollTop = 0;
+  });
 
   el.itemList.addEventListener('click', event => {
     const btn = event.target.closest('button[data-act]');
@@ -2246,6 +2877,19 @@ function bindEvents() {
       } else {
         enqueueTask(item.id, 'extract', { force: false });
       }
+    } else if (act === 'edit-tags') {
+      openTagEditor(item.id);
+    } else if (act === 'filter-tag') {
+      const name = btn.dataset.tag || '';
+      state.tagFilter = state.tagFilter === name ? '' : name;
+      state.filter = 'all';
+      for (const node of el.filterChips.querySelectorAll('.chip')) {
+        const active = node.dataset.filter === 'all';
+        node.classList.toggle('is-active', active);
+        node.setAttribute('aria-selected', active ? 'true' : 'false');
+      }
+      renderItems();
+      el.listBody.scrollTop = 0;
     } else if (act === 'copy-summary') {
       copyText(item.summary).then(ok => showToast(ok ? '总结已复制' : '复制失败，请长按文字手动复制'));
     } else if (act === 'copy-transcript') {
@@ -2269,13 +2913,7 @@ function bindEvents() {
       const win = window.open(item.url, '_blank');
       if (!win) showToast('浏览器拦截了新窗口，请长按链接手动打开');
     } else if (act === 'delete') {
-      if (!confirm('删除这条收藏？本机记录会被移除，飞书表格里的记录不受影响。')) return;
-      state.items = state.items.filter(entry => entry.id !== item.id);
-      state.expanded.delete(item.id);
-      state.notes.delete(item.id);
-      persistItems();
-      renderItems();
-      showToast('已删除');
+      deleteItem(item);
     }
   });
 
@@ -2283,8 +2921,43 @@ function bindEvents() {
     if (event.target.closest('[data-sheet-close]')) closeSettings();
   });
 
+  el.listSheetWrap.addEventListener('click', event => {
+    if (event.target.closest('[data-list-close]')) closeList();
+  });
+
+  el.tagSheetWrap.addEventListener('click', event => {
+    if (event.target.closest('[data-tag-close]')) closeTagEditor();
+  });
+
+  el.manageSheetWrap.addEventListener('click', event => {
+    if (event.target.closest('[data-manage-close]')) closeTagManager();
+  });
+
+  el.tagAddBtn.addEventListener('click', addTagsFromInput);
+  el.tagInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addTagsFromInput();
+    }
+  });
+  el.tagDoneBtn.addEventListener('click', closeTagEditor);
+  el.autoTagBtn.addEventListener('click', async () => {
+    const item = findItem(state.tagEditorId);
+    if (!item) return;
+    el.autoTagBtn.disabled = true;
+    el.autoTagBtn.textContent = '生成中…';
+    await autoTagItem(item, { notify: true });
+    el.autoTagBtn.disabled = false;
+    el.autoTagBtn.textContent = '自动生成标签';
+  });
+  el.autoTagAllBtn.addEventListener('click', autoTagMissing);
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !el.sheetWrap.hidden) closeSettings();
+    if (event.key !== 'Escape') return;
+    if (!el.tagSheetWrap.hidden) closeTagEditor();
+    else if (!el.manageSheetWrap.hidden) closeTagManager();
+    else if (!el.sheetWrap.hidden) closeSettings();
+    else if (!el.listSheetWrap.hidden) closeList();
   });
 
   el.toggleKeyBtn.addEventListener('click', () => {
@@ -2406,7 +3079,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.1 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.2 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   if (state.settings.autoPullFeishu === 'open' && state.settings.feishuReadUrl) {
     setTimeout(() => pullFeishu({ silent: true }), 900);

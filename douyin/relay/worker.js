@@ -121,6 +121,7 @@ function normalize(record) {
     summary: field(fields, ['视频总结', '总结', 'summary']),
     author: field(fields, ['作者', 'author']),
     cover: httpUrl(field(fields, ['封面', 'cover'])),
+    tags: listText(fields['标签'] !== undefined ? fields['标签'] : fields.tags),
     status: field(fields, ['处理状态', 'status']),
     savedAt: timestamp(fields['收藏时间']),
     syncedAt: timestamp(fields['同步时间'])
@@ -138,6 +139,11 @@ function field(fields, names) {
 
 function httpUrl(value) {
   return /^https?:\/\//i.test(value) ? value : '';
+}
+
+function listText(value) {
+  if (Array.isArray(value)) return value.map(text).filter(Boolean).join('、');
+  return text(value);
 }
 
 function text(value) {

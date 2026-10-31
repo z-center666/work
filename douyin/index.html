@@ -50,10 +50,41 @@
       <p class="hint" id="addHint">一次可以粘贴多条链接，会逐条读取标题和封面。点「存入收藏」先收进来，文案和总结稍后再提取。</p>
     </section>
 
-    <section class="list-head" aria-label="收藏列表">
+    <section class="collection-card" aria-label="收藏列表入口">
+      <button type="button" class="collection-entry" id="openListBtn">
+        <span class="collection-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2a.8.8 0 0 1-1.25.66L12 16.6l-5.25 3.76a.8.8 0 0 1-1.25-.66V5.5a1 1 0 0 1 1-1Z"/></svg>
+        </span>
+        <span class="collection-text">
+          <span class="collection-title">收藏列表</span>
+          <span class="collection-sub" id="collectionSummary">还没有收藏</span>
+        </span>
+        <span class="collection-open">打开<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
+      </button>
+    </section>
+
+    <footer class="page-foot">
+      <p>数据只保存在这台手机。长期不打开可能被系统清理，建议同步飞书或定期导出备份。收藏列表里可以打标签、按标签筛选和删除收藏。</p>
+    </footer>
+  </main>
+</div>
+
+<div class="sheet-wrap list-wrap" id="listSheetWrap" hidden>
+  <div class="sheet-backdrop" data-list-close></div>
+  <section class="sheet list-sheet" role="dialog" aria-modal="true" aria-labelledby="listSheetTitle">
+    <header class="sheet-head">
+      <h2 id="listSheetTitle">收藏列表<span class="sheet-count" id="listCount"></span></h2>
+      <div class="sheet-head-side">
+        <button type="button" class="text-btn" id="manageTagsBtn">标签管理</button>
+        <button type="button" class="icon-btn" data-list-close aria-label="关闭收藏列表">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="list-tools">
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
-        <input id="searchInput" type="search" placeholder="搜索标题、作者或文案" autocomplete="off">
+        <input id="searchInput" type="search" placeholder="搜索标题、作者、文案或标签" autocomplete="off">
       </div>
       <div class="chips" id="filterChips" role="tablist" aria-label="筛选">
         <button type="button" class="chip is-active" data-filter="all" role="tab" aria-selected="true">全部</button>
@@ -61,23 +92,68 @@
         <button type="button" class="chip" data-filter="text" role="tab" aria-selected="false">有文案</button>
         <button type="button" class="chip" data-filter="unsynced" role="tab" aria-selected="false">未同步</button>
       </div>
+      <div class="chips tag-chips" id="tagChips" role="tablist" aria-label="按标签筛选" hidden></div>
       <p class="list-hint" id="listHint"></p>
-    </section>
+    </div>
+    <div class="list-body" id="listBody">
+      <section class="item-list" id="itemList" aria-live="polite"></section>
+      <section class="empty" id="emptyState" hidden>
+        <div class="empty-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2a.8.8 0 0 1-1.25.66L12 16.6l-5.25 3.76a.8.8 0 0 1-1.25-.66V5.5a1 1 0 0 1 1-1Z"/></svg>
+        </div>
+        <h3 id="emptyTitle">还没有收藏</h3>
+        <p id="emptyText">在抖音、快手等 App 里复制分享链接，粘贴到主页面即可；多条链接可以一次粘贴。</p>
+      </section>
+    </div>
+  </section>
+</div>
 
-    <section class="item-list" id="itemList" aria-live="polite"></section>
-
-    <section class="empty" id="emptyState" hidden>
-      <div class="empty-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2a.8.8 0 0 1-1.25.66L12 16.6l-5.25 3.76a.8.8 0 0 1-1.25-.66V5.5a1 1 0 0 1 1-1Z"/></svg>
+<div class="sheet-wrap sub-wrap" id="tagSheetWrap" hidden>
+  <div class="sheet-backdrop" data-tag-close></div>
+  <section class="sheet tag-sheet" role="dialog" aria-modal="true" aria-labelledby="tagSheetTitle">
+    <header class="sheet-head">
+      <h2 id="tagSheetTitle">编辑标签</h2>
+      <button type="button" class="icon-btn" data-tag-close aria-label="关闭标签编辑">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body">
+      <p class="tag-item-title" id="tagItemTitle"></p>
+      <div class="tag-editor-list" id="tagEditorList"></div>
+      <p class="hint" id="tagEditorHint">点标签上的 × 移除。输入新标签后按回车或点「添加」。</p>
+      <div class="tag-add-row">
+        <input id="tagInput" type="text" placeholder="输入标签，例如 人工智能" maxlength="24" autocomplete="off" enterkeyhint="done">
+        <button type="button" class="ghost-btn small" id="tagAddBtn">添加</button>
       </div>
-      <h3>还没有收藏</h3>
-      <p>在抖音、快手等 App 里复制分享链接，粘贴到上面即可；多条链接可以一次粘贴。安卓手机也可以在分享面板里直接选「视频收藏」。</p>
-    </section>
+      <p class="tag-suggest-title" id="tagSuggestTitle" hidden>已有标签</p>
+      <div class="tag-suggest" id="tagSuggest"></div>
+      <div class="setting-actions wrap">
+        <button type="button" class="ghost-btn small" id="autoTagBtn">自动生成标签</button>
+        <button type="button" class="ghost-btn small" id="tagDoneBtn">完成</button>
+      </div>
+    </div>
+  </section>
+</div>
 
-    <footer class="page-foot">
-      <p>数据只保存在这台手机。长期不打开可能被系统清理，建议同步飞书或定期导出备份。</p>
-    </footer>
-  </main>
+<div class="sheet-wrap sub-wrap" id="manageSheetWrap" hidden>
+  <div class="sheet-backdrop" data-manage-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="manageSheetTitle">
+    <header class="sheet-head">
+      <h2 id="manageSheetTitle">标签管理</h2>
+      <button type="button" class="icon-btn" data-manage-close aria-label="关闭标签管理">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="sheet-body">
+      <p class="hint">改名会同步到所有收藏；删除会从所有收藏里移除这个标签。</p>
+      <div class="manage-tag-list" id="manageTagList"></div>
+      <p class="hint" id="manageTagHint"></p>
+      <div class="setting-actions wrap">
+        <button type="button" class="ghost-btn small" id="autoTagAllBtn">给未打标签的收藏自动打标签</button>
+      </div>
+      <p class="hint">自动打标签会用设置里的硅基流动密钥理解内容；没填密钥时会先按标题关键词打标签。</p>
+    </div>
+  </section>
 </div>
 
 <div class="sheet-wrap" id="sheetWrap" hidden>
@@ -154,8 +230,8 @@
           <ol>
             <li>打开存放收藏的多维表格，右上角点「自动化」→ 新建。</li>
             <li>触发条件选「接收到 Webhook 时」，复制生成的地址。</li>
-            <li>添加操作「新增记录」，目标选这张表，把 Webhook 的字段分别映射到：标题、视频链接、描述文案、口播文案、视频总结、作者、封面、处理状态、收藏时间、同步时间。</li>
-            <li>字段名保持中文；收藏时间和同步时间传的是毫秒时间戳，处理状态只能是「处理中 / 已完成 / 失败」。</li>
+            <li>添加操作「新增记录」，目标选这张表，把 Webhook 的字段分别映射到：标题、视频链接、描述文案、口播文案、视频总结、作者、封面、标签、处理状态、收藏时间、同步时间。</li>
+            <li>字段名保持中文；收藏时间和同步时间传的是毫秒时间戳，标签是「、」分隔的文本，处理状态只能是「处理中 / 已完成 / 失败」。</li>
             <li>保存并启用自动化，再回到这里点「发送测试」。</li>
           </ol>
           <p class="hint">示例 JSON 里的字段就是实际发送的内容，可以直接对照映射。想避免重复记录，可以在自动化里先按「视频链接」查找记录：找到就更新，找不到再新增。</p>
@@ -247,7 +323,7 @@
       <section class="setting-group about">
         <h3>关于</h3>
         <p class="hint">视频收藏是纯手机端页面：解析、转写、总结都在浏览器里完成，不需要电脑在线。图文和视频版权归原作者所有，请仅作个人收藏。</p>
-        <p class="hint" id="versionLine">版本 1.0 · 本机存储</p>
+        <p class="hint" id="versionLine">版本 1.2 · 本机存储</p>
       </section>
     </div>
   </section>
