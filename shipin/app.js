@@ -2008,7 +2008,7 @@ function visibleItems() {
 function renderTagChips() {
   if (!el.tagChips) return;
   const entries = tagCounts();
-  el.tagChips.hidden = !entries.length;
+  el.tagChips.hidden = false;
   el.tagChips.replaceChildren();
   for (const [name, count] of entries) {
     const chip = document.createElement('button');
@@ -2020,6 +2020,7 @@ function renderTagChips() {
     chip.textContent = `${name} ${count}`;
     el.tagChips.appendChild(chip);
   }
+  if (el.manageTagsBtn) el.tagChips.appendChild(el.manageTagsBtn);
 }
 
 function renderItems() {
@@ -3003,7 +3004,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.5 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.6 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();

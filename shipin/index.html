@@ -75,7 +75,6 @@
     <header class="sheet-head">
       <h2 id="listSheetTitle">收藏列表<span class="sheet-count" id="listCount"></span></h2>
       <div class="sheet-head-side">
-        <button type="button" class="text-btn" id="manageTagsBtn">标签管理</button>
         <button type="button" class="icon-btn" data-list-close aria-label="关闭收藏列表">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
         </button>
@@ -92,7 +91,9 @@
         <button type="button" class="chip" data-filter="text" role="tab" aria-selected="false">有文案</button>
         <button type="button" class="chip" data-filter="unsynced" role="tab" aria-selected="false">未同步</button>
       </div>
-      <div class="chips tag-chips" id="tagChips" role="tablist" aria-label="按标签筛选" hidden></div>
+      <div class="chips tag-chips" id="tagChips" role="tablist" aria-label="按标签筛选">
+        <button type="button" class="text-btn manage-tags-link" id="manageTagsBtn">标签管理</button>
+      </div>
       <p class="list-hint" id="listHint"></p>
     </div>
     <div class="list-body" id="listBody">
@@ -255,7 +256,7 @@
       <section class="setting-group about">
         <h3>关于</h3>
         <p class="hint">视频收藏是纯手机端页面：解析、转写、总结都在浏览器里完成，不需要电脑在线。图文和视频版权归原作者所有，请仅作个人收藏。</p>
-        <p class="hint" id="versionLine">版本 1.5 · 本机存储</p>
+        <p class="hint" id="versionLine">版本 1.6 · 本机存储</p>
       </section>
     </div>
   </section>

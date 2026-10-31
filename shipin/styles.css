@@ -539,6 +539,18 @@ svg {
   padding-top: 2px;
 }
 
+.manage-tags-link {
+  flex: none;
+  align-self: center;
+  min-height: 34px;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1;
+}
+
+.manage-tags-link:active { color: var(--text); }
+
 .list-body {
   flex: 1;
   min-height: 0;
