@@ -1757,6 +1757,22 @@ function extractLabel(item) {
   return '提取文案';
 }
 
+/* 手机端直接走通用链接，由系统交给对应 App（没装 App 时会打开网页）；桌面端新开标签 */
+function openSource(item, preferApp = false) {
+  const url = item && item.url;
+  if (!url) {
+    showToast('这条收藏没有原始链接');
+    return;
+  }
+  const isMobile = /iPhone|iPad|iPod|Android|HarmonyOS/i.test(navigator.userAgent);
+  if (preferApp && isMobile) {
+    location.href = url;
+    return;
+  }
+  const win = window.open(url, '_blank');
+  if (!win) showToast('浏览器拦截了新窗口，请长按链接手动打开');
+}
+
 function buildCard(item) {
   const card = document.createElement('article');
   card.className = 'item';
@@ -1829,6 +1845,12 @@ function buildCard(item) {
 
   const actions = document.createElement('div');
   actions.className = 'item-actions';
+  const viewBtn = document.createElement('button');
+  viewBtn.type = 'button';
+  viewBtn.className = 'action-btn';
+  viewBtn.dataset.act = 'view';
+  viewBtn.textContent = '查看视频';
+
   const downloadBtn = document.createElement('button');
   downloadBtn.type = 'button';
   downloadBtn.className = 'action-btn';
@@ -1850,7 +1872,7 @@ function buildCard(item) {
   deleteBtn.setAttribute('aria-label', '删除收藏');
   deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M8 7l.7 11.2A1.8 1.8 0 0 0 10.5 20h3a1.8 1.8 0 0 0 1.8-1.8L16 7M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/></svg>';
 
-  actions.append(downloadBtn, extractBtn, deleteBtn);
+  actions.append(viewBtn, downloadBtn, extractBtn, deleteBtn);
 
   const status = document.createElement('p');
   status.className = 'item-status';
@@ -2783,7 +2805,9 @@ function bindEvents() {
     if (!item) return;
     const act = btn.dataset.act;
 
-    if (act === 'download') {
+    if (act === 'view') {
+      openSource(item, true);
+    } else if (act === 'download') {
       enqueueTask(item.id, 'download');
     } else if (act === 'extract') {
       if (item.transcript && item.summary) {
@@ -2825,8 +2849,7 @@ function bindEvents() {
       if (!confirm('重新提取会重新下载视频并调用转写，确定继续吗？')) return;
       enqueueTask(item.id, 'extract', { force: true });
     } else if (act === 'open') {
-      const win = window.open(item.url, '_blank');
-      if (!win) showToast('浏览器拦截了新窗口，请长按链接手动打开');
+      openSource(item, false);
     } else if (act === 'delete') {
       deleteItem(item);
     }
@@ -2980,7 +3003,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.3 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.4 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
