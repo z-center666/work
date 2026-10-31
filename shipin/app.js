@@ -1664,7 +1664,6 @@ function cacheEls() {
   el.linkInput = $('#linkInput');
   el.addBtn = $('#addBtn');
   el.pasteBtn = $('#pasteBtn');
-  el.addHint = $('#addHint');
   el.searchInput = $('#searchInput');
   el.filterChips = $('#filterChips');
   el.tagChips = $('#tagChips');
@@ -2979,9 +2978,6 @@ function applyPlatformHints() {
     el.phoneModeHint.textContent = standalone
       ? '当前是主屏幕 App：iOS 的主屏幕 App 与 Safari 存储互不相通，快捷指令写入的是 Safari。请用本页的「从剪贴板粘贴」添加；API Key 也需要在本 App 里单独填写。'
       : '当前在 Safari：快捷指令会打开同一个页面，添加的数据能直接看到。若之后添加到主屏幕，二者存储不会自动互通，可用导出/导入迁移。';
-    if (standalone) {
-      el.addHint.textContent = '在抖音等 App 复制分享链接后，点「从剪贴板粘贴」存入；主屏幕 App 与 Safari 的数据不互通。';
-    }
   } else {
     el.phoneModeHint.textContent = '安卓：在 Chrome 里安装到主屏幕后，分享面板可以直接选「视频收藏」，数据互通。';
   }
@@ -3004,7 +3000,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.6 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.7 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
