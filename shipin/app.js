@@ -3007,7 +3007,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.8 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.9 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
