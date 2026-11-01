@@ -1532,6 +1532,18 @@ function syncLabelFor(item) {
   return '同步飞书';
 }
 
+function pendingSyncCount() {
+  return state.items.filter(item => item.syncState === 'none' || item.syncState === 'error').length;
+}
+
+/* 列表头部按钮实时显示待同步条数：没有待同步时点它变成“核对全部” */
+function updateSyncButton() {
+  if (!el.syncAllBtn || state.syncAllRunning) return;
+  const pending = pendingSyncCount();
+  el.syncAllBtn.textContent = pending ? `同步全部 ${pending}` : '同步全部';
+  el.syncAllBtn.classList.toggle('is-idle', pending === 0);
+}
+
 async function sendPayload(payload) {
   const body = {
     title: payload['标题'],
@@ -1551,7 +1563,12 @@ async function sendPayload(payload) {
     const response = await Relay.call('POST', '/openapi/items', body);
     /* 中转是 NestJS，POST 成功返回 201；这里按 2xx 统一判定 */
     if (response.status >= 200 && response.status < 300 && response.data && response.data.id) {
-      return { state: 'done', message: response.data.duplicated ? '已在飞书同步队列中' : '已加入飞书同步队列' };
+      const duplicated = !!response.data.duplicated;
+      return {
+        state: 'done',
+        duplicated,
+        message: duplicated ? '已在飞书同步队列中' : '已加入飞书同步队列'
+      };
     }
     if (response.status === 401 || response.status === 403) {
       return { state: 'error', message: '飞书同步暂不可用，请稍后重试' };
@@ -1601,53 +1618,76 @@ async function syncItem(item, options = {}) {
 
 async function syncAll() {
   if (state.syncAllRunning) return;
-  const targets = state.items.filter(item => item.syncState === 'none' || item.syncState === 'error');
-  if (!targets.length) {
-    showToast('没有待同步的收藏');
+  if (!state.items.length) {
+    showToast('还没有收藏，先添加一条');
     return;
+  }
+
+  let targets = state.items.filter(item => item.syncState === 'none' || item.syncState === 'error');
+  const forced = targets.length === 0;
+  if (forced) {
+    const ok = confirm(`全部 ${state.items.length} 条都标记为已同步。要再提交一遍，确认飞书队列里都有它们吗？`);
+    if (!ok) return;
+    targets = state.items.slice();
   }
 
   state.syncAllRunning = true;
   el.syncAllBtn.disabled = true;
-  let done = 0;
-  let failed = 0;
+  el.syncAllBtn.textContent = forced ? `核对 1/${targets.length}` : `同步 1/${targets.length}`;
+  let added = 0;
+  let duplicated = 0;
   let unconfirmed = 0;
+  let failed = 0;
 
-  for (let i = 0; i < targets.length; i++) {
-    el.syncAllBtn.textContent = `同步 ${i + 1}/${targets.length}`;
-    const item = targets[i];
-    state.syncing.add(item.id);
-    updateCard(item);
-    const result = await sendPayload(buildPayload(item));
-    state.syncing.delete(item.id);
+  try {
+    for (let i = 0; i < targets.length; i++) {
+      el.syncAllBtn.textContent = `${forced ? '核对' : '同步'} ${i + 1}/${targets.length}`;
+      const item = targets[i];
+      state.syncing.add(item.id);
+      updateCard(item);
+      const result = await sendPayload(buildPayload(item));
+      state.syncing.delete(item.id);
 
-    if (result.state === 'done') {
-      item.syncState = 'done';
-      item.syncedAt = Date.now();
-      item.syncError = '';
-      done++;
-    } else if (result.state === 'unconfirmed') {
-      item.syncState = 'unconfirmed';
-      item.syncedAt = Date.now();
-      item.syncError = result.message;
-      unconfirmed++;
-    } else {
-      item.syncState = 'error';
-      item.syncError = result.message;
-      failed++;
+      if (result.state === 'done') {
+        item.syncState = 'done';
+        item.syncedAt = Date.now();
+        item.syncError = '';
+        if (result.duplicated) duplicated++;
+        else added++;
+      } else if (result.state === 'unconfirmed') {
+        item.syncState = 'unconfirmed';
+        item.syncedAt = Date.now();
+        item.syncError = result.message;
+        unconfirmed++;
+      } else {
+        item.syncState = 'error';
+        item.syncError = result.message;
+        failed++;
+      }
+      touch(item);
+      persistItems();
+      updateCard(item);
     }
-    touch(item);
-    persistItems();
-    updateCard(item);
+  } finally {
+    state.syncAllRunning = false;
+    el.syncAllBtn.disabled = false;
+    updateSyncButton();
   }
 
-  state.syncAllRunning = false;
-  el.syncAllBtn.disabled = false;
-  el.syncAllBtn.textContent = '同步全部';
-  const parts = [`成功 ${done} 条`];
-  if (unconfirmed) parts.push(`待确认 ${unconfirmed} 条`);
-  if (failed) parts.push(`失败 ${failed} 条`);
-  showToast('同步完成：' + parts.join('，'), 4600);
+  if (forced && !failed && !unconfirmed) {
+    if (added) {
+      showToast(`已补提交 ${added} 条${duplicated ? `，${duplicated} 条原本就在队列` : ''}；表格每天 21:30 补齐`, 5600);
+    } else {
+      showToast(`${duplicated} 条都已在飞书队列里，等表格每天 21:30 补齐`, 5600);
+    }
+  } else {
+    const parts = [];
+    if (added) parts.push(`新增 ${added} 条`);
+    if (duplicated) parts.push(`已在队列 ${duplicated} 条`);
+    if (unconfirmed) parts.push(`待确认 ${unconfirmed} 条`);
+    if (failed) parts.push(`失败 ${failed} 条`);
+    showToast('同步完成：' + parts.join('，'), 5200);
+  }
   renderItems();
 }
 
@@ -2038,6 +2078,7 @@ function renderItems() {
       : '还没有收藏，先粘贴链接';
   }
   if (el.listCount) el.listCount.textContent = total ? String(total) : '';
+  updateSyncButton();
 
   renderTagChips();
 
@@ -3007,7 +3048,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.9 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.10 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();

@@ -200,11 +200,17 @@ svg {
 .text-btn:active { color: var(--text); }
 
 .sheet-sync-btn {
-  min-height: 34px;
-  padding: 0 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
   color: var(--accent);
+  font-weight: 600;
   white-space: nowrap;
 }
+
+.sheet-sync-btn.is-idle { color: var(--muted); }
+
+.sheet-sync-btn:active { background: rgba(167, 139, 250, 0.12); }
 
 .sheet-sync-btn:disabled { color: var(--muted-2); }
 
