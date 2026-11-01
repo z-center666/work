@@ -1549,7 +1549,8 @@ async function sendPayload(payload) {
 
   try {
     const response = await Relay.call('POST', '/openapi/items', body);
-    if (response.status === 200 && response.data && response.data.id) {
+    /* 中转是 NestJS，POST 成功返回 201；这里按 2xx 统一判定 */
+    if (response.status >= 200 && response.status < 300 && response.data && response.data.id) {
       return { state: 'done', message: response.data.duplicated ? '已在飞书同步队列中' : '已加入飞书同步队列' };
     }
     if (response.status === 401 || response.status === 403) {
@@ -1567,7 +1568,7 @@ async function sendPayload(payload) {
 async function syncItem(item, options = {}) {
   if (!item || state.syncing.has(item.id)) return;
   if (item.syncState === 'done' && !options.confirmed) {
-    const ok = confirm('这条已经同步过，再次同步会在飞书新增一条记录。继续吗？');
+    const ok = confirm('这条已经同步过，再次提交不会在飞书重复新增。继续吗？');
     if (!ok) return;
   }
 
@@ -2742,6 +2743,12 @@ function bindEvents() {
     }
   });
 
+  const linkWrap = $('#linkWrap');
+  if (linkWrap) {
+    el.linkInput.addEventListener('focus', () => linkWrap.classList.add('is-focus'));
+    el.linkInput.addEventListener('blur', () => linkWrap.classList.remove('is-focus'));
+  }
+
   el.pasteBtn.addEventListener('click', async () => {
     try {
       const text = await navigator.clipboard.readText();
@@ -3000,7 +3007,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.7 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.8 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
