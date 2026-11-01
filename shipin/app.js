@@ -1,7 +1,7 @@
 'use strict';
 
 /* =========================================================
-   视频收藏 · 纯手机端收藏 PWA
+   掌藏 · 纯手机端视频收藏 PWA
    - 收藏与文案都存本机 localStorage
    - 解析：第三方公开接口；下载：浏览器直连
    - 转写/总结：硅基流动（用户自己的免费 Key）
@@ -1510,7 +1510,7 @@ async function extractItem(item, progress, force) {
 function buildPayload(item, isTest = false) {
   const now = Date.now();
   return {
-    标题: item.title || (isTest ? '视频收藏 · 同步测试' : '视频收藏'),
+    标题: item.title || (isTest ? '掌藏 · 同步测试' : '掌藏'),
     视频链接: item.url || pageUrl(),
     描述文案: item.desc || '',
     口播文案: item.transcript || '',
@@ -2685,8 +2685,8 @@ async function exportBackup() {
     items: state.items
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const name = `视频收藏备份_${formatFileStamp(Date.now())}.json`;
-  const mode = await saveBlob(blob, name, '视频收藏备份', 'application/json');
+  const name = `掌藏备份_${formatFileStamp(Date.now())}.json`;
+  const mode = await saveBlob(blob, name, '掌藏备份', 'application/json');
   if (mode === 'cancelled') showToast('已取消导出');
   else if (mode === 'shared') showToast('已打开保存面板');
   else showToast('备份已导出');
@@ -2698,7 +2698,7 @@ async function importBackup(file) {
   try {
     data = JSON.parse(await file.text());
   } catch (_) {
-    showToast('备份文件无法读取，请选择视频收藏导出的 JSON 文件');
+    showToast('备份文件无法读取，请选择掌藏导出的 JSON 文件');
     return;
   }
   const list = Array.isArray(data) ? data : (data && Array.isArray(data.items) ? data.items : null);
@@ -3027,7 +3027,7 @@ function applyPlatformHints() {
       ? '当前是主屏幕 App：iOS 的主屏幕 App 与 Safari 存储互不相通，快捷指令写入的是 Safari。请用本页的「从剪贴板粘贴」添加；API Key 也需要在本 App 里单独填写。'
       : '当前在 Safari：快捷指令会打开同一个页面，添加的数据能直接看到。若之后添加到主屏幕，二者存储不会自动互通，可用导出/导入迁移。';
   } else {
-    el.phoneModeHint.textContent = '安卓：在 Chrome 里安装到主屏幕后，分享面板可以直接选「视频收藏」，数据互通。';
+    el.phoneModeHint.textContent = '安卓：在 Chrome 里安装到主屏幕后，分享面板可以直接选「掌藏」，数据互通。';
   }
 }
 
@@ -3048,7 +3048,7 @@ function init() {
   fillSettingsForm();
   applyPlatformHints();
   ensurePersistentStorage();
-  el.versionLine.textContent = `版本 1.10 · 本机存储 · ${location.host || '本地文件'}`;
+  el.versionLine.textContent = `版本 1.11 · 本机存储 · ${location.host || '本地文件'}`;
   handleIncoming();
   setTimeout(() => pullFeishu({ silent: true }), 900);
   registerServiceWorker();
