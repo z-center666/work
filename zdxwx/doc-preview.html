@@ -53,15 +53,6 @@
   .doc-ul { padding-left: 22px; font-size: 14px; line-height: 1.9; margin-bottom: 12px; }
   .doc-li { margin-bottom: 4px; }
   .doc-li b { font-weight: 600; }
-
-  /* 水印 */
-  .pv-wm {
-    position: fixed; inset: 0; pointer-events: none; z-index: 9; overflow: hidden;
-  }
-  .pv-wm span {
-    position: absolute; font-size: 12px; color: rgba(31,35,41,.08);
-    transform: rotate(-24deg); white-space: nowrap;
-  }
 </style>
 </head>
 <body>
@@ -127,21 +118,5 @@
     </div>
   </div>
 
-  <!-- 水印层 -->
-  <div class="pv-wm" id="pvWm"></div>
-
-<script>
-(function () {
-  // 平铺水印
-  var wm = document.getElementById('pvWm');
-  var html = '';
-  for (var y = 0; y < 14; y++) {
-    for (var x = 0; x < 7; x++) {
-      html += '<span style="left:' + (x * 180 + (y % 2 ? 90 : 0)) + 'px;top:' + (y * 70) + 'px;">zkwweisong.ma  2026-10-17</span>';
-    }
-  }
-  wm.innerHTML = html;
-})();
-</script>
 </body>
 </html>
