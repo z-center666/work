@@ -3170,14 +3170,16 @@ body {
   function endSession() {
     // 隐藏结束按钮
     endBtn.style.display = 'none';
-    // 隐藏输入区（工具栏 + 发送按钮）
-    editor.style.display = 'none';
-    // 插入会话结束提示（居中，带分隔线）
+    // 隐藏输入区内容（工具栏 + 输入框），保留区域高度
+    var card = editor.querySelector('.dz-chat__card');
+    if (card) card.style.display = 'none';
+    // 在输入区显示会话结束提示 + 重新发起链接
     var tip = document.createElement('div');
-    tip.className = 'dz-session-end-line';
+    tip.className = 'dz-editor-end-tip';
     tip.id = 'dzSessionEndTip';
-    tip.innerHTML = '<div class="dz-session-end-line__row"><span class="dz-session-end-line__text">' + now() + ' 会话结束（系统结束）</span></div>' +
-      '<a class="dz-session-restart-link" id="dzSessionRestartBtn">重新发起会话</a>';
+    tip.innerHTML = '<span class="dz-editor-end-tip__text">' + now() + ' 会话结束（系统结束）</span>' +
+      '<a class="dz-editor-end-tip__link" id="dzSessionRestartBtn">重新发起会话</a>';
+    editor.appendChild(tip);
     stream.appendChild(tip);
     stream.scrollTop = stream.scrollHeight;
     
@@ -3206,9 +3208,10 @@ body {
     // 移除结束提示
     var tip = document.getElementById('dzSessionEndTip');
     if (tip) tip.remove();
-    // 恢复结束按钮和输入区
+    // 恢复结束按钮和输入区内容
     endBtn.style.display = '';
-    editor.style.display = '';
+    var card = editor.querySelector('.dz-chat__card');
+    if (card) card.style.display = '';
     
     // 移动会话卡片回"进行中"
     var card = document.getElementById('convCardAnonymous');
@@ -3697,43 +3700,29 @@ var kbDetails = {
 }
 .dz-session-end__link:hover { text-decoration: underline; }
 
-/* === 会话结束提示（居中分隔线样式）=== */
-.dz-session-end-line {
-  flex-shrink: 0;
+/* === 输入区会话结束提示 === */
+.dz-editor-end-tip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0;
+  justify-content: center;
+  padding: 16px 0 20px;
+  border-top: 1px solid #e5e6eb;
   gap: 8px;
 }
-.dz-session-end-line__row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  justify-content: center;
-}
-.dz-session-end-line__row::before,
-.dz-session-end-line__row::after {
-  content: '';
-  flex: 1;
-  max-width: 120px;
-  height: 1px;
-  background: #e5e6eb;
-}
-.dz-session-end-line__text {
+.dz-editor-end-tip__text {
   font-size: 13px;
   color: #86909c;
   white-space: nowrap;
 }
-.dz-session-restart-link {
+.dz-editor-end-tip__link {
   font-size: 13px;
   color: #0068ff;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
 }
-.dz-session-restart-link:hover { text-decoration: underline; }
+.dz-editor-end-tip__link:hover { text-decoration: underline; }
 
 /* === 结束会话确认弹窗 === */
 .dz-modal-overlay {
