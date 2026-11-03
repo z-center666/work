@@ -2137,8 +2137,8 @@ body {
               </div>
             </div>
           </div>
-          <div class="dz-dzim__second-content dz-conv-list">
-            <div class="dz-conv-card active">
+          <div class="dz-dzim__second-content dz-conv-list" id="convListInProgress">
+            <div class="dz-conv-card active" id="convCardAnonymous">
               <span class="dz-conv-card__avatar"><i class="bi bi-person-fill"></i></span>
               <div class="dz-conv-card__body">
                 <div class="dz-conv-card__name">匿名用户</div>
@@ -2146,6 +2146,9 @@ body {
               </div>
               <span class="dz-conv-card__close"><i class="bi bi-x-circle-fill"></i></span>
             </div>
+          </div>
+          <div class="dz-dzim__second-content dz-conv-list" id="convListRecent" style="display: none;">
+            <!-- 最近联系列表，初始为空 -->
           </div>
           
         </div>
@@ -3181,9 +3184,55 @@ body {
     var tip = document.createElement('div');
     tip.className = 'dz-session-end-line';
     tip.id = 'dzSessionEndTip';
-    tip.innerHTML = '<span class="dz-session-end-line__text">' + now() + ' 会话结束（系统结束）</span>';
+    tip.innerHTML = '<span class="dz-session-end-line__text">' + now() + ' 会话结束（系统结束）</span>' +
+      '<button class="dz-session-restart-btn" id="dzSessionRestartBtn">重新发起会话</button>';
     stream.appendChild(tip);
     stream.scrollTop = stream.scrollHeight;
+    
+    // 绑定重新发起按钮（直接绑定，无需 setTimeout）
+    var restartBtn = document.getElementById('dzSessionRestartBtn');
+    if (restartBtn) restartBtn.addEventListener('click', restartSession);
+    
+    // 移动会话卡片到"最近联系"
+    var card = document.getElementById('convCardAnonymous');
+    var recentList = document.getElementById('convListRecent');
+    var inProgressList = document.getElementById('convListInProgress');
+    if (card && recentList && inProgressList) {
+      card.classList.remove('active');
+      recentList.appendChild(card);
+      inProgressList.style.display = 'none';
+      recentList.style.display = 'block';
+      // 更新标题
+      document.querySelector('.dz-dzim__second-title span:first-child').textContent = '最近联系';
+      // 更新计数
+      document.querySelector('.dz-dzim__item:nth-child(1) .dz-dzim__count').textContent = '0';
+      document.querySelector('.dz-dzim__item:nth-child(6) .dz-dzim__count').textContent = '1';
+    }
+  }
+  
+  function restartSession() {
+    // 移除结束提示
+    var tip = document.getElementById('dzSessionEndTip');
+    if (tip) tip.remove();
+    // 恢复结束按钮和输入区
+    endBtn.style.display = '';
+    editor.style.display = '';
+    
+    // 移动会话卡片回"进行中"
+    var card = document.getElementById('convCardAnonymous');
+    var recentList = document.getElementById('convListRecent');
+    var inProgressList = document.getElementById('convListInProgress');
+    if (card && recentList && inProgressList) {
+      card.classList.add('active');
+      inProgressList.appendChild(card);
+      recentList.style.display = 'none';
+      inProgressList.style.display = 'block';
+      // 更新标题
+      document.querySelector('.dz-dzim__second-title span:first-child').textContent = '进行中';
+      // 更新计数
+      document.querySelector('.dz-dzim__item:nth-child(1) .dz-dzim__count').textContent = '1';
+      document.querySelector('.dz-dzim__item:nth-child(6) .dz-dzim__count').textContent = '0';
+    }
   }
 
   // 点击结束按钮显示弹窗
@@ -3677,6 +3726,22 @@ var kbDetails = {
   font-size: 13px;
   color: #86909c;
   white-space: nowrap;
+}
+.dz-session-restart-btn {
+  margin-left: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #0068ff;
+  background: transparent;
+  border: 1px solid #0068ff;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.dz-session-restart-btn:hover {
+  background: #0068ff;
+  color: #fff;
 }
 
 /* === 结束会话确认弹窗 === */
