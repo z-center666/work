@@ -2176,7 +2176,7 @@ body {
               <button class="dz-chat__act-btn">创建工单</button>
               <button class="dz-chat__act-btn">邀请</button>
               <button class="dz-chat__act-btn">转出</button>
-              <button class="dz-chat__act-btn">结束</button>
+              <button class="dz-chat__act-btn" id="btnEndSession">结束</button>
               <span class="dz-chat__session" hidden>sessionID: 8f3a-22c1<button class="dz-chat__copy" id="copySession" title="复制 sessionID"><i class="bi bi-copy"></i></button></span>
               <span class="dz-chat__timer"><i class="bi bi-clock"></i> <span id="chatTimer">02:28:44</span></span>
             </div>
@@ -3135,6 +3135,49 @@ body {
   });
 })();
 
+// 结束会话：点击结束按钮隐藏按钮和输入区，显示会话结束提示；点击重新发起恢复
+(function () {
+  var endBtn = document.getElementById('btnEndSession');
+  var stream = document.getElementById('chatStream');
+  var editor = document.querySelector('.dz-chat__editor');
+  if (!endBtn || !stream || !editor) return;
+
+  function now() {
+    var d = new Date();
+    function p(n) { return n < 10 ? '0' + n : n; }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+      ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  function endSession() {
+    // 隐藏结束按钮
+    endBtn.style.display = 'none';
+    // 隐藏输入区（工具栏 + 发送按钮）
+    editor.style.display = 'none';
+    // 插入会话结束提示
+    var tip = document.createElement('div');
+    tip.className = 'dz-session-end';
+    tip.id = 'dzSessionEndTip';
+    tip.innerHTML = '<div>' + now() + ' 会话结束</div>' +
+      '<div class="dz-session-end__link" id="dzSessionRestart">重新发起会话</div>';
+    stream.appendChild(tip);
+    stream.scrollTop = stream.scrollHeight;
+    // 绑定重新发起
+    document.getElementById('dzSessionRestart').addEventListener('click', restartSession);
+  }
+
+  function restartSession() {
+    // 移除结束提示
+    var tip = document.getElementById('dzSessionEndTip');
+    if (tip) tip.remove();
+    // 恢复结束按钮和输入区
+    endBtn.style.display = '';
+    editor.style.display = '';
+  }
+
+  endBtn.addEventListener('click', endSession);
+})();
+
 // 消息发送：Enter 发送 / Shift+Enter 换行，发送后滚动到底部
 (function () {
   var input = document.querySelector('.dz-chat__input');
@@ -3576,6 +3619,17 @@ var kbDetails = {
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 .dz-satisfy-tip .bi { color: var(--dzglobal-primary-color); font-size: 14px; }
+/* === 会话结束提示 === */
+.dz-session-end {
+  flex-shrink: 0; text-align: center; padding: 24px 0 16px;
+  font-size: 13px; color: var(--dz-font-color-3);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.dz-session-end__link {
+  color: var(--dzglobal-primary-color); cursor: pointer; font-size: 13px;
+  text-decoration: none;
+}
+.dz-session-end__link:hover { text-decoration: underline; }
 .dz-chat__stream { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 12px; }
 .dz-chat__row { max-width: 72%; }
 .dz-msg__avatar {
