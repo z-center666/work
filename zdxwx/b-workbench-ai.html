@@ -3142,6 +3142,29 @@ body {
   var editor = document.querySelector('.dz-chat__editor');
   if (!endBtn || !stream || !editor) return;
 
+  // 创建弹窗
+  var modal = document.createElement('div');
+  modal.className = 'dz-modal-overlay';
+  modal.id = 'dzEndSessionModal';
+  modal.innerHTML = '<div class="dz-modal">' +
+    '<div class="dz-modal__close" id="dzModalClose"><i class="bi bi-x-lg"></i></div>' +
+    '<div class="dz-modal__icon"><i class="bi bi-exclamation-circle-fill"></i></div>' +
+    '<div class="dz-modal__title">确定要结束与匿名用户会话？</div>' +
+    '<div class="dz-modal__actions">' +
+      '<button class="dz-modal__btn dz-modal__btn--cancel" id="dzModalCancel">取消</button>' +
+      '<button class="dz-modal__btn dz-modal__btn--confirm" id="dzModalConfirm">确定</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(modal);
+
+  function showModal() {
+    modal.classList.add('dz-modal-overlay--visible');
+  }
+
+  function hideModal() {
+    modal.classList.remove('dz-modal-overlay--visible');
+  }
+
   function now() {
     var d = new Date();
     function p(n) { return n < 10 ? '0' + n : n; }
@@ -3175,7 +3198,21 @@ body {
     editor.style.display = '';
   }
 
-  endBtn.addEventListener('click', endSession);
+  // 点击结束按钮显示弹窗
+  endBtn.addEventListener('click', showModal);
+
+  // 弹窗按钮事件
+  document.getElementById('dzModalClose').addEventListener('click', hideModal);
+  document.getElementById('dzModalCancel').addEventListener('click', hideModal);
+  document.getElementById('dzModalConfirm').addEventListener('click', function () {
+    hideModal();
+    endSession();
+  });
+
+  // 点击遮罩层关闭
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) hideModal();
+  });
 })();
 
 // 消息发送：Enter 发送 / Shift+Enter 换行，发送后滚动到底部
@@ -3630,6 +3667,67 @@ var kbDetails = {
   text-decoration: none;
 }
 .dz-session-end__link:hover { text-decoration: underline; }
+
+/* === 结束会话确认弹窗 === */
+.dz-modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.dz-modal-overlay--visible {
+  opacity: 1; pointer-events: auto;
+}
+.dz-modal {
+  background: #fff; border-radius: 12px;
+  width: 420px; max-width: 90vw;
+  padding: 32px 24px 24px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
+}
+.dz-modal-overlay--visible .dz-modal {
+  transform: scale(1);
+}
+.dz-modal__close {
+  position: absolute; top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #999; font-size: 18px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.dz-modal__close:hover { background: #f5f5f5; color: #333; }
+.dz-modal__icon {
+  text-align: center; margin-bottom: 16px;
+}
+.dz-modal__icon i {
+  font-size: 48px; color: #e6a23c;
+}
+.dz-modal__title {
+  text-align: center; font-size: 16px; color: #333;
+  margin-bottom: 24px; font-weight: 500;
+}
+.dz-modal__actions {
+  display: flex; gap: 12px; justify-content: center;
+}
+.dz-modal__btn {
+  min-width: 100px; height: 36px;
+  border-radius: 18px; font-size: 14px;
+  cursor: pointer; border: 1px solid #dcdfe6;
+  background: #fff; color: #606266;
+  transition: all 0.15s;
+}
+.dz-modal__btn:hover { opacity: 0.85; }
+.dz-modal__btn--cancel {
+  border-color: #dcdfe6; color: #606266;
+}
+.dz-modal__btn--confirm {
+  background: var(--dzglobal-primary-color); color: #fff;
+  border-color: var(--dzglobal-primary-color);
+}
 .dz-chat__stream { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 12px; }
 .dz-chat__row { max-width: 72%; }
 .dz-msg__avatar {
