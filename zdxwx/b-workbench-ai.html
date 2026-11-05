@@ -2367,8 +2367,9 @@ body {
           </div>
         </div>
 
-        <!-- ============ 右侧窄图标栏：面板快捷入口（客户信息 / 待拨打 / 待跟进 / 联络历史 / 关联工单 / AI知识库） ============ -->
+        <!-- ============ 右侧窄图标栏：面板快捷入口（客户详情 / 客户信息 / 待拨打 / 待跟进 / 联络历史 / 关联工单 / AI知识库） ============ -->
         <aside class="dz-rail" id="railNav">
+          <div class="dz-rail__item" data-tip="客户详情" data-panel="custDetail"><i class="bi bi-person-lines-fill"></i></div>
           <div class="dz-rail__item active" data-tip="客户信息" data-panel="custInfo"><i class="bi bi-person-vcard"></i></div>
           <div class="dz-rail__item" data-tip="业务记录" data-panel="bizRecord"><i class="bi bi-journal-text"></i></div>
           <div class="dz-rail__item" data-tip="访问信息" data-panel="visitInfo"><i class="bi bi-compass"></i></div>
@@ -2377,6 +2378,40 @@ body {
           <div class="dz-rail__item" data-tip="关联工单" data-panel="relatedTicket"><i class="bi bi-ticket-perforated"></i></div>
           <div class="dz-rail__item" data-tip="AI知识库" data-panel="aiKb"><i class="bi bi-robot"></i></div>
           <div class="dz-rail__item" data-tip="AI助手" data-panel="aiAssist"><i class="bi bi-stars"></i></div>
+        </aside>
+
+        <!-- ============ 客户详情面板：历史聊天总结、客户画像 ============ -->
+        <aside class="dz-customer" id="custDetail" hidden="">
+          <div class="dz-customer__head">
+            <span class="dz-customer__avatar"><i class="bi bi-person-lines-fill"></i></span>
+            <span class="dz-customer__title">客户详情</span>
+          </div>
+          <div class="dz-customer__body" style="padding: 12px 16px; overflow-y: auto; flex: 1;">
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 8px;">客户画像</div>
+              <div style="font-size: 12px; color: #4e5969; line-height: 1.8;">
+                <div>• 匿名访客，24小时内进线1次</div>
+                <div>• 主要需求：酒店预订、外卖订购、打车出行</div>
+                <div>• 偏好：少油少盐、不吃辣、忌花生香菜</div>
+                <div>• 常用地址：杭州君悦酒店、上海雅居乐万豪侯爵酒店</div>
+              </div>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 8px;">历史会话摘要</div>
+              <div style="font-size: 12px; color: #4e5969; line-height: 1.8;">
+                <div>• 2026-10-17：咨询杭帮菜推荐，发送满意度评价</div>
+                <div>• 2026-11-03：订购外卖（小笼包、红烧肉），确认打车行程</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 8px;">标签</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <span style="font-size: 11px; padding: 2px 8px; background: #f2f3f5; border-radius: 10px; color: #4e5969;">酒店常客</span>
+                <span style="font-size: 11px; padding: 2px 8px; background: #f2f3f5; border-radius: 10px; color: #4e5969;">外卖用户</span>
+                <span style="font-size: 11px; padding: 2px 8px; background: #f2f3f5; border-radius: 10px; color: #4e5969;">出行需求</span>
+              </div>
+            </div>
+          </div>
         </aside>
 
         <!-- ============ 右侧客户信息栏 ============ -->
@@ -3309,10 +3344,11 @@ body {
   stream.scrollTop = stream.scrollHeight;
 })();
 
-// 右侧 rail 导航：点击图标切换右栏面板（客户信息 / 业务记录 / 访问信息 / 联络历史 / 关联工单）
+// 右侧 rail 导航：点击图标切换右栏面板（客户详情 / 客户信息 / 业务记录 / 访问信息 / 联络历史 / 关联工单）
 (function () {
   var items = document.querySelectorAll('#railNav .dz-rail__item');
   var panes = {
+    custDetail: document.getElementById('custDetail'),
     custInfo: document.getElementById('custInfo'),
     bizRecord: document.getElementById('bizRecord'),
     visitInfo: document.getElementById('visitInfo'),
