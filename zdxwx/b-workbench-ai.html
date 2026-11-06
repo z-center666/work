@@ -2156,7 +2156,8 @@ body {
           <div class="dz-chat__tabs">
             <div class="dz-chat__tab active">会话信息</div>
             <div class="dz-chat__tab">客户资料</div>
-            <div class="dz-chat__tab">订单查询</div>
+            <div class="dz-chat__tab">外卖订单</div>
+            <div class="dz-chat__tab">打车订单</div>
             <div class="dz-chat__tab">外卖代下单</div>
             <div class="dz-chat__tab">打车代下单</div>
           </div>
@@ -2343,8 +2344,16 @@ body {
           </div>
         </div>
 
-        <!-- 订单查询面板 -->
-        <div class="dz-custprofile" id="panelOrder" hidden="">
+        <!-- 外卖订单面板 -->
+        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="">
+          <div class="dz-custprofile__empty">
+            <i class="bi bi-inbox"></i>
+            <div>暂无数据</div>
+          </div>
+        </div>
+
+        <!-- 打车订单面板 -->
+        <div class="dz-custprofile" id="panelDacheOrder" hidden="">
           <div class="dz-custprofile__empty">
             <i class="bi bi-inbox"></i>
             <div>暂无数据</div>
@@ -3273,14 +3282,15 @@ body {
   });
 })();
 
-// 会话 Tab 切换（会话信息/客户资料/订单查询/外卖代下单/打车代下单）
+// 会话 Tab 切换（会话信息/客户资料/外卖订单/打车订单/外卖代下单/打车代下单）
 (function () {
   var tabs = document.querySelectorAll('.dz-chat__tab');
   var chatBodyEls = Array.prototype.slice.call(
     document.querySelectorAll('.dz-chat > :not(.dz-chat__tabs):not(.dz-custprofile)')
   );
   var profile = document.getElementById('custProfile');
-  var panelOrder = document.getElementById('panelOrder');
+  var panelWaimaiOrder = document.getElementById('panelWaimaiOrder');
+  var panelDacheOrder = document.getElementById('panelDacheOrder');
   var panelWaimai = document.getElementById('panelWaimai');
   var panelDache = document.getElementById('panelDache');
   tabs.forEach(function (t) {
@@ -3289,14 +3299,16 @@ body {
       t.classList.add('active');
       var text = t.textContent;
       var isProfile = text.indexOf('客户资料') === 0;
-      var isOrder = text.indexOf('订单查询') === 0;
+      var isWaimaiOrder = text.indexOf('外卖订单') === 0;
+      var isDacheOrder = text.indexOf('打车订单') === 0;
       var isWaimai = text.indexOf('外卖代下单') === 0;
       var isDache = text.indexOf('打车代下单') === 0;
       if (profile) profile.hidden = !isProfile;
-      if (panelOrder) panelOrder.hidden = !isOrder;
+      if (panelWaimaiOrder) panelWaimaiOrder.hidden = !isWaimaiOrder;
+      if (panelDacheOrder) panelDacheOrder.hidden = !isDacheOrder;
       if (panelWaimai) panelWaimai.hidden = !isWaimai;
       if (panelDache) panelDache.hidden = !isDache;
-      chatBodyEls.forEach(function (el) { el.hidden = isProfile || isOrder || isWaimai || isDache; });
+      chatBodyEls.forEach(function (el) { el.hidden = isProfile || isWaimaiOrder || isDacheOrder || isWaimai || isDache; });
     });
   });
   // 客户资料面板内二级 tab 切换
