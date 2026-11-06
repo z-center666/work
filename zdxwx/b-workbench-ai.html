@@ -3920,7 +3920,7 @@ var kbDetails = {
 .dz-chat { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; }
 .dz-chat__tabs {
   height: 44px; flex-shrink: 0; background: #fff;
-  display: flex; align-items: stretch; gap: 8px; padding: 0 12px;
+  display: flex; align-items: stretch; gap: 6px; padding: 0 12px 0 16px;
   border-bottom: 1px solid var(--dz-table-border);
   overflow-x: auto;
   scrollbar-width: none;
@@ -3928,11 +3928,12 @@ var kbDetails = {
 }
 .dz-chat__tabs::-webkit-scrollbar { display: none; }
 .dz-chat__tabs::after {
-  content: ''; flex-shrink: 0; width: 12px;
+  content: ''; flex-shrink: 0; width: 20px;
 }
 .dz-chat__tab {
   display: flex; align-items: center; font-size: 13px; color: var(--dz-text-secondary);
   cursor: pointer; position: relative; white-space: nowrap; flex-shrink: 0;
+  padding: 0 4px;
 }
 .dz-chat__tab:hover { color: var(--dzglobal-primary-color); }
 .dz-chat__tab.active { color: var(--dz-text-heading); font-weight: 600; }
