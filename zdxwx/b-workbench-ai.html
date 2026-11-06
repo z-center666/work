@@ -2487,7 +2487,7 @@ body {
         </div>
 
         <!-- 外卖代下单面板 -->
-        <div class="dz-custprofile" id="panelWaimai" hidden="" style="padding:0;overflow:auto;min-height:auto;height:100%;">
+        <div id="panelWaimai" hidden="" style="flex:1;display:flex;flex-direction:column;background:#fff;min-height:0;overflow:auto;padding:0;box-sizing:border-box;">
           <div class="wo-agent-wrap">
             <!-- 页面标题 + 流程说明 -->
             <div class="wo-agent-head">
@@ -3525,7 +3525,7 @@ body {
 (function () {
   var tabs = document.querySelectorAll('.dz-chat__tab');
   var chatBodyEls = Array.prototype.slice.call(
-    document.querySelectorAll('.dz-chat > :not(.dz-chat__tabs):not(.dz-custprofile)')
+    document.querySelectorAll('.dz-chat > :not(.dz-chat__tabs):not(.dz-custprofile):not(#panelWaimai)')
   );
   var profile = document.getElementById('custProfile');
   var panelWaimaiOrder = document.getElementById('panelWaimaiOrder');
