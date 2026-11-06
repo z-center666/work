@@ -2487,10 +2487,122 @@ body {
         </div>
 
         <!-- 外卖代下单面板 -->
-        <div class="dz-custprofile" id="panelWaimai" hidden="">
-          <div class="dz-custprofile__empty">
-            <i class="bi bi-inbox"></i>
-            <div>暂无数据</div>
+        <div class="dz-custprofile" id="panelWaimai" hidden="" style="padding:0;overflow:auto;min-height:auto;">
+          <div class="wo-agent-wrap">
+            <!-- 页面标题 + 流程说明 -->
+            <div class="wo-agent-head">
+              <div class="wo-agent-title">外卖代下单</div>
+              <div class="wo-agent-desc">两卡片确认流：① 系统进入页面自动获取老外档案（userId + 经纬度） → ② 选收货地址并确认<b>忌口/偏好</b>，点「推送给老外确认」推送<b>卡片①</b>（老外确认后自动进入第③步）→ ③ 菜品点「<b>+</b>」加入购物车，点右下角「推送订单给老外确认」推送<b>卡片②</b>（老外确认后系统自动向闪购下单）</div>
+            </div>
+
+            <div class="wo-agent-body">
+              <div class="wo-agent-main">
+                <!-- ① 已选老外 -->
+                <div class="wo-agent-step wo-step-foreigner">
+                  <span class="wo-step-num wo-step-num--done">①</span>
+                  <span class="wo-step-label">已选老外</span>
+                  <span class="wo-step-info">John Smith · U346620 · 设备 DEV-2026-0001 · 经纬度 120.1551, 30.2741</span>
+                </div>
+
+                <!-- ② 选择收货地址与忌口偏好 -->
+                <div class="wo-agent-step wo-step-addr">
+                  <div class="wo-step-header">
+                    <span class="wo-step-num wo-step-num--active">②</span>
+                    <span class="wo-step-label wo-step-label--active">选择收货地址与忌口偏好</span>
+                    <span class="wo-step-countdown">
+                      <span class="wo-countdown-dot"></span>
+                      请在 <b>23:19</b> 内确认收货地址与忌口偏好
+                      <span class="wo-countdown-left">剩余 <b>09:40</b></span>
+                      <span class="wo-countdown-sim">演示超时</span>
+                    </span>
+                  </div>
+
+                  <div class="wo-addr-split">
+                    <!-- 左侧：已有地址 -->
+                    <div class="wo-addr-left">
+                      <div class="wo-addr-section-title">已有地址 <span class="wo-addr-hint">共 9 条 · 可上下滑动</span></div>
+                      <div class="wo-addr-list">
+                        <div class="wo-addr-card wo-addr-card--selected">
+                          <div class="wo-addr-name">杭州君悦酒店 1212 房</div>
+                          <div class="wo-addr-detail">杭州市西湖区湖滨路 28 号 · John / 138****6620</div>
+                          <div class="wo-addr-coord">杭州市 · 120.1622, 30.2490 · 距离 2.9 km</div>
+                        </div>
+                        <div class="wo-addr-card">
+                          <div class="wo-addr-name">杭州君悦酒店 行政酒廊 8F</div>
+                          <div class="wo-addr-detail">杭州市西湖区湖滨路 28 号 · John / 138****6620</div>
+                          <div class="wo-addr-coord">杭州市 · 120.1622, 30.2490 · 距离 2.9 km</div>
+                        </div>
+                        <div class="wo-addr-card">
+                          <div class="wo-addr-name">杭州西子湖四季酒店 3205 房</div>
+                          <div class="wo-addr-detail">杭州市西湖区灵隐路 5 号 · John / 138****6620</div>
+                          <div class="wo-addr-coord">杭州市 · 120.1288, 30.2570 · 距离 3.2 km</div>
+                        </div>
+                        <div class="wo-addr-card">
+                          <div class="wo-addr-name">杭州东站维也纳酒店 706 房</div>
+                          <div class="wo-addr-detail">杭州市上城区东站西广场 1 号 · John / 138****6620</div>
+                          <div class="wo-addr-coord">杭州市 · 120.2130, 30.2885 · 距离 5.8 km</div>
+                        </div>
+                        <div class="wo-addr-card">
+                          <div class="wo-addr-name">杭州湖滨银泰 in77 公寓 1806</div>
+                          <div class="wo-addr-detail">杭州市上城区湖滨路 · John / 138****6620</div>
+                          <div class="wo-addr-coord">杭州市 · 120.1630, 30.2480 · 距离 2.8 km</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 右侧：推荐地址 -->
+                    <div class="wo-addr-right">
+                      <div class="wo-addr-section-title">推荐地址 <span class="wo-addr-hint">输入关键词后展示</span></div>
+                      <div class="wo-addr-search-row">
+                        <input class="wo-addr-search-input" placeholder="关键词：酒店 / 楼宇 / 商圈（必填）">
+                        <button class="wo-addr-search-btn">搜索</button>
+                      </div>
+                      <div class="wo-addr-search-empty">
+                        输入关键词（酒店 / 楼宇 / 商圈）后，<br>展示闪购返回的推荐地址
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 忌口与偏好 -->
+                  <div class="wo-diet-section">
+                    <div class="wo-diet-title">忌口与偏好 <span class="wo-diet-hint">（默认回显该老外档案，客服可修改）</span></div>
+                    <div class="wo-diet-row">
+                      <span class="wo-diet-label">忌口</span>
+                      <input class="wo-diet-input" value="不吃辣；忌花生、香菜">
+                    </div>
+                    <div class="wo-diet-row">
+                      <span class="wo-diet-label">偏好</span>
+                      <input class="wo-diet-input" value="少油少盐；餐具要 2 份，送到前台请致电">
+                    </div>
+                    <div class="wo-diet-foot">卡片①：收货地址 + 忌口 + 偏好，老外确认后自动进入第③步</div>
+                  </div>
+                </div>
+
+                <!-- 底部推送按钮 -->
+                <div class="wo-agent-foot">
+                  <button class="wo-agent-push-btn">推送收货地址、忌口偏好给老外确认</button>
+                </div>
+              </div>
+
+              <!-- 老外硬件端 -->
+              <aside class="wo-guest-panel">
+                <div class="wo-gp-head">
+                  <span class="wo-gp-dot"></span>
+                  老外硬件端
+                  <span class="wo-gp-tag">模拟</span>
+                </div>
+                <div class="wo-gp-dev">
+                  设备 DEV-2026-0001 · John Smith · 英语<br>
+                  推送内容会同时出现在老外对话框与客服系统对话中（卡片由其他团队实现，本后台只负责推送数据）
+                </div>
+                <div class="wo-gp-body">
+                  <div class="wo-gp-empty">
+                    暂无推送内容<br>
+                    客服推送卡片①（收货信息）或卡片②（订单）后，<br>会出现在这里
+                  </div>
+                </div>
+              </aside>
+            </div>
           </div>
         </div>
 
@@ -4727,6 +4839,84 @@ var kbDetails = {
   padding: 4px 10px; cursor: pointer; margin-left: 6px; font-size: 12px; color: #4e5969;
 }
 .wo-pager-btns button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============ 外卖代下单面板 ============ */
+.wo-agent-wrap { display: flex; flex-direction: column; height: 100%; }
+.wo-agent-head { padding: 14px 20px 10px; border-bottom: 1px solid #e5e6eb; background: #fff; flex-shrink: 0; }
+.wo-agent-title { font-size: 16px; font-weight: 700; color: #1f2329; margin-bottom: 6px; }
+.wo-agent-desc { font-size: 12px; color: #86909c; line-height: 1.6; }
+.wo-agent-desc b { color: #1f2329; }
+
+.wo-agent-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+.wo-agent-main { flex: 1; min-width: 0; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* 步骤条 */
+.wo-agent-step { background: #fff; border: 1px solid #e5e6eb; border-radius: 8px; padding: 14px 16px; }
+.wo-step-foreigner { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.wo-step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.wo-step-num--done { background: #2fbf4e; color: #fff; }
+.wo-step-num--active { background: #0068ff; color: #fff; }
+.wo-step-label { font-weight: 600; color: #1f2329; }
+.wo-step-label--active { color: #0068ff; }
+.wo-step-info { color: #4e5969; font-size: 12px; }
+
+/* 步骤②头部 */
+.wo-step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.wo-step-countdown { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: 12px; font-weight: 600; color: #0068ff; flex-shrink: 0; }
+.wo-countdown-dot { width: 6px; height: 6px; border-radius: 50%; background: #0068ff; animation: woPulse 1.2s infinite; }
+.wo-countdown-left { font-weight: 400; font-size: 11.5px; color: #86909c; }
+.wo-countdown-left b { font-size: 12px; color: #4e5969; }
+.wo-countdown-sim { font-weight: 400; font-size: 11px; color: #86909c; text-decoration: underline; cursor: pointer; }
+.wo-countdown-sim:hover { color: #0068ff; }
+@keyframes woPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* 地址双栏 */
+.wo-addr-split { display: flex; gap: 16px; }
+.wo-addr-left { flex: 1; min-width: 0; }
+.wo-addr-right { width: 340px; flex-shrink: 0; }
+.wo-addr-section-title { font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 10px; }
+.wo-addr-hint { font-weight: 400; font-size: 12px; color: #86909c; }
+
+/* 地址列表 */
+.wo-addr-list { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+.wo-addr-card { border: 1px solid #e5e6eb; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color .15s; }
+.wo-addr-card:hover { border-color: #0068ff; }
+.wo-addr-card--selected { border-color: #0068ff; background: #f0f5ff; }
+.wo-addr-name { font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 4px; }
+.wo-addr-detail { font-size: 12px; color: #4e5969; margin-bottom: 2px; }
+.wo-addr-coord { font-size: 11px; color: #86909c; }
+
+/* 推荐地址搜索 */
+.wo-addr-search-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.wo-addr-search-input { flex: 1; height: 34px; border: 1px solid #dcdfe6; border-radius: 6px; padding: 0 12px; font-size: 12px; outline: none; }
+.wo-addr-search-input:focus { border-color: #0068ff; }
+.wo-addr-search-btn { height: 34px; padding: 0 18px; background: #0068ff; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.wo-addr-search-btn:hover { background: #0052cc; }
+.wo-addr-search-empty { border: 1px dashed #dcdfe6; border-radius: 8px; padding: 30px 20px; text-align: center; font-size: 12px; color: #86909c; line-height: 1.8; }
+
+/* 忌口与偏好 */
+.wo-diet-section { margin-top: 4px; }
+.wo-diet-title { font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 12px; }
+.wo-diet-hint { font-weight: 400; font-size: 12px; color: #86909c; }
+.wo-diet-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.wo-diet-label { font-size: 13px; color: #4e5969; width: 48px; flex-shrink: 0; text-align: right; }
+.wo-diet-input { flex: 1; height: 34px; border: 1px solid #dcdfe6; border-radius: 6px; padding: 0 12px; font-size: 12px; outline: none; }
+.wo-diet-input:focus { border-color: #0068ff; }
+.wo-diet-foot { font-size: 11px; color: #86909c; margin-top: 4px; }
+
+/* 底部推送按钮 */
+.wo-agent-foot { display: flex; justify-content: flex-end; padding: 12px 20px; background: #fff; border-top: 1px solid #e5e6eb; flex-shrink: 0; }
+.wo-agent-push-btn { height: 40px; padding: 0 28px; background: #0068ff; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(0,104,255,.25); }
+.wo-agent-push-btn:hover { background: #0052cc; }
+
+/* 老外硬件端面板 */
+.wo-guest-panel { width: 280px; flex-shrink: 0; border-left: 1px solid #e5e6eb; background: #fff; display: flex; flex-direction: column; }
+.wo-gp-head { padding: 12px 14px; border-bottom: 1px solid #e5e6eb; background: #fafbfd; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.wo-gp-dot { width: 7px; height: 7px; border-radius: 50%; background: #2fbf4e; flex-shrink: 0; }
+.wo-gp-tag { margin-left: auto; font-size: 10px; font-weight: 600; color: #86909c; border: 1px solid #dcdfe6; border-radius: 10px; padding: 0 7px; }
+.wo-gp-dev { padding: 8px 14px; font-size: 11px; color: #86909c; border-bottom: 1px dashed #e5e6eb; line-height: 1.5; flex-shrink: 0; }
+.wo-gp-body { padding: 12px 14px; flex: 1; overflow-y: auto; }
+.wo-gp-empty { color: #86909c; font-size: 12px; text-align: center; padding: 20px 0; line-height: 1.6; }
 </style>
 
 
