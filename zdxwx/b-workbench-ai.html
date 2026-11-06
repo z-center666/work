@@ -2345,7 +2345,7 @@ body {
         </div>
 
         <!-- 外卖订单面板 -->
-        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="" style="padding:0;overflow:auto;">
+        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="" style="padding:0;overflow:auto;display:block;min-height:auto;height:100%;">
           <div class="wo-wrap">
             <div class="wo-filters">
               <input class="wo-input" placeholder="订单号">
@@ -4045,7 +4045,7 @@ var kbDetails = {
 .dz-chat { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; }
 .dz-chat__tabs {
   height: 44px; flex-shrink: 0; background: #fff;
-  display: flex; align-items: stretch; gap: 6px; padding: 0 12px 0 16px;
+  display: flex; align-items: stretch; gap: 2px; padding: 0 8px 0 12px;
   border-bottom: 1px solid var(--dz-table-border);
   overflow-x: auto;
   scrollbar-width: none;
@@ -4053,12 +4053,12 @@ var kbDetails = {
 }
 .dz-chat__tabs::-webkit-scrollbar { display: none; }
 .dz-chat__tabs::after {
-  content: ''; flex-shrink: 0; width: 20px;
+  content: ''; flex-shrink: 0; width: 12px;
 }
 .dz-chat__tab {
-  display: flex; align-items: center; font-size: 13px; color: var(--dz-text-secondary);
+  display: flex; align-items: center; font-size: 12px; color: var(--dz-text-secondary);
   cursor: pointer; position: relative; white-space: nowrap; flex-shrink: 0;
-  padding: 0 4px;
+  padding: 0 3px;
 }
 .dz-chat__tab:hover { color: var(--dzglobal-primary-color); }
 .dz-chat__tab.active { color: var(--dz-text-heading); font-weight: 600; }
