@@ -2345,7 +2345,7 @@ body {
         </div>
 
         <!-- 外卖订单面板 -->
-        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="" style="padding:0;overflow:auto;display:block;min-height:auto;height:100%;">
+        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="" style="padding:0;overflow:auto;min-height:auto;">
           <div class="wo-wrap">
             <div class="wo-filters">
               <input class="wo-input" placeholder="订单号">
@@ -2360,6 +2360,7 @@ body {
               <button class="wo-btn wo-btn-ghost">重置</button>
               <button class="wo-btn wo-btn-ghost">导出</button>
             </div>
+            <div class="wo-table-wrap">
             <table class="wo-table">
               <thead>
                 <tr>
@@ -2467,6 +2468,7 @@ body {
                 </tr>
               </tbody>
             </table>
+            </div>
             <div class="wo-pager">
               <span>共 7 条，每页 20 条，支持分页</span>
               <span class="wo-pager-btns">
@@ -4661,11 +4663,13 @@ var kbDetails = {
 }
 
 /* ============ 外卖订单面板 ============ */
-.wo-wrap { display: flex; flex-direction: column; height: 100%; }
+.wo-wrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .wo-filters {
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   padding: 12px 16px; border-bottom: 1px solid #e5e6eb; background: #fff; flex-shrink: 0;
 }
+.wo-table-wrap { flex: 1; min-height: 0; overflow: auto; }
+.wo-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .wo-input {
   height: 30px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px;
   font-size: 12px; color: #1f2329; background: #fff; outline: none;
@@ -4687,7 +4691,7 @@ var kbDetails = {
 .wo-btn-primary:hover { background: #0052cc; }
 .wo-btn-ghost:hover { border-color: #0068ff; color: #0068ff; }
 
-.wo-table { width: 100%; border-collapse: collapse; font-size: 12px; flex: 1; }
+.wo-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .wo-table th {
   text-align: left; font-size: 12px; color: #86909c; font-weight: 600;
   padding: 10px 12px; background: #fafbfd; border-bottom: 1px solid #e5e6eb;
