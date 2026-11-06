@@ -2691,6 +2691,81 @@ body {
 
       </main>
 
+      <!-- ============ 会话排队页面 ============ -->
+      <section class="dz-queue" id="queuePage" hidden>
+        <div class="dz-queue__header">
+          <div class="dz-queue__title">排队列表 <i class="bi bi-question-circle" style="font-size: 14px; color: #86909c; cursor: help;" title="当前排队中的会话"></i></div>
+          <div class="dz-queue__filters">
+            <div class="dz-queue__select">
+              <span>全部技能组</span>
+              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+            </div>
+            <div class="dz-queue__select">
+              <span>全部渠道</span>
+              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+            </div>
+            <div class="dz-queue__select">
+              <span>是否留资</span>
+              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+            </div>
+          </div>
+          <div class="dz-queue__actions">
+            <button class="dz-queue__btn dz-queue__btn--primary">刷新</button>
+            <button class="dz-queue__btn dz-queue__btn--light">批量邀请</button>
+            <button class="dz-queue__btn dz-queue__btn--light">批量分配</button>
+          </div>
+        </div>
+
+        <div class="dz-queue__table-wrap">
+          <table class="dz-queue__table">
+            <thead>
+              <tr>
+                <th style="width: 40px;"><input type="checkbox"></th>
+                <th>客户姓名</th>
+                <th>手机号</th>
+                <th>留言内容</th>
+                <th>客户等级</th>
+                <th>是否留资</th>
+                <th>排队技能组</th>
+                <th>排队时长</th>
+                <th>来源渠道</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td>匿名客户</td>
+                <td>--</td>
+                <td>--</td>
+                <td>普通客户</td>
+                <td>否</td>
+                <td>song</td>
+                <td>00:01:12</td>
+                <td>song</td>
+                <td>
+                  <a class="dz-queue__link">邀请</a>
+                  <a class="dz-queue__link" style="margin-left: 12px;">分配</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dz-queue__footer">
+          <span class="dz-queue__total">共 1 条</span>
+          <div class="dz-queue__pagination">
+            <span class="dz-queue__page-size">20条/页 <i class="bi bi-chevron-down" style="font-size: 12px;"></i></span>
+            <span class="dz-queue__page-nav">
+              <i class="bi bi-chevron-left" style="color: #c0c4cc;"></i>
+              <span class="dz-queue__page-num active">1</span>
+              <i class="bi bi-chevron-right" style="color: #c0c4cc;"></i>
+            </span>
+            <span class="dz-queue__page-jump">前往 <input type="text" value="1" style="width: 36px; height: 24px; border: 1px solid #dcdfe6; border-radius: 4px; text-align: center; font-size: 12px; margin: 0 4px;"> 页</span>
+          </div>
+        </div>
+      </section>
+
       <!-- ============ 数据运营 → 会话报表 → 会话统计（报表页，覆盖聊天工作台） ============ -->
       <section class="dz-report" id="reportPage" hidden>
         <!-- 左侧二级菜单：会话报表分组（截图实测 10 项，选中浅蓝底蓝字加粗） -->
@@ -3604,6 +3679,43 @@ var kbDetails = {
     imgFile.value = '';
   });
 })();
+
+// 会话排队：点击左侧「会话排队」显示排队列表页
+(function () {
+  var queueItem = document.querySelectorAll('.dz-dzim__item')[9]; // 队列分组下的会话排队
+  var chatWrap = document.querySelector('.dz-chat-wrap');
+  var queuePage = document.getElementById('queuePage');
+  var dzimSecond = document.querySelector('.dz-dzim__second');
+
+  if (queueItem && chatWrap && queuePage) {
+    queueItem.addEventListener('click', function () {
+      // 移除其他 active
+      document.querySelectorAll('.dz-dzim__item').forEach(function (el) { el.classList.remove('active'); });
+      queueItem.classList.add('active');
+
+      // 隐藏聊天工作台，显示排队页
+      chatWrap.hidden = true;
+      queuePage.hidden = false;
+
+      // 隐藏第二列会话列表
+      if (dzimSecond) dzimSecond.style.display = 'none';
+    });
+  }
+
+  // 点击「进行中」返回聊天工作台
+  var inProgressItem = document.querySelector('.dz-dzim__item'); // 第一个是进行中
+  if (inProgressItem && chatWrap && queuePage) {
+    inProgressItem.addEventListener('click', function () {
+      document.querySelectorAll('.dz-dzim__item').forEach(function (el) { el.classList.remove('active'); });
+      inProgressItem.classList.add('active');
+
+      chatWrap.hidden = false;
+      queuePage.hidden = true;
+
+      if (dzimSecond) dzimSecond.style.display = '';
+    });
+  }
+})();
 </script>
 <style>
 /* ============ 会话列表卡片（图片实测：白卡 br8 + 头像 + 名称/最后消息 + 右上关闭） ============ */
@@ -4187,6 +4299,91 @@ var kbDetails = {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .dz-report__footer .dz-select { height: 28px; }
+
+/* ============ 会话排队页面 ============ */
+.dz-queue {
+  flex: 1; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  background: #f5f7fa; padding: 16px 20px; box-sizing: border-box;
+}
+.dz-queue[hidden] { display: none !important; }
+
+.dz-queue__header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border-radius: 8px; padding: 14px 20px;
+  margin-bottom: 12px; flex-shrink: 0;
+}
+.dz-queue__title {
+  font-size: 16px; font-weight: 600; color: #1f2329;
+  display: flex; align-items: center; gap: 6px;
+}
+.dz-queue__filters {
+  display: flex; align-items: center; gap: 10px;
+}
+.dz-queue__select {
+  height: 32px; padding: 0 28px 0 12px; border: 1px solid #dcdfe6; border-radius: 4px;
+  font-size: 13px; color: #86909c; background: #fff; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; position: relative;
+}
+.dz-queue__select:hover { border-color: #0068ff; color: #0068ff; }
+.dz-queue__actions {
+  display: flex; align-items: center; gap: 10px;
+}
+.dz-queue__btn {
+  height: 32px; padding: 0 16px; border-radius: 16px; font-size: 13px;
+  cursor: pointer; border: none; white-space: nowrap;
+}
+.dz-queue__btn--primary {
+  background: #0068ff; color: #fff;
+}
+.dz-queue__btn--primary:hover { background: #0052cc; }
+.dz-queue__btn--light {
+  background: #e8f1ff; color: #0068ff;
+}
+.dz-queue__btn--light:hover { background: #d4e4ff; }
+
+.dz-queue__table-wrap {
+  flex: 1; background: #fff; border-radius: 8px; overflow: auto;
+}
+.dz-queue__table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.dz-queue__table th {
+  background: #f7f8fa; color: #86909c; font-weight: 500;
+  padding: 12px 14px; text-align: left; border-bottom: 1px solid #e5e6eb;
+  position: sticky; top: 0; z-index: 1;
+}
+.dz-queue__table td {
+  padding: 12px 14px; border-bottom: 1px solid #f2f3f5; color: #1f2329;
+}
+.dz-queue__table tbody tr:hover { background: #f7f8fa; }
+.dz-queue__link {
+  color: #0068ff; cursor: pointer; text-decoration: none; font-size: 13px;
+}
+.dz-queue__link:hover { text-decoration: underline; }
+
+.dz-queue__footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0 0; flex-shrink: 0;
+}
+.dz-queue__total { font-size: 13px; color: #86909c; }
+.dz-queue__pagination {
+  display: flex; align-items: center; gap: 16px; font-size: 13px; color: #86909c;
+}
+.dz-queue__page-size {
+  display: flex; align-items: center; gap: 4px; cursor: pointer;
+}
+.dz-queue__page-nav {
+  display: flex; align-items: center; gap: 6px;
+}
+.dz-queue__page-num {
+  width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px; font-size: 13px; cursor: pointer;
+}
+.dz-queue__page-num.active { background: #0068ff; color: #fff; }
+.dz-queue__page-jump {
+  display: flex; align-items: center;
+}
 </style>
 
 
