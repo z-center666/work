@@ -2062,7 +2062,7 @@ body {
             <div class="dz-dzim__group-title">队列</div>
             
             
-            <div class="dz-dzim__item">
+            <div class="dz-dzim__item" data-queue-item>
               <span class="dz-dzim__icon c-green"><i class="bi bi-person-circle"></i></span><span class="dz-dzim__name">会话排队</span>
               <span class="dz-dzim__count">0</span>
             </div>
@@ -3682,7 +3682,7 @@ var kbDetails = {
 
 // 会话排队：点击左侧「会话排队」显示排队列表页
 (function () {
-  var queueItem = document.querySelectorAll('.dz-dzim__item')[9]; // 队列分组下的会话排队
+  var queueItem = document.querySelector('[data-queue-item]');
   var chatWrap = document.querySelector('.dz-chat-wrap');
   var queuePage = document.getElementById('queuePage');
   var dzimSecond = document.querySelector('.dz-dzim__second');
@@ -4305,6 +4305,7 @@ var kbDetails = {
   flex: 1; min-width: 0; min-height: 0;
   display: flex; flex-direction: column;
   background: #f5f7fa; padding: 16px 20px; box-sizing: border-box;
+  border-left: 1px solid var(--dz-input-border);
 }
 .dz-queue[hidden] { display: none !important; }
 
