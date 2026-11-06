@@ -2345,10 +2345,135 @@ body {
         </div>
 
         <!-- 外卖订单面板 -->
-        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="">
-          <div class="dz-custprofile__empty">
-            <i class="bi bi-inbox"></i>
-            <div>暂无数据</div>
+        <div class="dz-custprofile" id="panelWaimaiOrder" hidden="" style="padding:0;overflow:auto;">
+          <div class="wo-wrap">
+            <div class="wo-filters">
+              <input class="wo-input" placeholder="订单号">
+              <input class="wo-input wo-input-wide" placeholder="老外姓名 / 护照号 / 设备号 / 用户ID">
+              <select class="wo-select"><option>全部租户</option><option>杭州趣游科技</option><option>浙江文投数媒</option><option>上海入境通</option></select>
+              <select class="wo-select"><option>全部订单状态</option><option>已支付</option><option>商家备餐中</option><option>配送中</option><option>已完成</option><option>已取消</option><option>下单或履约失败</option><option>已退款</option></select>
+              <select class="wo-select"><option>全部订单来源</option><option>AI对话</option><option>客服代下单</option></select>
+              <input class="wo-input wo-date" type="date" value="2026-10-31">
+              <span class="wo-sep">~</span>
+              <input class="wo-input wo-date" type="date" value="2026-11-06">
+              <button class="wo-btn wo-btn-primary">查询</button>
+              <button class="wo-btn wo-btn-ghost">重置</button>
+              <button class="wo-btn wo-btn-ghost">导出</button>
+            </div>
+            <table class="wo-table">
+              <thead>
+                <tr>
+                  <th>订单号</th><th>老外用户</th><th>用户ID</th><th>设备号</th><th>租户名称</th><th>订单来源</th><th>商家</th><th>商品</th><th>订单金额</th><th>订单状态</th><th>下单时间</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="wo-mono">SG20260907140212</td>
+                  <td><div class="wo-user"><span class="wo-nm">John Smith</span><span class="wo-sub">英语 · 护照 E****5678 · 138****6620</span></div></td>
+                  <td class="wo-mono">U346620</td>
+                  <td class="wo-mono">DEV-2026-0001</td>
+                  <td>杭州趣游科技</td>
+                  <td><span class="wo-tag wo-tag-ai">AI对话</span></td>
+                  <td>海底捞火锅(西湖店)</td>
+                  <td>麻辣锅底 + 酸梅汤 · 2 件</td>
+                  <td><b>74.8 积分</b> <span class="wo-sub">(含 6.8 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-paid">已支付</span></td>
+                  <td class="wo-mono">2026-10-20 14:02:12</td>
+                  <td class="wo-ops"><a>详情</a><a>查看闪购订单链接</a><a class="wo-mut">补偿积分（审核中）</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260907112543</td>
+                  <td><div class="wo-user"><span class="wo-nm">佐藤健</span><span class="wo-sub">日语 · 护照 T****5678 · 137****2210</span></div></td>
+                  <td class="wo-mono">U342210</td>
+                  <td class="wo-mono">DEV-2026-0002</td>
+                  <td>杭州趣游科技</td>
+                  <td><span class="wo-tag wo-tag-ai">AI对话</span></td>
+                  <td>沙县小吃(湖滨店)</td>
+                  <td>蒸饺 + 拌面 · 2 件</td>
+                  <td><b>31.5 积分</b> <span class="wo-sub">(含 2.9 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-preparing">商家备餐中</span></td>
+                  <td class="wo-mono">2026-10-15 11:25:43</td>
+                  <td class="wo-ops"><a>详情</a><a>查看闪购订单链接</a><a>补偿积分</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260907112055</td>
+                  <td><div class="wo-user"><span class="wo-nm">Emma Wilson</span><span class="wo-sub">英语 · 护照 G****3210 · 159****3381</span></div></td>
+                  <td class="wo-mono">U343381</td>
+                  <td class="wo-mono">DEV-2026-0003</td>
+                  <td>浙江文投数媒</td>
+                  <td><span class="wo-tag wo-tag-cs">客服代下单</span></td>
+                  <td>麦当劳(武林店)</td>
+                  <td>麦辣鸡腿堡套餐 · 1 件</td>
+                  <td><b>42.0 积分</b> <span class="wo-sub">(含 3.8 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-doing">配送中</span></td>
+                  <td class="wo-mono">2026-09-07 11:20:55</td>
+                  <td class="wo-ops"><a>详情</a><a class="wo-mut">补偿积分（审核中）</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260906190533</td>
+                  <td><div class="wo-user"><span class="wo-nm">佐藤健</span><span class="wo-sub">日语 · 护照 T****5678 · 137****2210</span></div></td>
+                  <td class="wo-mono">U342210</td>
+                  <td class="wo-mono">DEV-2026-0002</td>
+                  <td>杭州趣游科技</td>
+                  <td><span class="wo-tag wo-tag-ai">AI对话</span></td>
+                  <td>沙县小吃(湖滨店)</td>
+                  <td>蒸饺 + 拌面 · 2 件</td>
+                  <td><b>31.5 积分</b> <span class="wo-sub">(含 2.9 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-done">已完成</span></td>
+                  <td class="wo-mono">2026-09-06 19:05:33</td>
+                  <td class="wo-ops"><a>详情</a><a class="wo-mut">补偿积分（审核中）</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260906170010</td>
+                  <td><div class="wo-user"><span class="wo-nm">Kim Min-jun</span><span class="wo-sub">韩语 · 护照 M****5678 · 186****9045</span></div></td>
+                  <td class="wo-mono">U349045</td>
+                  <td class="wo-mono">DEV-2026-0004</td>
+                  <td>浙江文投数媒</td>
+                  <td><span class="wo-tag wo-tag-cs">客服代下单</span></td>
+                  <td>星巴克(西湖天地)</td>
+                  <td>燕麦拿铁 · 1 件</td>
+                  <td><b>32.0 积分</b> <span class="wo-sub">(含 2.9 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-cancel">已取消</span></td>
+                  <td class="wo-mono">2026-09-06 17:00:10</td>
+                  <td class="wo-ops"><a>详情</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260906143008</td>
+                  <td><div class="wo-user"><span class="wo-nm">Kim Min-jun</span><span class="wo-sub">韩语 · 护照 M****5678 · 186****9045</span></div></td>
+                  <td class="wo-mono">U349045</td>
+                  <td class="wo-mono">DEV-2026-0004</td>
+                  <td>上海入境通</td>
+                  <td><span class="wo-tag wo-tag-cs">客服代下单</span></td>
+                  <td>星巴克(西湖天地)</td>
+                  <td>燕麦拿铁 · 1 件</td>
+                  <td><b>32.0 积分</b> <span class="wo-sub">(含 2.9 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-fail">下单或履约失败</span></td>
+                  <td class="wo-mono">2026-09-06 14:30:08</td>
+                  <td class="wo-ops"><a>详情</a><a>推送订单</a></td>
+                </tr>
+                <tr>
+                  <td class="wo-mono">SG20260905183044</td>
+                  <td><div class="wo-user"><span class="wo-nm">John Smith</span><span class="wo-sub">英语 · 护照 E****5678 · 138****6620</span></div></td>
+                  <td class="wo-mono">U346620</td>
+                  <td class="wo-mono">DEV-2026-0001</td>
+                  <td>上海入境通</td>
+                  <td><span class="wo-tag wo-tag-ai">AI对话</span></td>
+                  <td>肯德基(湖滨店)</td>
+                  <td>劲脆鸡腿堡 · 1 件</td>
+                  <td><b>28.0 积分</b> <span class="wo-sub">(含 2.5 积分服务费)</span></td>
+                  <td><span class="wo-tag wo-tag-refund">已退款</span></td>
+                  <td class="wo-mono">2026-09-05 18:30:44</td>
+                  <td class="wo-ops"><a>详情</a><a>推送订单</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="wo-pager">
+              <span>共 7 条，每页 20 条，支持分页</span>
+              <span class="wo-pager-btns">
+                <button disabled>上一页</button>
+                <button disabled>下一页</button>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -4534,6 +4659,76 @@ var kbDetails = {
 .dz-queue__page-jump {
   display: flex; align-items: center;
 }
+
+/* ============ 外卖订单面板 ============ */
+.wo-wrap { display: flex; flex-direction: column; height: 100%; }
+.wo-filters {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid #e5e6eb; background: #fff; flex-shrink: 0;
+}
+.wo-input {
+  height: 30px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px;
+  font-size: 12px; color: #1f2329; background: #fff; outline: none;
+}
+.wo-input:focus { border-color: #0068ff; }
+.wo-input-wide { width: 200px; }
+.wo-date { width: 130px; }
+.wo-select {
+  height: 30px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 8px;
+  font-size: 12px; color: #1f2329; background: #fff; outline: none;
+}
+.wo-select:focus { border-color: #0068ff; }
+.wo-sep { color: #86909c; font-size: 12px; }
+.wo-btn {
+  height: 30px; padding: 0 14px; border-radius: 4px; font-size: 12px;
+  cursor: pointer; border: 1px solid #dcdfe6; background: #fff; color: #1f2329;
+}
+.wo-btn-primary { background: #0068ff; border-color: #0068ff; color: #fff; }
+.wo-btn-primary:hover { background: #0052cc; }
+.wo-btn-ghost:hover { border-color: #0068ff; color: #0068ff; }
+
+.wo-table { width: 100%; border-collapse: collapse; font-size: 12px; flex: 1; }
+.wo-table th {
+  text-align: left; font-size: 12px; color: #86909c; font-weight: 600;
+  padding: 10px 12px; background: #fafbfd; border-bottom: 1px solid #e5e6eb;
+  white-space: nowrap; position: sticky; top: 0; z-index: 1;
+}
+.wo-table td {
+  padding: 10px 12px; border-bottom: 1px solid #f2f3f5; vertical-align: middle;
+}
+.wo-table tbody tr:hover { background: #eaf1ff; }
+.wo-table tbody tr:hover td { border-bottom-color: #d8e4ff; }
+.wo-mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 11px; color: #4e5969; }
+.wo-user { display: flex; flex-direction: column; gap: 2px; }
+.wo-nm { font-weight: 600; font-size: 13px; color: #1f2329; }
+.wo-sub { font-size: 11px; color: #86909c; }
+.wo-tag {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.wo-tag-ai { background: #e8f1ff; color: #0068ff; }
+.wo-tag-cs { background: #f0e9ff; color: #7c3aed; }
+.wo-tag-paid { background: #e8f1ff; color: #0068ff; }
+.wo-tag-preparing { background: #fff7e6; color: #ff902b; }
+.wo-tag-doing { background: #fff7e6; color: #ff902b; }
+.wo-tag-done { background: #e8f8ee; color: #2fbf4e; }
+.wo-tag-cancel { background: #f2f3f5; color: #86909c; }
+.wo-tag-fail { background: #fde8e8; color: #f5544a; }
+.wo-tag-refund { background: #fde8e8; color: #f5544a; }
+.wo-ops a { color: #0068ff; text-decoration: none; margin-right: 8px; cursor: pointer; font-size: 12px; }
+.wo-ops a:hover { text-decoration: underline; }
+.wo-ops a.wo-mut { color: #86909c; }
+
+.wo-pager {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-top: 1px solid #e5e6eb; background: #fff;
+  font-size: 12px; color: #86909c; flex-shrink: 0;
+}
+.wo-pager-btns button {
+  border: 1px solid #dcdfe6; background: #fff; border-radius: 4px;
+  padding: 4px 10px; cursor: pointer; margin-left: 6px; font-size: 12px; color: #4e5969;
+}
+.wo-pager-btns button:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 
 
