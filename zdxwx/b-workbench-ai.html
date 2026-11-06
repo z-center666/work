@@ -3686,6 +3686,7 @@ var kbDetails = {
   var chatWrap = document.querySelector('.dz-chat-wrap');
   var queuePage = document.getElementById('queuePage');
   var dzimSecond = document.querySelector('.dz-dzim__second');
+  var dzim = document.querySelector('.dz-dzim');
 
   if (queueItem && chatWrap && queuePage) {
     queueItem.addEventListener('click', function () {
@@ -3697,8 +3698,9 @@ var kbDetails = {
       chatWrap.hidden = true;
       queuePage.hidden = false;
 
-      // 隐藏第二列会话列表
+      // 隐藏第二列会话列表，收缩侧边栏宽度
       if (dzimSecond) dzimSecond.style.display = 'none';
+      if (dzim) dzim.style.width = '152px';
     });
   }
 
@@ -3713,6 +3715,7 @@ var kbDetails = {
       queuePage.hidden = true;
 
       if (dzimSecond) dzimSecond.style.display = '';
+      if (dzim) dzim.style.width = '';
     });
   }
 })();
@@ -4303,16 +4306,16 @@ var kbDetails = {
 /* ============ 会话排队页面 ============ */
 .dz-queue {
   flex: 1; min-width: 0; min-height: 0;
-  display: flex; flex-direction: column;
-  background: #f5f7fa; padding: 16px 20px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: stretch;
+  background: #fff; padding: 0; box-sizing: border-box;
   border-left: 1px solid var(--dz-input-border);
 }
 .dz-queue[hidden] { display: none !important; }
 
 .dz-queue__header {
   display: flex; align-items: center; justify-content: space-between;
-  background: #fff; border-radius: 8px; padding: 14px 20px;
-  margin-bottom: 12px; flex-shrink: 0;
+  background: #fff; padding: 14px 20px;
+  border-bottom: 1px solid #e5e6eb; flex-shrink: 0; width: 100%;
 }
 .dz-queue__title {
   font-size: 16px; font-weight: 600; color: #1f2329;
@@ -4344,7 +4347,7 @@ var kbDetails = {
 .dz-queue__btn--light:hover { background: #d4e4ff; }
 
 .dz-queue__table-wrap {
-  flex: 1; background: #fff; border-radius: 8px; overflow: auto;
+  flex: 1; background: #fff; overflow: auto; width: 100%;
 }
 .dz-queue__table {
   width: 100%; border-collapse: collapse; font-size: 13px;
@@ -4365,7 +4368,7 @@ var kbDetails = {
 
 .dz-queue__footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 0 0; flex-shrink: 0;
+  padding: 12px 20px; border-top: 1px solid #e5e6eb; flex-shrink: 0; width: 100%;
 }
 .dz-queue__total { font-size: 13px; color: #86909c; }
 .dz-queue__pagination {
