@@ -2694,25 +2694,29 @@ body {
       <!-- ============ 会话排队页面 ============ -->
       <section class="dz-queue" id="queuePage" hidden>
         <div class="dz-queue__header">
-          <div class="dz-queue__title">排队列表 <i class="bi bi-question-circle" style="font-size: 14px; color: #86909c; cursor: help;" title="当前排队中的会话"></i></div>
-          <div class="dz-queue__filters">
-            <div class="dz-queue__select">
-              <span>全部技能组</span>
-              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
-            </div>
-            <div class="dz-queue__select">
-              <span>全部渠道</span>
-              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
-            </div>
-            <div class="dz-queue__select">
-              <span>是否留资</span>
-              <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
-            </div>
+          <div class="dz-queue__title-row">
+            <div class="dz-queue__title">排队列表 <i class="bi bi-question-circle" style="font-size: 14px; color: #86909c; cursor: help;" title="当前排队中的会话"></i></div>
           </div>
-          <div class="dz-queue__actions">
-            <button class="dz-queue__btn dz-queue__btn--primary">刷新</button>
-            <button class="dz-queue__btn dz-queue__btn--light">批量邀请</button>
-            <button class="dz-queue__btn dz-queue__btn--light">批量分配</button>
+          <div class="dz-queue__toolbar">
+            <div class="dz-queue__filters">
+              <div class="dz-queue__select">
+                <span>全部技能组</span>
+                <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+              </div>
+              <div class="dz-queue__select">
+                <span>全部渠道</span>
+                <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+              </div>
+              <div class="dz-queue__select">
+                <span>是否留资</span>
+                <i class="bi bi-chevron-down" style="font-size: 12px; color: #86909c;"></i>
+              </div>
+            </div>
+            <div class="dz-queue__actions">
+              <button class="dz-queue__btn dz-queue__btn--primary">刷新</button>
+              <button class="dz-queue__btn dz-queue__btn--light">批量邀请</button>
+              <button class="dz-queue__btn dz-queue__btn--light">批量分配</button>
+            </div>
           </div>
         </div>
 
@@ -4427,9 +4431,13 @@ var kbDetails = {
 .dz-queue[hidden] { display: none !important; }
 
 .dz-queue__header {
-  display: flex; align-items: center; justify-content: space-between;
-  background: #fff; padding: 14px 20px;
+  display: flex; flex-direction: column;
+  background: #fff; padding: 14px 20px 12px;
   border-bottom: 1px solid #e5e6eb; flex-shrink: 0; width: 100%;
+}
+.dz-queue__title-row { margin-bottom: 12px; }
+.dz-queue__toolbar {
+  display: flex; align-items: center; justify-content: space-between;
 }
 .dz-queue__title {
   font-size: 16px; font-weight: 600; color: #1f2329;
