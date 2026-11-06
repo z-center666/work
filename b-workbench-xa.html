@@ -2406,10 +2406,10 @@ textarea.dz-field__input { height: auto; min-height: 76px; padding: 8px 11px; re
           <!-- 沟通组 -->
           <div class="dz-dzim__group">
             <div class="dz-dzim__group-title">沟通</div>
-            <div class="dz-dzim__item active">
+            <div class="dz-dzim__item active" data-subnav="进行中">
               <span class="dz-dzim__icon c-green"><i class="bi bi-chat-dots-fill"></i></span><span class="dz-dzim__name">进行中</span><span class="dz-dzim__badge">1</span>
             </div>
-            <div class="dz-dzim__item">
+            <div class="dz-dzim__item" data-subnav="待完结">
               <span class="dz-dzim__icon c-gray"><i class="bi bi-clock-history"></i></span><span class="dz-dzim__name">待完结</span><span class="dz-dzim__badge">0</span>
             </div>
             <div class="dz-dzim__item">
@@ -2428,7 +2428,7 @@ textarea.dz-field__input { height: auto; min-height: 76px; padding: 8px 11px; re
           <!-- 队列组 -->
           <div class="dz-dzim__group">
             <div class="dz-dzim__group-title">队列</div>
-            <div class="dz-dzim__item">
+            <div class="dz-dzim__item" data-subnav="会话排队">
               <span class="dz-dzim__icon c-green"><i class="bi bi-person-lines-fill"></i></span><span class="dz-dzim__name">会话排队</span><span class="dz-dzim__badge">1</span>
             </div>
           </div>
@@ -3516,6 +3516,11 @@ textarea.dz-field__input { height: auto; min-height: 76px; padding: 8px 11px; re
       { type: 'num', num: '6875', color: 'is-blue', badge: '', name: '131****6875', sub: '待回访 · 定期回访', time: '15:50' },
       { type: 'num', num: '8291', color: 'is-green', badge: '', name: '152****8291', sub: '待回访 · 节日回访', time: '昨天' },
       { type: 'person', color: 'is-blue', badge: '', name: '匿名用户', sub: '待回访 · 邀约回访', time: '09-30' }
+    ],
+    '会话排队': [
+      { type: 'person', color: 'is-green', badge: '1', name: '匿名用户', sub: '会话排队 · 等待接入', clock: true },
+      { type: 'num', num: '6688', color: 'is-blue', badge: '', name: '158****6688', sub: '会话排队 · 排队第 2 位', time: '刚刚' },
+      { type: 'person', color: 'is-green', badge: 'video', name: '匿名用户', sub: '会话排队 · 视频排队中', clock: true }
     ]
   };
   function escConv(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
