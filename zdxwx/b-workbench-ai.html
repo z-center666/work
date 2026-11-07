@@ -2666,12 +2666,23 @@ body {
           </div>
         </div>
 
-        <!-- 打车代下单面板 -->
-        <div class="dz-custprofile" id="panelDache" hidden="">
-          <div class="dz-custprofile__empty">
-            <i class="bi bi-inbox"></i>
-            <div>暂无数据</div>
+        <!-- 打车代下单面板（移植自「外卖打车管理后台页面」打车代下单导航页） -->
+        <div id="panelDache" hidden="" style="flex:1;display:flex;flex-direction:column;background:#fff;min-height:0;overflow:hidden;padding:0;box-sizing:border-box;position:relative;">
+          <div class="txa-wrap">
+            <div class="page-head">
+              <h3>打车代下单</h3>
+              <span class="wz-hint" style="margin:0;">对应「2.1 客服代下单流程」：① 系统进入页面自动获取老外档案（userId + 经纬度） → ② 输入经纬度或关键词<b>搜索上车点</b>（经纬度默认回显老外定位，可编辑） → ③ 输入关键词<b>搜索并选择目的地</b>（POI / 子 POI 都可选）→ 点右下角「<b>预估价格</b>」（有效期 <b>9 分 50 秒</b>，超时需重新预估）→ 勾选车档（默认 舒适型/豪华型/礼帽专车）→ 点「<b>推送打车订单给老外确认</b>」；推送后本页锁定等待老外：<b>确认 → 强制弹窗提醒；拒绝 → 可重新推送；超时 → 预估价格过期、重新预估后再推</b></span>
+            </div>
+            <div class="agent-split">
+              <div class="agent-main">
+                <div class="agent-step" id="tx-step-1"></div>
+                <div class="agent-step hidden" id="tx-step-2"></div>
+                <div class="agent-step hidden" id="tx-step-3"></div>
+              </div>
+              <div class="guest-panel" id="tx-guest-panel"></div>
+            </div>
           </div>
+          <div class="txa-toast" id="tx-toast"></div>
         </div>
         </div>
 
@@ -3585,7 +3596,7 @@ body {
 (function () {
   var tabs = document.querySelectorAll('.dz-chat__tab');
   var chatBodyEls = Array.prototype.slice.call(
-    document.querySelectorAll('.dz-chat > :not(.dz-chat__tabs):not(.dz-custprofile):not(#panelWaimai)')
+    document.querySelectorAll('.dz-chat > :not(.dz-chat__tabs):not(.dz-custprofile):not(#panelWaimai):not(#panelDache)')
   );
   var profile = document.getElementById('custProfile');
   var panelWaimaiOrder = document.getElementById('panelWaimaiOrder');
@@ -5316,4 +5327,2014 @@ var kbDetails = {
 
 
 
+<style id="txa-style">
+#panelDache{
+    --bg:#f4f6fa; --panel:#ffffff; --line:#e6e9f0; --line-strong:#d4d9e4;
+    --text:#1f2733; --text-2:#5b6573; --text-3:#8a93a3;
+    --brand:#2f6bff; --brand-soft:#eaf1ff;
+    --green:#16a34a; --green-soft:#e7f6ec;
+    --orange:#f59e0b; --orange-soft:#fff3e0;
+    --red:#e23b3b; --red-soft:#fdecec;
+    --gray:#6b7280; --gray-soft:#eef1f5;
+    --radius:10px;
+  }
+#panelDache .pager{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;color:var(--text-3);font-size:12px;}
+#panelDache .pager .pg-btns button{border:1px solid var(--line-strong);background:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;margin-left:6px;font-family:inherit;color:var(--text-2);}
+#panelDache .pager .pg-btns button:disabled{opacity:.5;cursor:not-allowed;}
+#panelDache .hidden{display:none;}
+#panelDache .modal-overlay{position:fixed;inset:0;background:rgba(31,39,51,.45);z-index:200;display:flex;align-items:center;justify-content:center;}
+#panelDache .modal{width:420px;max-width:90vw;background:#fff;border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,.18);overflow:hidden;}
+#panelDache .modal .mh{padding:16px 20px;border-bottom:1px solid var(--line);font-weight:600;font-size:15px;}
+#panelDache .modal .mb{padding:18px 20px;}
+#panelDache .modal .mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#fafbfd;}
+#panelDache .modal .info-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;}
+#panelDache .modal .info-row .k{color:var(--text-3);}
+#panelDache .modal .info-row .v{font-weight:600;}
+#panelDache .modal .info-row .v.points{color:var(--brand);}
+#panelDache .modal .input-row{margin-top:14px;}
+#panelDache .modal .input-row label{display:block;font-size:13px;color:var(--text-3);margin-bottom:6px;}
+#panelDache .modal .input-row input{width:100%;border:1px solid var(--line-strong);border-radius:7px;padding:9px 12px;font-size:14px;font-family:inherit;outline:none;}
+#panelDache .modal .input-row input:focus{border-color:var(--brand);}
+#panelDache .modal .input-row .hint{font-size:12px;color:var(--text-3);margin-top:6px;}
+#panelDache .modal .comp-scene{font-size:12px;color:var(--text-3);background:var(--gray-soft);padding:10px 12px;border-radius:6px;margin:14px 0 4px;line-height:1.6;}
+#panelDache .modal .mf button{padding:7px 16px;border-radius:7px;font-size:13px;font-family:inherit;cursor:pointer;border:1px solid var(--line-strong);background:#fff;color:var(--text);}
+#panelDache .modal .mf button.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+#panelDache .modal .mf button.danger{background:var(--red);border-color:var(--red);color:#fff;}
+#panelDache .modal .btn{border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:7px;padding:8px 16px;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap;}
+#panelDache .modal .btn:hover{filter:brightness(.95);}
+#panelDache .page-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:#fafbfd;border-radius:var(--radius) var(--radius) 0 0;}
+#panelDache .page-head h3{margin:0;font-size:16px;}
+#panelDache .page-head .back{background:#fff;border:1px solid var(--line-strong);border-radius:7px;padding:7px 14px;font-size:13px;font-family:inherit;color:var(--text);cursor:pointer;}
+#panelDache .page-head .back:hover{border-color:var(--brand);color:var(--brand);}
+#panelDache .agent-step{margin-bottom:20px;}
+#panelDache .agent-step:last-child{margin-bottom:0;}
+#panelDache .step-head{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius);background:#f5f7fb;border:1px solid var(--line);font-weight:600;font-size:14px;}
+#panelDache .step-head.active{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);}
+#panelDache .step-head.done{cursor:pointer;}
+#panelDache .step-head.done:hover{background:#eef3ff;}
+#panelDache .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:700;flex-shrink:0;}
+#panelDache .step-head.done .step-num{background:var(--green);}
+#panelDache .step-sum{font-weight:400;font-size:12px;color:var(--text-2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#panelDache .step-body{margin-top:12px;padding:0 2px;}
+#panelDache .search-box{display:flex;gap:8px;margin-bottom:14px;}
+#panelDache .search-box input{flex:1;border:1px solid var(--line-strong);border-radius:7px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;}
+#panelDache .search-box input:focus{border-color:var(--brand);}
+#panelDache .pager{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--text-3);}
+#panelDache .pager .pg-btns{display:flex;gap:8px;}
+#panelDache .pager button{border:1px solid var(--line-strong);background:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;}
+#panelDache .pager button:disabled{color:var(--text-3);cursor:not-allowed;opacity:.6;}
+#panelDache .note-count{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums;}
+#panelDache .note-count.max{color:#b45309;font-weight:600;}
+#panelDache .note-warn{margin-bottom:8px;padding:7px 10px;border-radius:7px;background:#fff7ed;border:1px solid #fde3c0;
+    color:#b45309;font-size:11.5px;line-height:1.55;}
+#panelDache .note-warn b{color:#c2410c;}
+#panelDache .agent-split{display:flex;gap:16px;align-items:flex-start;}
+#panelDache .agent-main{flex:1;min-width:0;}
+#panelDache .guest-panel{width:308px;flex-shrink:0;position:sticky;top:0;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+#panelDache .guest-panel .gp-head{padding:11px 14px;border-bottom:1px solid var(--line);background:#fafbfd;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;}
+#panelDache .guest-panel .gp-head .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+#panelDache .guest-panel .gp-head .gp-tag{margin-left:auto;font-size:10px;font-weight:600;color:var(--text-3);border:1px solid var(--line-strong);border-radius:10px;padding:0 7px;}
+#panelDache .guest-panel .gp-dev{padding:8px 14px;font-size:11px;color:var(--text-3);border-bottom:1px dashed var(--line);line-height:1.5;}
+#panelDache .guest-panel .gp-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-height:58vh;overflow:auto;}
+#panelDache .gp-empty{color:var(--text-3);font-size:12px;text-align:center;padding:20px 0;line-height:1.6;}
+#panelDache .gp-msg{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fbfcfe;}
+#panelDache .gp-msg.pending{border-color:var(--orange);background:#fffaf0;}
+#panelDache .gp-msg.done{border-color:var(--green);background:#f5fbf7;}
+#panelDache .gp-msg .gm-kind{font-size:11px;color:var(--text-3);margin-bottom:5px;font-family:"SF Mono",Menlo,monospace;}
+#panelDache .gp-msg .gm-title{font-weight:600;font-size:13px;line-height:1.5;}
+#panelDache .gp-msg .gm-sub{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.5;}
+#panelDache .gp-msg .gm-act{margin-top:9px;display:flex;align-items:center;gap:8px;}
+#panelDache .gp-msg .gm-act button{border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:6px;padding:5px 14px;font-size:12px;font-family:inherit;cursor:pointer;}
+#panelDache .gp-msg .gm-state{font-size:11px;font-weight:600;}
+#panelDache .gp-msg .gm-state.pending{color:#a06a00;}
+#panelDache .gp-msg .gm-state.done{color:var(--green);}
+#panelDache .push-btn{border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:7px;padding:5px 13px;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;}
+#panelDache .push-btn:hover{filter:brightness(1.06);}
+#panelDache .push-btn.ghost{background:#fff;color:var(--brand);}
+#panelDache .push-state{display:inline-block;font-size:11px;font-weight:600;border-radius:10px;padding:1px 8px;white-space:nowrap;}
+#panelDache .push-state.pending{background:var(--orange-soft);color:#a06a00;}
+#panelDache .push-state.done{background:var(--green-soft);color:var(--green);}
+#panelDache .push-state.rejected{background:var(--red-soft);color:#a3271f;}
+#panelDache .gp-msg.rejected{border-color:var(--red);background:#fdf5f4;}
+#panelDache .gp-msg .gm-act button.reject{background:#fff;color:#a3271f;border-color:#f3c9c6;}
+#panelDache .gp-msg .gm-state.rejected{color:#a3271f;}
+#panelDache .tx-next-float{position:fixed;bottom:18px;right:340px;display:flex;align-items:center;justify-content:flex-end;gap:10px;z-index:60;}
+#panelDache .tx-next-float .push-btn{padding:11px 22px;font-size:14px;border-radius:10px;
+    border:2px solid #fff;
+    box-shadow:0 10px 26px rgba(23,32,50,.22), 0 2px 6px rgba(47,107,255,.28);}
+#panelDache .addr-count-inline{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;
+    font-weight:600;font-size:12px;color:var(--brand);}
+#panelDache .addr-count-inline .dot{width:6px;height:6px;border-radius:50%;background:var(--brand);animation:addrPulse 1.2s infinite;}
+#panelDache .addr-count-inline b{font-family:"SF Mono",Menlo,monospace;font-size:13px;letter-spacing:.5px;}
+#panelDache .addr-count-inline .left{font-weight:400;font-size:11.5px;color:var(--text-3);white-space:nowrap;}
+#panelDache .addr-count-inline .left b{font-size:12px;color:var(--text-2);}
+#panelDache .addr-count-inline .sim{font-weight:400;font-size:11px;color:var(--text-3);text-decoration:underline;cursor:pointer;}
+#panelDache .addr-count-inline .sim:hover{color:var(--brand);}
+@keyframes addrPulse{0%,100%{opacity:1}50%{opacity:.3}}
+#panelDache .push-state .addr-reload{color:var(--brand);font-weight:600;text-decoration:underline;cursor:pointer;}
+#panelDache .push-state .addr-reload:hover{color:#1f4fd8;}
+#panelDache .txa-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1f2733;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:300;}
+#panelDache .txa-toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+#panelDache .modal.wide{width:640px;}
+#panelDache .modal.lg{width:820px;}
+#panelDache .modal .mb.scroll{max-height:60vh;overflow:auto;}
+#panelDache .modal .note{font-size:12px;border-radius:7px;padding:9px 11px;line-height:1.6;margin-top:12px;}
+#panelDache .modal .note.w{background:var(--orange-soft);color:#92670a;border:1px solid #f4d9a5;}
+#panelDache .modal .note.r{background:var(--red-soft);color:#a3271f;border:1px solid #f3c9c6;}
+#panelDache .modal .note.g{background:var(--green-soft);color:#137a37;border:1px solid #c4e8d2;}
+#panelDache .modal .note.i{background:var(--gray-soft);color:var(--text-2);}
+#panelDache .modal .chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;margin-top:12px;cursor:pointer;}
+#panelDache .modal .chk input{margin-top:3px;}
+#panelDache .modal table.mini{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+#panelDache .modal table.mini th{text-align:left;font-size:11px;color:var(--text-3);font-weight:600;padding:7px 9px;background:#fafbfd;border-bottom:1px solid var(--line);}
+#panelDache .modal table.mini td{padding:8px 9px;border-bottom:1px solid var(--line-2,#f0f2f5);}
+#panelDache .modal table.mini tr.pick{cursor:pointer;}
+#panelDache .modal table.mini tr.pick:hover{background:#fafcff;}
+#panelDache .modal table.mini td .zh{font-weight:600;}
+#panelDache .modal table.mini td .en{display:block;font-size:11px;color:var(--text-3);font-style:italic;}
+#panelDache .wz-hint{font-size:12px;color:var(--text-3);line-height:1.6;margin-top:8px;}
+#panelDache .wz-hint b{color:var(--text-2);font-weight:600;}
+#panelDache .pickup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:11px;margin-top:2px;}
+#panelDache .pk-split{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:12px;}
+#panelDache .pk-map{flex:1 1 380px;min-width:330px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f2f3f5;line-height:0;}
+#panelDache .pk-map svg{display:block;width:100%;height:auto;}
+#panelDache .pk-side{flex:1 1 280px;min-width:240px;max-width:320px;}
+#panelDache .pk-navcol{flex:0 1 208px;min-width:186px;max-width:240px;}
+#panelDache .pk-split.has-nav .pk-side{flex:0 0 212px;min-width:190px;max-width:230px;}
+#panelDache .pk-guide{border:1px dashed var(--line-strong);border-radius:10px;background:#fafbfc;padding:26px 20px;
+    text-align:center;margin-top:12px;}
+#panelDache .pk-guide-t{font-size:13.5px;font-weight:600;color:var(--text-2);}
+#panelDache .pk-guide-s{font-size:12px;color:var(--text-3);line-height:1.9;margin-top:8px;}
+#panelDache .pk-guide-s b{color:var(--text-2);font-weight:600;}
+#panelDache .pk-anchor-bar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 12px;background:#f4f8ff;
+    border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--text-2);}
+#panelDache .pk-anchor-bar b{color:var(--text);}
+#panelDache .pk-anchor-bar + .pk-split{margin-top:8px;}
+#panelDache .pk-anchor-back{margin-left:auto;border:0;background:none;color:var(--brand);font-size:12.5px;
+    font-family:inherit;cursor:pointer;padding:2px 4px;}
+#panelDache .pk-anchor-back:hover{text-decoration:underline;}
+#panelDache .pk-list-head{font-size:12.5px;color:var(--text-2);font-weight:600;margin-bottom:8px;display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+#panelDache .pk-list-head span{font-weight:400;font-size:11px;color:var(--text-3);}
+#panelDache .pk-list{display:flex;flex-direction:column;gap:8px;max-height:318px;overflow:auto;padding-right:2px;}
+#panelDache .pk-li{display:flex;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:#fff;transition:border-color .15s,background .15s;}
+#panelDache .pk-li:hover{border-color:var(--brand);background:#fafcff;}
+#panelDache .pk-li.active{border-color:var(--brand);background:var(--brand-soft);}
+#panelDache .pk-idx{flex:0 0 20px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--brand);color:var(--brand);
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#fff;margin-top:1px;}
+#panelDache .pk-li.active .pk-idx{background:var(--brand);color:#fff;border-color:var(--brand);}
+#panelDache .pk-li-main{min-width:0;}
+#panelDache .pk-li-name{font-size:13px;font-weight:600;line-height:1.45;}
+#panelDache .pk-li-flag{font-size:10px;font-weight:600;color:#fff;background:var(--brand);border-radius:8px;padding:0 6px;margin-left:6px;vertical-align:1.5px;}
+#panelDache .pk-li-sub{font-size:11.5px;color:var(--text-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#panelDache .pk-li-meta{font-size:11px;color:var(--text-3);margin-top:3px;}
+#panelDache .pk-kid-num{margin-left:6px;font-size:10.5px;font-weight:400;color:var(--text-3);
+    background:var(--gray-soft);border-radius:4px;padding:0 5px;vertical-align:1px;white-space:nowrap;}
+#panelDache .pk-li-child{margin-left:16px;padding-left:10px;border-left:2px solid #e3e8f2;background:#fcfdff;}
+#panelDache .pk-li-child:hover{background:#f7faff;}
+#panelDache .pk-li-child .pk-li-name{font-weight:500;font-size:12.5px;}
+#panelDache .pk-li-child .pk-li-sub{font-size:11px;}
+#panelDache .pk-list-tree{max-height:352px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;}
+#panelDache .pk-list-tree::-webkit-scrollbar{width:8px;}
+#panelDache .pk-list-tree::-webkit-scrollbar-thumb{background:#c9d2e0;border-radius:4px;}
+#panelDache .pk-list-tree::-webkit-scrollbar-thumb:hover{background:#aeb9cc;}
+#panelDache .pk-idx.sub{flex:0 0 auto;width:auto;min-width:26px;height:17px;border-radius:5px;
+    font-size:10px;font-weight:700;color:#4a72d0;background:#eef3ff;border:1px solid #dbe5ff;padding:0 4px;margin-top:2px;}
+#panelDache .pk-card{border:1px solid var(--line);border-radius:var(--radius);padding:11px 13px;cursor:pointer;transition:border-color .15s,background .15s;}
+#panelDache .pk-card:hover{border-color:var(--brand);background:#fafcff;}
+#panelDache .pk-card.active{border-color:var(--brand);background:var(--brand-soft);}
+#panelDache .pk-card .pk-name{font-weight:600;font-size:13px;}
+#panelDache .pk-card .pk-en{font-size:11px;color:var(--text-3);font-style:italic;margin-top:2px;}
+#panelDache .pk-card .pk-dist{font-size:11.5px;color:var(--text-2);margin-top:6px;}
+#panelDache .pk-card .pk-dist b{color:var(--brand);}
+#panelDache .pk-card .pk-ll{font-family:"SF Mono",Menlo,monospace;font-size:10.5px;color:var(--text-3);margin-top:5px;}
+#panelDache .pager{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px;}
+#panelDache .pager .pg-info{font-size:12px;color:var(--text-3);margin-right:auto;}
+#panelDache .pg-btn{border:1px solid var(--line-strong);background:#fff;color:var(--text-2);border-radius:6px;padding:5px 10px;font-size:12px;font-family:inherit;cursor:pointer;transition:border-color .15s,color .15s;}
+#panelDache .pg-btn:hover:not(:disabled){border-color:var(--brand);color:var(--brand);}
+#panelDache .pg-btn:disabled{opacity:.45;cursor:not-allowed;}
+#panelDache .pg-btn.num{min-width:28px;text-align:center;padding:5px 6px;}
+#panelDache .pg-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+#panelDache .pk-side .pager, #panelDache .pk-navcol .pager{margin-top:10px;gap:6px;flex-wrap:nowrap;justify-content:center;}
+#panelDache .pk-side .pg-info, #panelDache .pk-navcol .pg-info{display:none;}
+#panelDache .pk-side .pg-btn, #panelDache .pk-navcol .pg-btn{padding:4px 7px;font-size:11.5px;white-space:nowrap;}
+#panelDache .pk-side .pg-btn.num, #panelDache .pk-navcol .pg-btn.num{min-width:24px;padding:4px 5px;}
+#panelDache .pk-nav{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;}
+#panelDache .pk-nav-head{padding:9px 11px;background:#f4f8ff;border-bottom:1px solid var(--line);
+    font-size:12.5px;font-weight:600;color:var(--text);}
+#panelDache .pk-nav-head .nav-top{display:flex;align-items:baseline;gap:8px;}
+#panelDache .pk-nav-head .nav-to{font-size:11px;font-weight:400;color:var(--text-3);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#panelDache .pk-nav-head .sum{margin-left:auto;font-size:11.5px;color:var(--brand);font-weight:600;white-space:nowrap;}
+#panelDache .pk-nav-steps{list-style:none;margin:0;padding:6px 11px 2px;min-height:100px;}
+#panelDache .pk-nav-steps li{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:12.5px;line-height:1.55;color:var(--text);}
+#panelDache .pk-nav-steps li + li{border-top:1px dashed var(--line);}
+#panelDache .pk-nav-steps .n{flex:0 0 18px;height:18px;border-radius:50%;background:var(--brand);color:#fff;
+    font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+#panelDache .pk-nav-steps li.last .n{background:var(--green);}
+#panelDache .pk-nav-steps li.warn .n{background:#e8833a;}
+#panelDache .pk-nav-steps li.warn b{color:#c2410c;}
+#panelDache .pk-nav-steps li b{color:var(--brand);font-weight:600;}
+#panelDache .pk-nav-steps li.last b{color:var(--text);}
+#panelDache .pk-nav .pager{margin-top:6px;padding:0 11px 10px;}
+#panelDache .pk-route path{pointer-events:none;}
+#panelDache .btn{border:1px solid var(--brand);background:var(--brand);color:#fff;border-radius:7px;padding:8px 16px;font-size:13px;font-family:inherit;cursor:pointer;}
+#panelDache .btn:disabled{opacity:.5;cursor:not-allowed;}
+#panelDache .btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand);}
+#panelDache .tx-est{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
+#panelDache .tx-est-title{font-size:12.5px;font-weight:700;color:var(--text-2);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+#panelDache .tx-est-title::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--brand);}
+#panelDache .tx-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:2px 0 14px;}
+#panelDache .tx-metric{background:var(--gray-soft);border-radius:8px;padding:9px 12px;}
+#panelDache .tx-metric .k{font-size:11px;color:var(--text-3);}
+#panelDache .tx-metric .v{font-size:15px;font-weight:700;margin-top:3px;}
+#panelDache .q-chk{display:inline-flex;width:15px;height:15px;border:1.5px solid var(--line-strong);border-radius:4px;margin-right:7px;
+    align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;vertical-align:middle;background:#fff;}
+#panelDache .q-chk.on{background:var(--brand);border-color:var(--brand);}
+#panelDache .tx-est-sub{font-weight:400;font-size:11.5px;color:var(--text-3);margin-left:auto;}
+#panelDache .tx-demo-btn{border:1px dashed var(--line-strong);background:#fff;color:var(--text-3);border-radius:7px;
+    font-family:inherit;font-size:11.5px;padding:3px 9px;cursor:pointer;flex-shrink:0;margin-left:4px;}
+#panelDache .tx-demo-btn:hover{color:var(--brand);border-color:var(--brand);background:#f7faff;}
+#panelDache .tx-est.expired{border-top-color:#f3c9c6;}
+#panelDache .tx-est.expired .tx-est-title::before{background:var(--red);}
+#panelDache .tx-est-table{width:100%;border-collapse:collapse;margin-top:2px;}
+#panelDache .tx-est-table thead th{background:#fafbfd;font-size:11.5px;font-weight:600;color:var(--text-3);
+    text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+#panelDache .tx-est-table thead th.num{text-align:right;}
+#panelDache .tx-est-table tbody td{padding:9px 10px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:middle;}
+#panelDache .tx-est-table tbody td.num{text-align:right;font-family:"SF Mono",Menlo,monospace;}
+#panelDache .tx-est-table tbody tr{cursor:pointer;}
+#panelDache .tx-est-table tbody tr:hover{background:#fafcff;}
+#panelDache .tx-est-table tbody tr.on{background:var(--brand-soft);}
+#panelDache .tx-est-table tbody tr.off{cursor:not-allowed;opacity:.55;}
+#panelDache .tx-est-table tbody tr.off:hover{background:transparent;}
+#panelDache .tx-est-table tbody tr.locked{cursor:default;}
+#panelDache .tx-est-table tbody tr.locked:hover{background:transparent;}
+#panelDache .tx-est-table tbody tr.on.locked:hover{background:var(--brand-soft);}
+#panelDache .tx-est-table .q-bad{font-size:10px;font-weight:600;color:#a3271f;background:#fdecea;border-radius:8px;padding:1px 6px;}
+#panelDache .tx-est-table .q-chk{margin-right:7px;}
+#panelDache .tx-est-table td.tot b{color:var(--brand);}
+#panelDache .tx-seat{font-size:11px;font-weight:400;color:var(--text-2);background:var(--gray-soft);border-radius:9px;
+    padding:1px 7px;margin-left:7px;white-space:nowrap;}
+#panelDache .tx-est-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:10px;margin-top:2px;}
+#panelDache .tx-est-card{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;}
+#panelDache .tx-est-card:hover{border-color:#c3d5fb;}
+#panelDache .tx-est-card.on{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 2px 10px rgba(47,107,255,.08);}
+#panelDache .tx-est-card.off{cursor:not-allowed;opacity:.55;}
+#panelDache .tx-est-card.off:hover{border-color:var(--line);}
+#panelDache .tx-est-card.locked{cursor:default;}
+#panelDache .tx-est-card .qc-top{display:flex;align-items:center;gap:9px;}
+#panelDache .q-chk-c{width:17px;height:17px;border-radius:50%;border:1.5px solid #c0c9d6;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;color:#fff;transition:all .15s;}
+#panelDache .on > .qc-top .q-chk-c, #panelDache .tx-est-card.on .q-chk-c{background:var(--brand);border-color:var(--brand);}
+#panelDache .tx-est-card .car-name{font-size:13px;font-weight:600;color:var(--text);}
+#panelDache .tx-est-card .q-bad{font-size:10px;font-weight:600;color:#a3271f;background:#fdecea;border-radius:8px;padding:1px 6px;}
+#panelDache .tx-est-card .qc-price{margin-top:9px;font-size:12px;color:var(--text-2);display:flex;justify-content:space-between;line-height:1.9;}
+#panelDache .tx-est-card .qc-price .num{font-family:"SF Mono",Menlo,monospace;color:var(--text);}
+#panelDache .tx-est-card .qc-tot{margin-top:6px;padding-top:7px;border-top:1px dashed var(--line);
+    display:flex;justify-content:space-between;align-items:baseline;}
+#panelDache .tx-est-card .qc-tot .lab{font-size:11.5px;color:var(--text-3);}
+#panelDache .tx-est-card .qc-tot .num{font-size:16px;font-weight:700;color:var(--brand);font-family:"SF Mono",Menlo,monospace;}
+#panelDache .tx-link{color:var(--brand);font-weight:600;text-decoration:underline;cursor:pointer;}
+#panelDache .tx-link:hover{color:#1f4fd8;}
+#panelDache .push-state .tx-link{margin-left:2px;}
+#panelDache .tx-lock-tip{display:flex;align-items:center;gap:8px;background:#f4f8ff;border:1px solid #cfe0ff;
+    border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text-2);margin-top:10px;line-height:1.6;}
+#panelDache .tx-lock-tip b{color:var(--text);}
+#panelDache .tx-lock-tip .lk{font-size:11px;font-weight:700;color:var(--brand);background:#fff;border:1px solid #cfe0ff;
+    border-radius:9px;padding:0 7px;flex-shrink:0;}
+#panelDache .note{font-size:12px;border-radius:7px;padding:9px 11px;line-height:1.6;margin-top:12px;}
+#panelDache .note.w{background:var(--orange-soft);color:#92670a;border:1px solid #f4d9a5;}
+#panelDache .note.r{background:var(--red-soft);color:#a3271f;border:1px solid #f3c9c6;}
+#panelDache .note.g{background:var(--green-soft);color:#137a37;border:1px solid #c4e8d2;}
+#panelDache .note.i{background:var(--gray-soft);color:var(--text-2);}
+#panelDache .modal .mh{position:relative;padding-right:44px;}
+#panelDache .modal .mh .mx{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-3);font-weight:400;font-size:18px;line-height:1;}
+#panelDache .modal .mh .mx:hover{color:var(--text);}
+/* ===== 嵌入适配：panelDache 作为 .dz-chat 的 flex 子项 ===== */
+#panelDache{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:13px;line-height:1.6;color:var(--text);}
+#panelDache *{box-sizing:border-box;}
+#panelDache .txa-wrap{flex:1;min-height:0;display:flex;flex-direction:column;}
+#panelDache .page-head{flex-shrink:0;flex-direction:column;align-items:flex-start;gap:6px;border-radius:0;padding:14px 18px;}
+#panelDache .page-head h3{font-size:15px;}
+#panelDache .page-head .wz-hint{margin:0;}
+#panelDache .agent-split{flex:1;min-height:0;align-items:stretch;gap:14px;padding:14px 16px;overflow-x:auto;overflow-y:hidden;}
+#panelDache .agent-main{flex:1 1 auto;min-width:880px;overflow-y:auto;overflow-x:hidden;padding:2px 6px 12px 2px;scrollbar-width:thin;}
+#panelDache .agent-main::-webkit-scrollbar{width:8px;}
+#panelDache .agent-main::-webkit-scrollbar-thumb{background:#c9d2e0;border-radius:4px;}
+#panelDache .agent-main::-webkit-scrollbar-thumb:hover{background:#aeb9cc;}
+#panelDache .agent-split::-webkit-scrollbar{height:8px;}
+#panelDache .agent-split::-webkit-scrollbar-thumb{background:#c9d2e0;border-radius:4px;}
+#panelDache .agent-split::-webkit-scrollbar-thumb:hover{background:#aeb9cc;}
+#panelDache .guest-panel{position:static;flex:0 0 300px;width:300px;max-height:100%;overflow-y:auto;align-self:stretch;scrollbar-width:thin;}
+#panelDache .guest-panel::-webkit-scrollbar{width:8px;}
+#panelDache .guest-panel::-webkit-scrollbar-thumb{background:#c9d2e0;border-radius:4px;}
+#panelDache .guest-panel .gp-body{max-height:none;overflow:visible;}
+#panelDache .pk-list::-webkit-scrollbar,#panelDache .pk-list-tree::-webkit-scrollbar{width:8px;}
+#panelDache .pk-list::-webkit-scrollbar-thumb,#panelDache .pk-list-tree::-webkit-scrollbar-thumb{background:#c9d2e0;border-radius:4px;}
+/* 悬浮「下一步/预估价格/推送」按钮：原页用 fixed+JS 定位，嵌入后改 sticky 贴滚动区底部 */
+#panelDache .tx-next-float{position:sticky;bottom:10px;margin:14px 0 0 auto;width:max-content;z-index:50;}
+/* 老外确认强制弹窗：挂在面板内，盖住整个视口 */
+#panelDache .modal-overlay{z-index:3000;}
+/* toast：面板内绝对定位（面板 position:relative） */
+#panelDache .txa-toast{position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1f2733;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:3200;max-width:86%;text-align:center;}
+#panelDache .txa-toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+
+</style>
+<script>
+/* ============================================================
+   打车代下单（移植自「外卖打车管理后台页面.html」的 view-taxi-agent）
+   三步流程 + 自绘高德风格 SVG 地图 + 预估价格 9 分 50 秒倒计时 + 老外硬件端模拟。
+   全部收在 IIFE 内，仅把行内 onclick 用到的函数暴露到 window。
+   ============================================================ */
+(function(){
+
+    /* ---------- 通用小工具（源自原后台页面，作用域收在本 IIFE 内） ---------- */
+    function fmtCountdown(ms){
+      const s2 = Math.max(0, Math.ceil(ms / 1000));
+      return ('0' + Math.floor(s2 / 60)).slice(-2) + ':' + ('0' + (s2 % 60)).slice(-2);
+    }
+    function fmtClock(ts){
+      const d = new Date(ts);
+      return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    }
+    function userIdOf(o){
+      if(!o) return '—';
+      if(o.userId) return o.userId;
+      const digits = String(o.phone || '').replace(/\D/g, '');
+      return digits.length >= 6 ? ('U' + digits.slice(-6)) : '—';
+    }
+    /* 原页用 fixed + JS 对齐悬浮按钮；嵌入后按钮改 sticky，这里置空 */
+    function placeAddrFloat(){}
+    /* 回到主内容区顶部（原页 window.scrollTo 的替代） */
+    function txaScrollTop(){
+      const m = document.querySelector('#panelDache .agent-main');
+      if(m) m.scrollTop = 0;
+    }
+    /* toast：挂在面板内的 #tx-toast */
+    let txaToastTimer = null;
+    function showToast(msg){
+      const el = document.getElementById('tx-toast');
+      if(!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      if(txaToastTimer) clearTimeout(txaToastTimer);
+      txaToastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    const TX_PLACES = {
+      '西湖景区':          ['西湖景区', 'West Lake Scenic Area',            120.1332, 30.2466],
+      /* 西湖周边测试点位（关键词「西湖」可一次命中多个，用于演示地图多点位 + 翻页） */
+      '西湖断桥':          ['西湖断桥', 'West Lake Broken Bridge',           120.1517, 30.2593],
+      '西湖音乐喷泉':      ['西湖音乐喷泉', 'West Lake Music Fountain',       120.1524, 30.2504],
+      '西湖游船码头':      ['西湖游船码头', 'West Lake Cruise Pier · Hubin',  120.1566, 30.2466],
+      '西湖三潭印月':      ['西湖三潭印月', 'Three Pools Mirroring the Moon', 120.1445, 30.2405],
+      '西湖雷峰塔':        ['西湖雷峰塔', 'Leifeng Pagoda',                   120.1493, 30.2308],
+      '西湖苏堤春晓':      ['西湖苏堤春晓', 'Su Causeway in Spring',          120.1352, 30.2455],
+      '灵隐寺':            ['灵隐寺', 'Lingyin Temple',                      120.1021, 30.2408],
+      '杭州东站':          ['杭州东站到达层', 'Hangzhou East Railway Station · Arrivals', 120.2126, 30.2907],
+      '萧山国际机场':      ['萧山国际机场 T4 航站楼', 'Xiaoshan Intl Airport · Terminal 4', 120.4341, 30.2361],
+      '杭州君悦酒店':      ['杭州君悦酒店', 'Grand Hyatt Hangzhou',          120.1612, 30.2490],
+      '杭州柏悦酒店':      ['杭州柏悦酒店', 'Park Hyatt Hangzhou',           120.1710, 30.2462],
+      '西子湖四季酒店':    ['杭州西子湖四季酒店正门', 'Four Seasons Hotel Hangzhou', 120.1271, 30.2477],
+      '河坊街':            ['河坊街历史街区', 'Hefang Street Historic Block', 120.1712, 30.2372],
+      '武林广场':          ['武林广场', 'Wulin Square',                      120.1668, 30.2782],
+      '西溪湿地':          ['西溪国家湿地公园', 'Xixi National Wetland Park', 120.0608, 30.2692],
+      '城站火车站':        ['杭州城站火车站', 'Hangzhou Railway Station',    120.1802, 30.2436],
+      '湖滨银泰':          ['湖滨银泰 in77', 'Intime in77 · Hubin',          120.1663, 30.2508],
+      '西湖文化广场':      ['西湖文化广场', 'West Lake Cultural Square',      120.1659, 30.2848],
+      '外滩':              ['外滩', 'The Bund',                              121.4900, 31.2397],
+      '虹桥火车站':        ['上海虹桥站', 'Shanghai Hongqiao Railway Station', 121.3194, 31.1943],
+      '浦东国际机场':      ['浦东国际机场 T2', 'Pudong Intl Airport · T2',    121.8086, 31.1434],
+      '南京路步行街':      ['南京路步行街', 'Nanjing Road Pedestrian Street', 121.4790, 31.2340],
+      '上海环球金融中心':  ['上海环球金融中心', 'Shanghai World Financial Center', 121.5050, 31.2345],
+      '静安寺':            ['静安寺', 'Jing an Temple',                      121.4450, 31.2230],
+      '陆家嘴':            ['陆家嘴环路', 'Lujiazui Ring Road',              121.5030, 31.2380]
+    };
+    /* 点位查找：返回 {zh, en, lng, lat} */
+    function txPlace(name){
+      const p = TX_PLACES[name] || [name, name, 0, 0];
+      return {zh: p[0], en: p[1], lng: p[2], lat: p[3]};
+    }
+    function txMatch(text, kw){
+      if(!text || !kw) return false;
+      const t = String(text).toLowerCase(), k = String(kw).toLowerCase();
+      if(t.indexOf(k) >= 0) return true;
+      if(k.length <= 2) return false;
+      for(let i = 0; i + 2 <= k.length; i++){
+        if(t.indexOf(k.substr(i, 2)) >= 0) return true;
+      }
+      return false;
+    }
+    /* 老外档案（硬件上报：个人信息 + 当前定位 + 硬件内临时卡号） */
+    const TX_TOURISTS = [
+      {id:'T001', name:'James Miller',   lang:'英语',   passport:'US8812001', phone:'13901120001', deviceNo:'DEV-2026-0101', city:'杭州', lng:120.1612, lat:30.2490, balance:'412.5', card:'硬件临时卡 · 中国移动 139****0001'},
+      {id:'T002', name:'Sofia Rossi',    lang:'意大利语', passport:'IT4451202', phone:'13901120002', deviceNo:'DEV-2026-0102', city:'杭州', lng:120.1271, lat:30.2477, balance:'298.0', card:'硬件临时卡 · 中国联通 139****0002'},
+      {id:'T003', name:'Hans Weber',     lang:'德语',   passport:'DE2231003', phone:'13901120003', deviceNo:'DEV-2026-0103', city:'杭州', lng:120.1710, lat:30.2462, balance:'560.4', card:'硬件临时卡 · 中国移动 139****0003'},
+      {id:'T004', name:'佐藤健太',        lang:'日语',   passport:'JP3312005', phone:'13901120005', deviceNo:'DEV-2026-0105', city:'上海', lng:121.4900, lat:31.2397, balance:'704.8', card:'硬件临时卡 · 中国电信 139****0005'},
+      {id:'T005', name:'Maria Garcia',   lang:'西班牙语', passport:'ES7788010', phone:'13901120010', deviceNo:'DEV-2026-0110', city:'杭州', lng:120.1332, lat:30.2466, balance:'64.3',  card:'硬件临时卡 · 中国移动 139****0010'}
+    ];
+    /* 该 city_code 支持的车型（原型：按 1.1 前期准备里那张「城市 × 车型」表） */
+    const TX_CITY_CARS = { '杭州':'0571', '上海':'021' };
+    const TX_PICKUP_POOL = {
+      '杭州': ['西湖景区','西湖断桥','西湖音乐喷泉','西湖游船码头','西湖三潭印月','西湖雷峰塔','西湖苏堤春晓',
+               '灵隐寺','杭州东站','萧山国际机场','河坊街','武林广场','城站火车站','湖滨银泰','西子湖四季酒店'],
+      '上海': ['外滩','虹桥火车站','浦东国际机场','南京路步行街','静安寺','陆家嘴']
+    };
+
+    /* ---------- POI 子点位（高德「搜索 POI」返回的层级结构） ----------
+       一层结构：直接是 POI；有子 POI 的：父 POI + children（停车场 / 出入口 / 站口…），
+       dx / dy 是相对父点位的偏移（米，东/北为正），生成时换算成经纬度。 */
+    const TX_POI_CHILDREN = {
+      '杭州城站火车站': [
+        {zh:'杭州城站火车站南广场停车场', en:'South Square Parking', dx:-90,  dy:-170},
+        {zh:'杭州城站火车站西门',         en:'West Gate',             dx:-250, dy:  30},
+        {zh:'杭州城站火车站北出站口',     en:'North Exit',            dx: 60,  dy: 190}
+      ],
+      '杭州东站到达层': [
+        {zh:'杭州东站西广场 P1 停车场', en:'West Square P1 Parking', dx:-260, dy:  60},
+        {zh:'杭州东站东广场网约车上车点', en:'East Square Ride-hailing Pickup', dx: 300, dy:  40},
+        {zh:'杭州东站南二出口',       en:'South Exit 2',           dx: 40,  dy:-230}
+      ],
+      '萧山国际机场 T4 航站楼': [
+        {zh:'萧山机场 T4 停车楼 B 区', en:'T4 Parking Building Zone B', dx:-200, dy: 120},
+        {zh:'萧山机场 T4 到达层 3 号门', en:'T4 Arrival Gate 3',     dx: 60,  dy: -180},
+        {zh:'萧山机场 T4 出发层 12 号门', en:'T4 Departure Gate 12',  dx: 210, dy:  190}
+      ],
+      '西湖景区': [
+        {zh:'西湖景区湖滨公园入口',   en:'Hubin Park Entrance',     dx: 180, dy:  40},
+        {zh:'西湖景区断桥入口',       en:'Broken Bridge Entrance',  dx: 60,  dy: 320},
+        {zh:'西湖景区花港观鱼码头',   en:'Huagang Ferry Pier',      dx:-120, dy:-260},
+        {zh:'西湖景区苏堤南口',       en:'Su Causeway South End',   dx:-380, dy:-140}
+      ],
+      '灵隐寺': [
+        {zh:'灵隐寺停车场',           en:'Lingyin Temple Parking',  dx:-160, dy:  80},
+        {zh:'灵隐寺东门',             en:'East Gate',               dx: 190, dy:  30}
+      ],
+      '湖滨银泰 in77': [
+        {zh:'湖滨银泰 in77 地下停车场', en:'in77 Underground Parking', dx:-120, dy:-60},
+        {zh:'湖滨银泰 B 区入口',      en:'Zone B Entrance',         dx: 140, dy:  50}
+      ],
+      '杭州西子湖四季酒店正门': [
+        {zh:'四季酒店大堂入口',       en:'Hotel Lobby Entrance',    dx: 60,  dy:  70},
+        {zh:'四季酒店地下车库',       en:'Underground Garage',      dx:-120, dy: -40}
+      ],
+      '上海虹桥站': [
+        {zh:'虹桥站 P3 停车场',       en:'P3 Parking',              dx:-220, dy:  90},
+        {zh:'虹桥站南 2 出口',        en:'South Exit 2',            dx: 80,  dy:-200}
+      ],
+      '浦东国际机场 T2': [
+        {zh:'浦东机场 T2 停车楼',     en:'T2 Parking Building',     dx:-180, dy: 140},
+        {zh:'浦东机场 T2 到达 3 号门', en:'T2 Arrival Gate 3',       dx: 90,  dy:-160}
+      ],
+      '外滩': [
+        {zh:'外滩地下停车库',         en:'Bund Underground Parking', dx:-140, dy:-80},
+        {zh:'南京东路地铁站 2 号口',  en:'Metro Line 2 Exit 2',      dx: 210, dy: 120}
+      ]
+    };
+
+    /* ---------- 周边推荐上车点（原型 mock） ----------
+       真实业务：曹操按定位返回「周边」的上车点 —— 它们彼此只差几百米，
+       名字是「地标 + 出入口/停车场」这种（xx景区北门 / xx景区东门 / P1 停车场），
+       而不是火车站、机场这类十几公里外的 POI。
+       这里按「离搜索点最近的地标」+「出入口后缀」生成，坐标在搜索点 100~400 m 内。 */
+    /* 上车点 mock：固定 5 个（东门 / 西门 / 南门 / 北门 / 停车场），
+       围绕「搜索定位点」按 200~350 m 的偏移展开，由近到远排列。
+       —— 真实业务里曹操返回的是这种「同一地标的几个出入口」，不是跨区的 POI。 */
+    const TX_PICKUP_POINTS = [
+      {zh:'东门',   en:'East Gate', dx: 200, dy:   70},
+      {zh:'西门',   en:'West Gate', dx:-230, dy:  -90},
+      {zh:'南门',   en:'South Gate', dx:  90, dy: -260},
+      {zh:'北门',   en:'North Gate', dx: -90, dy:  290},
+      {zh:'停车场', en:'Parking',   dx: 150, dy:  320}
+    ];
+    /* 各城市的 mock 基名（演示用）；超出该地标 6km 时自动退回「离定位最近的地标」 */
+    const TX_PICKUP_BASE = { '杭州':'西湖景区', '上海':'外滩' };
+    /* baseOverride：关键词路径下客服选中的 POI —— 周边点位就直接以它命名（"湖滨银泰 in77 东门"） */
+    /* 周边上车点后缀：普通 POI 用「东南西北门」，停车场类 / 出入口类各自更自然 */
+    const TX_PICK_SUFFIX = {
+      default: [['东门','East Gate'],['西门','West Gate'],['南门','South Gate'],['北门','North Gate'],['停车场','Parking']],
+      parking: [['入口','Entrance'],['出口','Exit'],['北侧','North Side'],['南侧','South Side'],['路边临时停靠','Roadside']],
+      gate:    [['路边','Roadside'],['对面','Opposite'],['北侧','North Side'],['南侧','South Side'],['停车场','Parking']]
+    };
+    function txPickupNearby(lng, lat, city, baseOverride, suffixMode){
+      /* 优先用本城市的 mock 基名 */
+      let base = baseOverride ? {zh: baseOverride.zh, en: baseOverride.en} : null;
+      const mockName = TX_PICKUP_BASE[city];
+      if(!base && mockName && TX_PLACES[mockName]){
+        const p = txPlace(mockName);
+        const d = Math.sqrt(Math.pow((p.lng - lng) * PK_KM_LNG, 2) + Math.pow((p.lat - lat) * PK_KM_LAT, 2));
+        if(d <= 6) base = {zh: p.zh, en: p.en};
+      }
+      /* 否则退回离定位最近的地标 */
+      if(!base){
+        let bd = Infinity;
+        (TX_PICKUP_POOL[city] || []).forEach(n => {
+          const p = txPlace(n);
+          const d = Math.sqrt(Math.pow((p.lng - lng) * PK_KM_LNG, 2) + Math.pow((p.lat - lat) * PK_KM_LAT, 2));
+          if(d < bd){ bd = d; base = {zh: p.zh, en: p.en}; }
+        });
+      }
+      if(!base) base = {zh:'所选位置', en:'Selected location'};
+      /* 去掉地标名里自带的方位/出入口后缀，避免「xx酒店正门北门」这种叠加 */
+      let bz = base.zh, bez = base.en;
+      const stripZh = /\s*(正门|北门|南门|东门|西门|入口|出口|大门|到达层|出发层|T\d+\s*航站楼|航站楼|候机楼)\s*$/;
+      let guard = 0;
+      while(stripZh.test(bz) && guard++ < 4) bz = bz.replace(stripZh, '');
+      if(!bz) bz = base.zh;
+      bez = bez.replace(/\s*·\s*(Arrivals|Departures|Terminal\s*\d+)\s*$/i, '').replace(/\s*(Main Gate|Gate)\s*$/i, '').trim() || bez;
+      const dLatOf = m => m / 110540;
+      const dLngOf = m => m / (111320 * Math.cos(lat * Math.PI / 180));
+      const suf = TX_PICK_SUFFIX[suffixMode] || TX_PICK_SUFFIX.default;
+      return TX_PICKUP_POINTS.map((p, i) => {
+        const px = +(lng + dLngOf(p.dx)).toFixed(6);
+        const py = +(lat + dLatOf(p.dy)).toFixed(6);
+        const km = Math.sqrt(p.dx * p.dx + p.dy * p.dy) / 1000;
+        /* 基名以英文/数字结尾时补空格：「湖滨银泰 in77 北门」比「in77北门」好看 */
+        const sp = /[A-Za-z0-9]$/.test(bz) ? ' ' : '';
+        const lbl = suf[i] || [p.zh, p.en];
+        return {zh: bz + sp + lbl[0], en: bez + ' · ' + lbl[1], lng: px, lat: py, dist: Number(km.toFixed(2))};
+      });
+    }
+    /* ---------- 步行导航（原型 mock）----------
+       真实业务：选了上车点后，曹操/高德返回「从定位步行到上车点」的路线与文字指引。
+       这里用「先东西 → 再南北 → 再东西」的折线模拟街道走法，
+       方向、分段距离、左右转都由这条折线推导，保证文字与地图上画的线一致。 */
+    function txWalkRoute(from, to){
+      if(!from || !to) return null;
+      const dxm = (to.lng - from.lng) * PK_KM_LNG * 1000;    /* 东西向位移（米，东为正） */
+      const dym = (to.lat - from.lat) * PK_KM_LAT * 1000;    /* 南北向位移（米，北为正） */
+      /* 两个方向都够远才拐两次（先东西 46% → 南北 → 剩余东西）；
+         否则用一次拐弯的 L 形；同一方向则为直线 */
+      let pts;
+      if(Math.abs(dxm) >= 60 && Math.abs(dym) >= 60){
+        const k = 0.46;
+        pts = [from,
+               {lng: from.lng + (to.lng - from.lng) * k, lat: from.lat},
+               {lng: from.lng + (to.lng - from.lng) * k, lat: to.lat},
+               to];
+      } else if(Math.abs(dxm) >= Math.abs(dym)){
+        pts = [from, {lng: to.lng, lat: from.lat}, to];
+      } else {
+        pts = [from, {lng: from.lng, lat: to.lat}, to];
+      }
+      /* 去掉重复点（例如直线时中间点与终点重合） */
+      const P = [];
+      pts.forEach(pt => {
+        const last = P[P.length - 1];
+        if(!last || Math.abs(last.lng - pt.lng) > 1e-9 || Math.abs(last.lat - pt.lat) > 1e-9) P.push(pt);
+      });
+      const dirOf = (dx, dy) => Math.abs(dx) >= Math.abs(dy) ? (dx >= 0 ? '东' : '西') : (dy >= 0 ? '北' : '南');
+      const legs = [];
+      for(let i = 1; i < P.length; i++){
+        const dx = (P[i].lng - P[i-1].lng) * PK_KM_LNG * 1000;
+        const dy = (P[i].lat - P[i-1].lat) * PK_KM_LAT * 1000;
+        const m = Math.sqrt(dx*dx + dy*dy);
+        if(m < 8) continue;
+        legs.push({dx: dx, dy: dy, m: m, dir: dirOf(dx, dy)});
+      }
+      /* 合并同方向的相邻段（避免「向东走 92 米，右转向东走 108 米」这种废话） */
+      const merged = [];
+      legs.forEach(lg => {
+        const last = merged[merged.length - 1];
+        if(last && last.dir === lg.dir){ last.dx += lg.dx; last.dy += lg.dy; last.m += lg.m; }
+        else merged.push({dx: lg.dx, dy: lg.dy, m: lg.m, dir: lg.dir});
+      });
+      const steps = [];
+      merged.forEach((lg, i) => {
+        const dist = Math.max(10, Math.round(lg.m / 5) * 5);
+        if(i === 0){
+          steps.push('从当前定位向<b>' + lg.dir + '</b>步行 <b>' + dist + '</b> 米');
+        } else {
+          const prev = merged[i-1];
+          const cross = prev.dx * lg.dy - prev.dy * lg.dx;   /* >0 逆时针 → 左转 */
+          steps.push('<b>' + (cross > 0 ? '左转' : '右转') + '</b>，向<b>' + lg.dir + '</b>步行 <b>' + dist + '</b> 米');
+        }
+      });
+      const meters = Math.max(10, Math.round(merged.reduce((s2, l) => s2 + l.m, 0) / 5) * 5);
+      const minutes = Math.max(1, Math.round(meters / 75));    /* 步行约 75 m/min */
+      return {pts: P, legs: merged, steps: steps, meters: meters, minutes: minutes};
+    }
+    /* 老外定位 → 上车点的直线距离（km），导航面板/取景共用 */
+    function txNavKm(){
+      const st = txAgentState;
+      if(!st.tourist || !st.pickup) return 0;
+      return Math.sqrt(Math.pow((st.pickup.lng - st.tourist.lng) * PK_KM_LNG, 2)
+                     + Math.pow((st.pickup.lat - st.tourist.lat) * PK_KM_LAT, 2));
+    }
+    /* 「导航到上车点」开关 */
+    function txToggleNav(){
+      txAgentState.navOn = !txAgentState.navOn;
+      txAgentState.navPage = 1;      /* 每次打开都从第 1 页开始 */
+      renderTaxiAgent();
+      if(!txAgentState.navOn) return;
+      showToast('已展示从老外当前定位到「' + (txAgentState.pickup ? txAgentState.pickup.zh : '') + '」的步行路线，文字指引见地图右侧');
+    }
+    /* 导航文字说明面板（放在地图右侧栏；条数多时翻页） */
+    const PK_NAV_PAGE = 3;
+    function txNavPanelHtml(){
+      const st = txAgentState;
+      if(!st.navOn || !st.tourist || !st.pickup) return '';
+      /* 窄栏标题：第一行「步行导航 + 里程/时长」，第二行整行放「从老外定位到「X」」（不会被挤成省略号） */
+      const head = sum => '<div class="pk-nav-head">'
+        + '<div class="nav-top"><span>步行导航</span><span class="sum">' + sum + '</span></div>'
+        + '<div class="nav-to">从老外定位到「' + st.pickup.zh + '」</div></div>';
+      const r = txWalkRoute(st.tourist, st.pickup);
+      if(!r || !r.steps.length) return '';
+      /* 分步指引 + 最后一条「到达」一起参与翻页 */
+      const all = r.steps.map((txt, i) => ({n: String(i + 1), txt: txt, last: false}));
+      all.push({n: '✓', txt: '到达「<b>' + st.pickup.zh + '</b>」，请在路边等候司机', last: true});
+      const pi = txPageInfo(st.navPage, all.length, PK_NAV_PAGE);
+      st.navPage = pi.page;
+      const rows = all.slice(pi.offset, pi.offset + pi.size).map(it =>
+          '<li class="' + (it.last ? 'last' : '') + '"><span class="n">' + it.n + '</span><span>' + it.txt + '</span></li>').join('');
+      return '<div class="pk-nav">' + head(r.meters + ' m · 约 ' + r.minutes + ' 分')
+        + '<ol class="pk-nav-steps">' + rows + '</ol>'
+        + txPagerHtml('nav', pi.page, all.length, PK_NAV_PAGE) + '</div>';
+    }
+    function txNavPage(n){ txAgentState.navPage = n; renderTaxiAgent(); }
+    /* 距离文案：<1km 用米，更直观 */
+    function txDistTxt(km){
+      if(km === undefined || km === null) return '';
+      return km < 1 ? Math.round(km * 1000) + ' m' : (Math.round(km * 10) / 10) + ' km';
+    }
+    /* 各车型档位的计价参数（原型 mock：起步价 + 元/km，服务费按预估金额 10% 计） */
+    const TX_CAR_TYPES = ['舒适型','新能源','优选','商务型','豪华型','礼帽专车'];
+    const TX_CAR_FLAGFALL = {'舒适型':10,'新能源':9,'优选':11,'商务型':14,'豪华型':18,'礼帽专车':16};
+    const TX_CAR_RATE = {'舒适型':2.3,'新能源':2.1,'优选':2.6,'商务型':3.2,'豪华型':4.5,'礼帽专车':3.8};
+    /* 第③步：预估价格有效期（闪购 token 口径同款，9 分 50 秒）+ 车档默认勾选 */
+    const TX_QUOTE_TTL_MS = (9 * 60 + 50) * 1000;
+    const TX_DEFAULT_CARS = ['舒适型','豪华型','礼帽专车'];
+    /* 车档可乘坐人数（车档列表展示用） */
+    const TX_CAR_SEATS = {'舒适型':'1-4 人','豪华型':'1-4 人','礼帽专车':'1-7 人'};
+    /* 老外语种 → 机翻目标语种 */
+    const TX_LANG = {'英语':'en','日语':'ja','意大利语':'it','德语':'de','西班牙语':'es'};
+    /* 机翻 mock（仅外文展示用）：车型名 + 报价话术 + 按钮 */
+    const TX_MT = {
+      en: {舒适型:'Comfort', 豪华型:'Luxury', 商务型:'Business', 新能源:'New Energy', 优选:'Premium', 礼帽专车:'Top Hat',
+            fare:'Estimated fare', dist:'Distance', dur:'Duration', pts:'points', km:'km', min:'min',
+            from:'Pickup', to:'Destination',
+            submit:'Confirm & Submit', nsub:'Decline',
+            pushed:'Quote sent — please review & submit', subOk:'✓ Submitted · system will freeze points & call taxi', subNo:'✗ Declined · flow ended'},
+      ja: {舒适型:'コンフォート', 豪华型:'ラグジュアリー', 商务型:'ビジネス', 新能源:'新エネルギー', 优选:'プレミアム', 礼帽专车:'トップハット',
+            fare:'推定運賃', dist:'距離', dur:'時間', pts:'ポイント', km:'km', min:'分',
+            from:'乗車地', to:'目的地',
+            submit:'確定して送信', nsub:'キャンセル',
+            pushed:'見積もりを送信しました — 確認して送信してください', subOk:'✓ 送信済み · システムがポイントを凍結し配車します', subNo:'✗ 辞退 · フロー終了'},
+      it: {舒适型:'Comfort', 豪华型:'Lusso', 商务型:'Business', 新能源:'Energia Nuova', 优选:'Premium', 礼帽专车:'Top Hat',
+            fare:'Tariffa stimata', dist:'Distanza', dur:'Durata', pts:'punti', km:'km', min:'min',
+            from:'Partenza', to:'Destinazione',
+            submit:'Conferma e invia', nsub:'Rifiuta',
+            pushed:'Preventivo inviato — rivedi e invia', subOk:'✓ Inviato · il sistema congela i punti e chiama il taxi', subNo:'✗ Rifiutato · flusso terminato'},
+      de: {舒适型:'Komfort', 豪华型:'Luxus', 商务型:'Business', 新能源:'Neue Energie', 优选:'Premium', 礼帽专车:'Top Hat',
+            fare:'Geschätzter Fahrpreis', dist:'Entfernung', dur:'Dauer', pts:'Punkte', km:'km', min:'Min',
+            from:'Abholung', to:'Ziel',
+            submit:'Bestätigen & Senden', nsub:'Ablehnen',
+            pushed:'Angebot gesendet — bitte prüfen & senden', subOk:'✓ Gesendet · System friert Punkte ein & ruft Taxi', subNo:'✗ Abgelehnt · Vorgang beendet'},
+      es: {舒适型:'Confort', 豪华型:'Lujo', 商务型:'Negocios', 新能源:'Nueva Energía', 优选:'Premium', 礼帽专车:'Top Hat',
+            fare:'Tarifa estimada', dist:'Distancia', dur:'Duración', pts:'puntos', km:'km', min:'min',
+            from:'Recogida', to:'Destino',
+            submit:'Confirmar y enviar', nsub:'Rechazar',
+            pushed:'Cotización enviada — revisa y envía', subOk:'✓ Enviado · el sistema congela puntos y llama taxi', subNo:'✗ Rechazado · flujo terminado'}
+    };
+    function txMT(lang, key){ return (TX_MT[TX_LANG[lang] || 'en'] || TX_MT.en)[key] || key; }
+    let txAgentStep = 1;
+    let txAgentState = null;
+    function txResetAgentState(){
+      stopQuoteTimer();   /* 重置前先停掉预估价格倒计时 */
+      txAgentState = {
+        tourist:null, cityCode:'', carOk:false,
+        pickupPois:[], pickupKw:'', pickupLL:'', pickup:null, pickupPage:1,
+        poiResults:[], poiPage:1, pickupAnchor:null,   /* 关键词搜出的 POI 列表 / 选中的 POI（选中后才有地图） */
+        pickupMode:'', pickupOrigin:null,   /* 'll'=按经纬度(定位)搜索 → 地图视图；'kw'=关键词 → 先选 POI，再出地图 */
+        navOn:false, navPage:1,            /* 是否在地图上展示「步行导航到上车点」路线 + 文字指引（右侧栏，可翻页） */
+        destKw:'', destPois:[], dest:null, destPage:1,
+        quote:null, selectedCars:[], pushedOrder:false, quoteConfirmed:null, distKm:0, durMin:0,
+        /* 第③步「预估价格」状态机：未预估 → 已预估(9分50秒有效) → 已过期；推送后锁定等待老外 */
+        quoteReq:false, quoteDeadline:0, quoteExpired:false, lastPushSeq:0,
+        pickedCars:[],   /* 上次客服勾选的车档名（拒绝 / 超时后重新预估时沿用） */
+        panelTourist:null,   /* 右侧「老外硬件端」面板展示的老外：推送后表单重置，但面板保留（独立于客服表单） */
+        guestMsgs:[], seq:0
+      };
+      /* 模拟：系统进入代下单页时自动获取老外档案（取第一个老外） + 经纬度默认回显 */
+      const t = TX_TOURISTS[0];
+      if(t){
+        txAgentState.tourist = t;
+        txAgentState.cityCode = TX_CITY_CARS[t.city] || '';
+        txAgentState.carOk = !!txAgentState.cityCode;
+        txAgentState.pickupLL = t.lng.toFixed(4) + ',' + t.lat.toFixed(4);
+        txAgentStep = 2;
+      } else {
+        txAgentStep = 1;
+      }
+    }
+    function txGuestPush(kind, text){
+      txAgentState.seq += 1;
+      const m = {seq: txAgentState.seq, kind: kind, text: text, status: '待确认'};
+      txAgentState.guestMsgs.push(m);
+      return m;
+    }
+    /* 步骤头点击：仅允许跳到「前一步已完成」的步（安全回退 / 前进）
+       已推送且等待老外确认时锁定：除停留在第③步外不可切步 */
+    function txGotoStep(n){
+      const st = txAgentState;
+      if(n >= 3 && !st.pickup) return;   /* 进入第③步前提：上车点已选 */
+      if(txIsLocked() && n !== 3){ showToast('已推送打车订单，等待老外确认，暂不可操作'); return; }
+      txAgentStep = n;
+      renderTaxiAgent();
+      if(n === 3) txaScrollTop();  /* 进第③步回到页面顶部，从「3 搜索并选择目的地」这一行开始看 */
+    }
+    function txBackToStep1(){
+      if(txIsLocked()){ showToast('已推送打车订单，等待老外确认，暂不可操作'); return; }
+      txAgentStep = 1; renderTaxiAgent();
+    }
+    /* 老外对整单（上车点 + 目的地 + 车档 + 预估费用）的确认 / 拒绝
+       · 确认 → 强制弹窗提醒客服 + 关闭后页面重新初始化
+       · 拒绝 → 解锁，客服可重新点「推送打车订单给老外确认」再推一次 */
+    function txGuestResolveOrder(seq, res){
+      const st = txAgentState, m = st.guestMsgs.find(x => x.seq === seq);
+      if(!m || m.status !== '待确认') return;
+      if(res === 'submit'){
+        m.status = '已提交';
+        st.quoteConfirmed = 'submit';
+        st.pushedOrder = false;
+        stopQuoteTimer();
+        renderTaxiAgent();
+        txTaxiConfirmedModal();          /* 5.2 强制弹窗：老外已确认下单 */
+      } else {
+        m.status = '已拒绝';
+        st.quoteConfirmed = 'nsub';
+        st.pushedOrder = false;          /* 5.3 解锁：可重新推送（预估仍有效时无需重新预估） */
+        renderTaxiAgent();
+        startQuoteTimer();
+        showToast('老外已拒绝，客服可重新推送打车订单（或重新预估价格）');
+      }
+    }
+    /* 5.2 老外确认下单 → 强制弹窗（对齐外卖第③步确认后的提醒） */
+    function txTaxiConfirmedModal(){
+      const st = txAgentState;
+      const old = document.getElementById('tx-done-modal');
+      if(old && old.parentNode) old.parentNode.removeChild(old);
+      const t = st.tourist || st.panelTourist || {};
+      const picked = st.selectedCars.slice().sort((a,b)=>a-b).map(i => st.quote[i]).filter(Boolean);
+      const carsTxt = picked.length
+        ? picked.map(q => q.car + '（' + q.total + ' 积分，含服务费 ' + q.svc + '）').join('；')
+        : '—';
+      const svcSum = picked.reduce((n,q) => n + q.svc, 0);
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.id = 'tx-done-modal';
+      overlay.innerHTML = '<div class="modal wide">'
+        + '<div class="mh">' + (t.name || '老外') + '已确认下单<span class="mx" onclick="closeTxDoneModal()">×</span></div>'
+        + '<div class="mb">'
+        +   '<div class="note g"><b>老外已确认打车订单</b>，系统将按所选车档里<b>最贵</b>的报价冻结积分，并调「2.7 多车型下单叫车」；<b>本期原型不实际生成订单</b>。</div>'
+        +   '<div class="info-row"><span class="k">老外</span><span class="v">' + (t.name || '—') + (t.lang ? ' · ' + t.lang : '') + '</span></div>'
+        +   '<div class="info-row"><span class="k">上车点</span><span class="v">' + (st.pickup ? st.pickup.zh : '—') + '</span></div>'
+        +   '<div class="info-row"><span class="k">目的地</span><span class="v">' + (st.dest ? st.dest.zh : '—') + '</span></div>'
+        +   '<div class="info-row"><span class="k">行程</span><span class="v">' + st.distKm + ' km · ' + st.durMin + ' min</span></div>'
+        +   '<div class="info-row"><span class="k">车档</span><span class="v">' + carsTxt + '</span></div>'
+        +   '<div class="info-row"><span class="k">服务费合计</span><span class="v">' + Math.round(svcSum * 10) / 10 + ' 积分</span></div>'
+        +   '<div class="note i">关闭本弹窗后，「打车代下单」页面将<b>重新初始化</b>（回到第②步，系统重新获取老外档案），可继续为下一位老外代下单。</div>'
+        + '</div>'
+        + '<div class="mf"><button class="primary" onclick="closeTxDoneModal()">关闭</button></div>'
+        + '</div>';
+      /* 强制弹窗：不绑定点遮罩关闭，只能点按钮 / × */
+      (document.getElementById('panelDache') || document.body).appendChild(overlay);
+    }
+    function closeTxDoneModal(){
+      const el = document.getElementById('tx-done-modal');
+      if(el && el.parentNode) el.parentNode.removeChild(el);
+      txResetAgentState();
+      renderTaxiAgent();
+      txaScrollTop();
+      showToast('已关闭提醒，「打车代下单」页面已重新初始化');
+    }
+    /* ---------- 第①步：搜老外 + 校验城市/车型 ---------- */
+    /* 支持：姓名 / 护照号 / 手机号 / 设备号 / 用户ID（userid 与订单列表同一口径：U + 手机号后 6 位）
+       注意：这里用**严格包含**匹配（不走 txMatch 的 2 字模糊），否则搜 userid / 护照这类
+       含数字的串会因为手机号里命中 "12"/"00" 之类的二元组而把所有老外都筛出来。 */
+    function txSearchTourist(){
+      const el = document.getElementById('tx-tourist-search');
+      const kw = el && el.value ? el.value.trim().toLowerCase() : '';
+      const box = document.getElementById('tx-tourist-list');
+      if(!box) return;
+      const hit = s => String(s || '').toLowerCase().indexOf(kw) >= 0;
+      const list = kw ? TX_TOURISTS.filter(t =>
+        hit(t.name) || hit(t.passport) || hit(t.phone) || hit(t.deviceNo) || hit(userIdOf(t))
+      ) : [];
+      box.innerHTML = list.length
+        ? list.map(t => '<div class="select-card" onclick="txSelectTourist(\'' + t.id + '\')">'
+            + '<div class="title">' + t.name + '　<span style="font-weight:400;color:var(--text-3);font-size:12px;">' + t.lang + '</span></div>'
+            + '<div class="sub">用户ID ' + userIdOf(t) + ' · 护照 ' + t.passport + ' · 手机 ' + t.phone + ' · 设备 ' + t.deviceNo + '</div>'
+            + '</div>').join('')
+        : '<div class="gp-empty">输入姓名 / 护照号 / 手机号 / 设备号 / 用户ID 搜索老外</div>';
+    }
+    function txSelectTourist(id){
+      const t = TX_TOURISTS.find(x => x.id === id);
+      if(!t) return;
+      const st = txAgentState;
+      st.tourist = t;
+      /* 校验：2.2 城市编码查询 → 判断该 city_code 有无对应车型 */
+      st.cityCode = TX_CITY_CARS[t.city] || '';
+      st.carOk = !!st.cityCode;
+      if(!st.carOk){ showToast('该定位所在城市（' + t.city + '）暂无可用车型，无法下单'); }
+      /* 上车点 / 地图都不预置：需客服在第二步输入经纬度或关键词搜索后才出现 */
+      st.pickupPois = []; st.pickupPage = 1;
+      st.poiResults = []; st.poiPage = 1; st.pickupAnchor = null;
+      st.pickup = null; st.pickupKw = ''; st.pickupLL = '';
+      st.pickupMode = ''; st.pickupOrigin = null; st.navOn = false;
+      st.dest = null; st.destKw = ''; st.destPois = []; st.destPage = 1;
+      txClearQuote();   /* 换老外 → 清空预估价格（含倒计时与推送状态） */
+      txAgentStep = 2;
+      renderTaxiAgent();
+    }
+    /* ---------- 第②步：按「经纬度」或「关键词」搜索上车点 ---------- */
+    /* 两个输入框：经纬度优先（命中则按到该坐标的距离排序）；否则按关键词匹配名称；都空则返回附近候选 */
+    function txPickupSearch(){
+      const st = txAgentState, t = st.tourist;
+      const kw = (((document.getElementById('tx-pickup-kw') || {}).value) || '').trim();
+      const ll = (((document.getElementById('tx-pickup-ll') || {}).value) || '').trim();
+      const all = (TX_PICKUP_POOL[t.city] || []).map(n => {
+        const p = txPlace(n);
+        const dist = Number((Math.abs(p.lng - t.lng) * 52 + Math.abs(p.lat - t.lat) * 60).toFixed(2));
+        return {zh: p.zh, en: p.en, lng: p.lng, lat: p.lat, dist: dist};
+      });
+      let pois, tip, llOut = ll;   /* llOut：回填输入框的经纬度（可能与客服输入的不同：填反/距定位太远时已归一到老外定位） */
+      if(ll){
+        const m = ll.split(/[,，\s]+/).map(Number);
+        if(m.length < 2 || isNaN(m[0]) || isNaN(m[1])){ showToast('经纬度格式：经度,纬度（如 120.1612,30.2490）'); return; }
+        let lng = m[0], lat = m[1], notes = [];
+        /* 纬度不可能 > 90°：说明客服按「纬度,经度」填反了 —— 自动换回来 */
+        if(Math.abs(lat) > 90 && Math.abs(lng) <= 90){
+          const tmp = lng; lng = lat; lat = tmp;
+          notes.push('经纬度填反（纬度不会 >90°），已自动纠正为「经度,纬度」');
+        }
+        /* 步行导航的前提是「老外从当前位置走到上车点」，距离必须是几百米级。
+           所以坐标离老外当前定位太远时（填错 / 填了别的城市 / 与定位不一致），
+           一律改以老外当前定位为基准返回周边上车点，避免出现几十公里甚至上万公里的「步行」。 */
+        const farKm = Math.sqrt(Math.pow((lng - t.lng) * PK_KM_LNG, 2) + Math.pow((lat - t.lat) * PK_KM_LAT, 2));
+        if(farKm > PK_ORIGIN_SNAP_KM){
+          notes.push('该坐标距老外当前定位约 ' + (Math.round(farKm * 10) / 10) + ' km，已改按老外当前定位');
+          lng = t.lng; lat = t.lat;
+        }
+        /* 曹操按定位返回「周边」上车点：都在 100~400 m 内，名称是地标 + 出入口 */
+        pois = txPickupNearby(lng, lat, t.city);
+        st.pickupMode = 'll';
+        st.pickupOrigin = {lng: lng, lat: lat};
+        st.poiResults = []; st.pickupAnchor = null;   /* 经纬度搜索：直接进地图视图 */
+        /* 距离一律按「老外当前定位」算（和步行导航同一口径），排序也据此由近到远 */
+        pois.forEach(p => {
+          p.dist = Number(Math.sqrt(Math.pow((p.lng - t.lng) * PK_KM_LNG, 2)
+                                  + Math.pow((p.lat - t.lat) * PK_KM_LAT, 2)).toFixed(2));
+        });
+        pois.sort((a, b) => a.dist - b.dist);
+        llOut = lng.toFixed(4) + ',' + lat.toFixed(4);   /* 回填输入框，和地图中心保持一致 */
+        notes.push('返回 ' + pois.length + ' 个周边推荐上车点'
+            + (pois.length ? '（步行 ' + txDistTxt(pois[0].dist) + '~' + txDistTxt(pois[pois.length - 1].dist) + '），默认选中最近的「' + pois[0].zh + '」' : ''));
+        tip = notes.join('；');
+      } else if(kw){
+        /* 关键词：按「父 POI + 子 POI」组织（高德有的一层结构、有的带子点位）。
+           父命中 → 带出它的全部子点位；仅子点位命中 → 只带出命中的子点位。 */
+        const groups = [];
+        all.forEach(p => {
+          const kids = (TX_POI_CHILDREN[p.zh] || []).map(c => {
+            const lng = p.lng + c.dx / (PK_KM_LNG * 1000);
+            const lat = p.lat + c.dy / (PK_KM_LAT * 1000);
+            /* 距离口径与父 POI 一致（POI 列表用的是 52/60 的近似算法，别混用两套） */
+            return { zh: c.zh, en: c.en, lng: lng, lat: lat,
+                     dist: Number((Math.abs(lng - t.lng) * 52 + Math.abs(lat - t.lat) * 60).toFixed(2)) };
+          });
+          const parentHit = txMatch(p.zh, kw) || txMatch(p.en, kw);
+          const kidHits = kids.filter(c => txMatch(c.zh, kw) || txMatch(c.en, kw));
+          if(parentHit) groups.push(Object.assign({}, p, { children: kids }));
+          else if(kidHits.length) groups.push(Object.assign({}, p, { children: kidHits }));
+        });
+        groups.sort((a, b) => a.dist - b.dist);
+        const kidTotal = groups.reduce((n, g) => n + (g.children ? g.children.length : 0), 0);
+        st.pickupMode = 'kw';
+        st.pickupOrigin = null;
+        st.poiResults = groups; st.poiPage = 1; st.pickupAnchor = null;
+        st.pickupPois = []; st.pickup = null; st.navOn = false;
+        st.pickupKw = kw; st.pickupLL = llOut;
+        txClearQuote();
+        renderTaxiAgent();
+        showToast('关键词「' + kw + '」匹配到 ' + groups.length + ' 个 POI'
+          + (kidTotal ? '（含 ' + kidTotal + ' 个子点位）' : '') + '，请选择一个作为上车点所在位置');
+        return;
+      } else {
+        showToast('请先输入经纬度或关键词，再搜索上车点');
+        return;
+      }
+      st.pickupKw = kw; st.pickupLL = llOut; st.pickupPois = pois; st.pickupPage = 1; st.navOn = false;
+      /* 经纬度（定位）搜索：系统默认选中距定位最近的上车点 */
+      st.pickup = (st.pickupMode === 'll' && pois.length) ? pois[0] : null;
+      txClearQuote();
+      renderTaxiAgent();
+      showToast(tip);
+    }
+    /* 关键词阶段：客服选中一个 POI（或子 POI）→ 生成该点位周边上车点，页面此时才出地图
+       gi = 父 POI 下标；ci = 子 POI 下标（不传表示选父 POI 本身） */
+    function txSelectPickupPoi(gi, ci){
+      const st = txAgentState, g = (st.poiResults || [])[gi];
+      if(!g) return;
+      const p = (ci === undefined || ci === null) ? g : (g.children || [])[ci];
+      if(!p) return;
+      st.pickupAnchor = p;
+      st.pickupOrigin = {lng: p.lng, lat: p.lat};
+      /* 子点位可能是停车场 / 出入口，后缀换成更贴合的类型，避免「xx停车场停车场」 */
+      const sufMode = /(停车场|车库|停车楼|停车区)/.test(p.zh) ? 'parking'
+                    : (/(出口|入口|上车点|落客点)$/.test(p.zh) || /门$/.test(p.zh)) ? 'gate'
+                    : 'default';
+      st.pickupPois = txPickupNearby(p.lng, p.lat, st.tourist.city, {zh: p.zh, en: p.en}, sufMode);
+      /* 距离统一按老外当前定位算（与步行导航同口径），由近到远 */
+      st.pickupPois.forEach(x => {
+        x.dist = Number(Math.sqrt(Math.pow((x.lng - st.tourist.lng) * PK_KM_LNG, 2)
+                                + Math.pow((x.lat - st.tourist.lat) * PK_KM_LAT, 2)).toFixed(2));
+      });
+      st.pickupPois.sort((a, b) => a.dist - b.dist);
+      st.pickup = st.pickupPois[0] || null;
+      st.pickupPage = 1; st.navPage = 1; st.navOn = false;
+      txClearQuote();
+      renderTaxiAgent();
+      showToast('已按「' + p.zh + '」返回 ' + st.pickupPois.length + ' 个周边推荐上车点，默认选中最近的「'
+        + (st.pickup ? st.pickup.zh : '') + '」');
+    }
+    /* 回到关键词 POI 列表（重新选点） */
+    function txBackToPoiList(){
+      const st = txAgentState;
+      st.pickupAnchor = null; st.pickupPois = []; st.pickup = null;
+      st.pickupPage = 1; st.navOn = false;
+      txClearQuote();
+      renderTaxiAgent();
+    }
+    function txPoiPage(n){ txAgentState.poiPage = n; renderTaxiAgent(); }
+    /* POI 层级扁平化：父 POI + 子 POI 逐个展开，带层级/编号（1、1.1、1.2…） */
+    function txPoiFlatList(){
+      const out = [];
+      (txAgentState.poiResults || []).forEach((g, gi) => {
+        out.push({ p: g, gi: gi, ci: null, lvl: 0, label: String(gi + 1) });
+        (g.children || []).forEach((c, ci) => {
+          out.push({ p: c, gi: gi, ci: ci, lvl: 1, label: (gi + 1) + '.' + (ci + 1) });
+        });
+      });
+      return out;
+    }
+    function txPoiKidCount(){
+      return (txAgentState.poiResults || []).reduce((n, g) => n + ((g.children || []).length), 0);
+    }
+    /* ---------- 结果列表分页（上车点 / 目的地共用） ---------- */
+    const TX_PAGE_SIZE = 6;
+    function txPageInfo(page, total, size){
+      const s = size || TX_PAGE_SIZE;
+      const pages = Math.max(1, Math.ceil(total / s));
+      let p = page || 1;
+      if(p < 1) p = 1;
+      if(p > pages) p = pages;
+      return { page: p, pages: pages, offset: (p - 1) * s, size: s };
+    }
+    function txPagerHtml(kind, page, total, size){
+      const s = size || TX_PAGE_SIZE;
+      const pages = Math.max(1, Math.ceil(total / s));
+      if(total <= s) return '';   /* 结果不足一页时不显示翻页 */
+      const fn = ({ pickup:'txPickupPage', dest:'txDestPage', poiPick:'txPoiPage',
+                    destPick:'txDestPickPage', nav:'txNavPage' })[kind] || 'txDestPage';
+      let h = '<div class="pager">'
+        + '<span class="pg-info">共 ' + total + ' 条 · 第 ' + page + '/' + pages + ' 页</span>'
+        + '<button class="pg-btn" ' + (page <= 1 ? 'disabled' : '') + ' onclick="' + fn + '(' + (page - 1) + ')">‹ 上一页</button>';
+      for(let i = 1; i <= pages; i++){
+        h += '<button class="pg-btn num ' + (i === page ? 'active' : '') + '" onclick="' + fn + '(' + i + ')">' + i + '</button>';
+      }
+      h += '<button class="pg-btn" ' + (page >= pages ? 'disabled' : '') + ' onclick="' + fn + '(' + (page + 1) + ')">下一页 ›</button>'
+        + '</div>';
+      return h;
+    }
+    /* 生成「关键词 POI / 候选上车点 / 目的地」当页卡片 + 分页器（卡片 onclick 用全局索引，保证翻页后仍选中正确项）
+       poiPick = 关键词搜出的 POI（选中后才生成周边上车点、才出地图） */
+    function txPoiGridHtml(kind){
+      const st = txAgentState;
+      const isPoi = (kind === 'poiPick');
+      const list = isPoi ? st.poiResults : ((kind === 'pickup') ? st.pickupPois : st.destPois);
+      const sel = isPoi ? st.pickupAnchor : ((kind === 'pickup') ? st.pickup : st.dest);
+      const clickFn = isPoi ? 'txSelectPickupPoi' : ((kind === 'pickup') ? 'txSelectPickup' : 'txSelectDestAgent');
+      const pi = txPageInfo(isPoi ? st.poiPage : ((kind === 'pickup') ? st.pickupPage : st.destPage), list.length);
+      const grid = '<div class="pickup-grid" style="margin-top:12px;">' + list.slice(pi.offset, pi.offset + TX_PAGE_SIZE).map((p, j) => {
+        const i = pi.offset + j;
+        return '<div class="pk-card ' + (sel && sel.zh === p.zh ? 'active' : '') + '" onclick="' + clickFn + '(' + i + ')">'
+          + '<div class="pk-name">' + p.zh + '</div><div class="pk-en">' + p.en + '</div>'
+          + '<div class="pk-dist">距老外 <b>' + p.dist + ' km</b></div>'
+          + '<div class="pk-ll">' + p.lng + ', ' + p.lat + '</div></div>';
+      }).join('') + '</div>';
+      return grid + txPagerHtml(kind, pi.page, list.length);
+    }
+    function txPickupPage(n){ txAgentState.pickupPage = n; renderTaxiAgent(); }
+    function txDestPage(n){ txAgentState.destPage = n; renderTaxiAgent(); }
+
+    /* ============================================================
+       第②步（经纬度 / 定位搜索）：自绘「高德风格」地图 + 右侧上车点列表
+       ------------------------------------------------------------
+       · 蓝点 = 老外当前定位（始终展示）
+       · 带编号气泡 = 曹操按定位返回的周边推荐上车点（编号与右侧列表一致）
+       · 点地图标记或右侧列表项均可选中，两边同步高亮
+       · 若客服输入的坐标与老外定位不同，额外画一个「搜索定位」十字标记
+       说明：原型无外网 / 无高德 Key，底图用 SVG 自绘模拟（含路网/水系/绿地/区域名），
+             接真实 SDK 时替换 txPickupMapSvg() 即可，其余交互不变。
+       ============================================================ */
+    const PK_MAP_W = 560, PK_MAP_H = 380, PK_MAP_PAD = 54;
+    const PK_LIST_PAGE = 3;      /* 地图右侧「推荐上车点」每页条数（>3 个就会出现翻页） */
+    const PK_KM_LNG = 96, PK_KM_LAT = 111;   /* 1° 经/纬度 ≈ 多少 km（长三角纬度附近近似） */
+    const PK_MIN_SEP = 44;                   /* 任意两个标记之间的最小像素间距（防重叠） */
+    const PK_NEAR_N  = 5;                    /* 取景时优先装下的「最近点数」 */
+    const PK_ORIGIN_SNAP_KM = 0.5;           /* 搜索坐标离老外定位超过这个距离，就归一到老外定位（保证步行距离是几百米级） */
+
+    /* 周边推荐上车点地图（自绘示意）
+       ------------------------------------------------------------
+       取景：以「搜索定位点」为地图中心，等比缩放（经/纬同一个 px/km，不拉伸几何）。
+       防重叠（四道）：
+         ① 只按「最近的若干个点」定倍率，远处的机场/高铁站不参与，避免视野被拉爆；
+         ② 视野外的点不丢弃 —— 沿「方向」贴在画布边缘画成虚线指示点（仍可点击、编号与列表一致）；
+         ③ 画之前对所有标记（含老外蓝点）做几轮斥力「弹开」，保证任意两个间距 ≥ PK_MIN_SEP；
+         ④ 被弹开的标记用一条细引线指回真实坐标，不误导。
+       ------------------------------------------------------------ */
+    function txPickupMapSvg(scope){
+      const st = txAgentState, t = st.tourist;
+      /* 三种地图视图：
+         · POI 阶段（第②步关键词搜索后、还没选 POI）：关键词命中的 POI（父 + 子），点一下选 POI；
+         · 上车点阶段（经纬度搜索 / 选完 POI）：周边推荐上车点，点一下选上车点；
+         · 目的地阶段（第③步 scope='dest'）：目的地 POI（父 + 子），点一下选目的地。 */
+      const destMode = (scope === 'dest');
+      const poiStage = destMode ? true : (st.pickupMode === 'kw' && !st.pickupAnchor);
+      /* 父 POI 与子 POI 全部上图（编号 1 / 1.1 / 1.2…，与右侧列表一致） */
+      const poiFlat = destMode ? txDestFlatList() : (poiStage ? txPoiFlatList() : []);
+      let pois = (destMode || poiStage) ? poiFlat.map(x => x.p) : (st.pickupPois || []);
+      const clickFn = destMode ? 'txSelectDestPoi' : (poiStage ? 'txSelectPickupPoi' : 'txSelectPickup');
+      let hitList = (destMode || poiStage)
+        ? poiFlat
+        : pois.map((p, i) => ({ p: p, gi: null, ci: null, lvl: 0, label: String(i + 1), _i: i }));
+      /* 第③步点过「预估价格」后，地图切到「路线视图」：只留已选目的地，其余候选 POI 不再画，
+         视野也收紧到「上车点 → 目的地」，否则远处 POI 会把路线压成一个点 */
+      if(destMode && st.quoteReq && st.dest){
+        pois = pois.filter(p => p.zh === st.dest.zh);
+        hitList = hitList.filter(x => x.p.zh === st.dest.zh);
+      }
+      const selZh = destMode ? ((st.dest && st.dest.zh) || '')
+                   : ((!poiStage && st.pickup) ? st.pickup.zh : '');
+      const W = PK_MAP_W, H = PK_MAP_H, pad = PK_MAP_PAD;
+      const INSET = 46, CHIP_INSET = 22;      /* 地理点位 / 视野外指示点 距边缘的留白 */
+      /* POI 阶段没有「搜索中心」，取所有命中 POI + 老外定位的外接框中心，保证一屏装下 */
+      let center = st.pickupOrigin || (t ? {lng: t.lng, lat: t.lat} : {lng: 120.16, lat: 30.25});
+      if(poiStage && pois.length){
+        const box = pois.concat(t ? [t] : []);
+        const lngs = box.map(p => p.lng), lats = box.map(p => p.lat);
+        center = {lng: (Math.min.apply(null, lngs) + Math.max.apply(null, lngs)) / 2,
+                  lat: (Math.min.apply(null, lats) + Math.max.apply(null, lats)) / 2};
+      }
+      const kmTo = p => Math.sqrt(Math.pow((p.lng - center.lng) * PK_KM_LNG, 2)
+                                + Math.pow((p.lat - center.lat) * PK_KM_LAT, 2));
+
+      /* ---------- 1. 取景 ---------- */
+      const nearKm = pois.length ? Math.max.apply(null, pois.map(kmTo)) : 0;
+      let fitKm = Math.min(Math.max(nearKm * 1.18, 0.3), 2.2);
+      if(poiStage){
+        /* 关键词可能命中跨城区的 POI（机场、火车站）—— 不设 2.2 km 上限，一屏装下全部命中项 */
+        const nearAll = pois.concat(t ? [t] : []).reduce((m, p) => Math.max(m, kmTo(p)), 0);
+        fitKm = Math.max(0.4, nearAll * 1.15);
+      }
+      /* 老外定位到「地图中心（搜索定位）」的距离 */
+      const tKm = t ? kmTo(t) : 0;
+      /* 步行导航打开时，取景必须把「老外定位 → 上车点」整条路线装进画面：
+         否则老外蓝点会被钳到地图边缘，蓝线却还按真实经纬度往外画 —— 看上去就是「线飞出了地图」。
+         所以导航可用时按老外距离放大视野（不套 8 km 上限）；不论远近都画线，不再按距离做取舍。 */
+      const navWalkable = !!(st.navOn && st.pickup && t) && (!poiStage || destMode);   /* 第③步预估后也可叠「老外→上车点」步行路线 */
+      if(t && !poiStage) fitKm = navWalkable
+        ? Math.max(fitKm, tKm * 1.18)
+        : Math.max(fitKm, Math.min(tKm * 1.25, 8));
+      const selPoi = !poiStage && pois.filter(p => selZh && selZh === p.zh)[0];
+      if(selPoi) fitKm = Math.max(fitKm, Math.min(kmTo(selPoi) * 1.2, 8));
+      /* 第③步点「预估价格」后要画「上车点 → 目的地」整条路线：
+         取景把上车点一起装进画面（否则上车点会被钳到边缘、路线看着像飞出地图） */
+      if(destMode && st.pickup && (st.quoteReq || st.navOn)){
+        const box = [st.pickup];
+        if(st.quoteReq && st.dest) box.push(st.dest);
+        if(st.navOn && t) box.push(t);
+        const lngs2 = box.map(p => p.lng), lats2 = box.map(p => p.lat);
+        center = { lng: (Math.min.apply(null, lngs2) + Math.max.apply(null, lngs2)) / 2,
+                   lat: (Math.min.apply(null, lats2) + Math.max.apply(null, lats2)) / 2 };
+        const far = box.reduce((m, p) => Math.max(m, kmTo(p)), 0);
+        fitKm = Math.max(0.4, far * 1.22);
+      }
+      const scale = (Math.min(W, H) / 2 - pad) / fitKm;
+      const XY = p => ({
+        x: W / 2 + (p.lng - center.lng) * PK_KM_LNG * scale,
+        y: H / 2 - (p.lat - center.lat) * PK_KM_LAT * scale
+      });
+
+      /* ---------- 2. 底图 ---------- */
+      let bg = '<rect width="' + W + '" height="' + H + '" fill="#f2f3f5"/>';
+      bg += '<rect x="' + W*0.04 + '" y="' + H*0.05 + '" width="' + W*0.2 + '" height="' + H*0.19 + '" rx="14" fill="#e3f1e6"/>'
+          + '<rect x="' + W*0.7 + '" y="' + H*0.66 + '" width="' + W*0.26 + '" height="' + H*0.22 + '" rx="16" fill="#e3f1e6"/>'
+          + '<text x="' + (W*0.14) + '" y="' + (H*0.15) + '" font-size="10" fill="#96bba0" text-anchor="middle">城市公园</text>';
+      bg += '<path d="M -20 ' + (H*0.74) + ' C ' + (W*0.24) + ' ' + (H*0.66) + ', ' + (W*0.52) + ' ' + (H*0.9) + ', ' + (W+20) + ' ' + (H*0.7)
+          + ' L ' + (W+20) + ' ' + (H*0.82) + ' C ' + (W*0.52) + ' ' + (H*1.02) + ', ' + (W*0.24) + ' ' + (H*0.78) + ', -20 ' + (H*0.86) + ' Z" fill="#cfe6fb" stroke="#b9d9f6" stroke-width="1"/>'
+          + '<text x="' + (W*0.1) + '" y="' + (H*0.84) + '" font-size="10" fill="#86add4">运河</text>';
+      const roads = [];
+      [0.2, 0.44, 0.68, 0.9].forEach(f => roads.push({x1:0, y1:H*f, x2:W, y2:H*f, w: f===0.44?10:6}));
+      [0.16, 0.38, 0.62, 0.86].forEach(f => roads.push({x1:W*f, y1:0, x2:W*f, y2:H, w: f===0.62?10:6}));
+      roads.forEach(r => {
+        bg += '<line x1="' + r.x1 + '" y1="' + r.y1 + '" x2="' + r.x2 + '" y2="' + r.y2 + '" stroke="#e3e6ea" stroke-width="' + (r.w+2.5) + '" stroke-linecap="round"/>';
+        bg += '<line x1="' + r.x1 + '" y1="' + r.y1 + '" x2="' + r.x2 + '" y2="' + r.y2 + '" stroke="#ffffff" stroke-width="' + r.w + '" stroke-linecap="round"/>';
+      });
+      bg += '<line x1="-10" y1="' + (H*0.95) + '" x2="' + (W+10) + '" y2="' + (H*0.1) + '" stroke="#e8ded0" stroke-width="12" stroke-linecap="round"/>'
+          + '<line x1="-10" y1="' + (H*0.95) + '" x2="' + (W+10) + '" y2="' + (H*0.1) + '" stroke="#fff8ee" stroke-width="8" stroke-linecap="round"/>';
+      bg += '<text x="' + (W*0.07) + '" y="' + (H*0.95) + '" font-size="10.5" fill="#aeb6c2">上城区</text>'
+          + '<text x="' + (W*0.86) + '" y="' + (H*0.09) + '" font-size="10.5" fill="#aeb6c2">西湖区</text>';
+
+      /* ---------- 3. 地理点位 / 视野外指示点 ---------- */
+      const L = INSET, R = W - INSET, T = INSET, B = H - INSET;
+      const nodes = [], chips = [];
+      if(t){
+        const q = XY(t);
+        nodes.push({kind:'me', x:q.x, y:q.y, tx:q.x, ty:q.y});
+      }
+      hitList.forEach((it, i) => {
+        const p = it.p, q = XY(p);
+        const click = destMode
+          ? 'txSelectDestPoi(' + it.gi + ',' + (it.ci === null ? 'null' : it.ci) + ')'
+          : poiStage
+            ? 'txSelectPickupPoi(' + it.gi + ',' + (it.ci === null ? 'null' : it.ci) + ')'
+            : 'txSelectPickup(' + i + ')';
+        const base = { kind:'poi', i:i, p:p, lvl:it.lvl, label:it.label, click:click };
+        if(q.x >= L && q.x <= R && q.y >= T && q.y <= B){
+          nodes.push(Object.assign(base, {x:q.x, y:q.y, tx:q.x, ty:q.y}));
+        } else {
+          /* 视野外：沿「定位点→该点」的方向，贴到画布边缘（虚线指示点） */
+          const ang = Math.atan2(q.y - H/2, q.x - W/2);
+          const cx = Math.cos(ang), cy = Math.sin(ang);
+          const hx = W/2 - CHIP_INSET, hy = H/2 - CHIP_INSET;
+          const tt = Math.min(Math.abs(hx / (cx || 1e-9)), Math.abs(hy / (cy || 1e-9)));
+          const chip = Object.assign(base, {kind:'chip', i:i, p:p, x: W/2 + cx*tt, y: H/2 + cy*tt});
+          nodes.push(chip); chips.push(chip);
+        }
+      });
+
+      /* 斥力弹开：地理点位限制在画布内；视野外指示点限制在边缘一圈上 */
+      const projectChip = n => {
+        const hx = W/2 - CHIP_INSET, hy = H/2 - CHIP_INSET;
+        if(Math.abs(n.x - W/2) / hx >= Math.abs(n.y - H/2) / hy) n.x = n.x < W/2 ? CHIP_INSET : W - CHIP_INSET;
+        else n.y = n.y < H/2 ? CHIP_INSET : H - CHIP_INSET;
+        n.x = Math.max(CHIP_INSET, Math.min(W - CHIP_INSET, n.x));
+        n.y = Math.max(CHIP_INSET, Math.min(H - CHIP_INSET, n.y));
+      };
+      for(let it = 0; it < 90; it++){
+        let moved = false;
+        for(let a = 0; a < nodes.length; a++){
+          for(let b = a + 1; b < nodes.length; b++){
+            const A = nodes[a], Bn = nodes[b];
+            let dx = Bn.x - A.x, dy = Bn.y - A.y;
+            let d = Math.sqrt(dx*dx + dy*dy);
+            /* 子 POI 用小 chip，彼此间距可以更小，避免整片被推得太散 */
+            const need = (A.kind === 'me' || Bn.kind === 'me') ? PK_MIN_SEP + 10
+                       : (A.kind === 'chip' || Bn.kind === 'chip') ? PK_MIN_SEP - 6
+                       : (A.lvl === 1 && Bn.lvl === 1) ? 30 : PK_MIN_SEP;
+            if(d >= need) continue;
+            if(d < 0.001){ dx = 0.9; dy = -0.45; d = Math.sqrt(dx*dx + dy*dy); }
+            const ux = dx / d, uy = dy / d, push = (need - d) + 0.8;
+            const wa = (A.kind === 'me') ? 0.3 : ((Bn.kind === 'me') ? 0.7 : 0.5);
+            A.x -= ux * push * wa;          A.y -= uy * push * wa;
+            Bn.x += ux * push * (1 - wa);   Bn.y += uy * push * (1 - wa);
+            moved = true;
+          }
+        }
+        nodes.forEach(n => {
+          if(n.kind === 'chip'){ projectChip(n); return; }
+          n.x = Math.max(L, Math.min(R, n.x));
+          n.y = Math.max(T, Math.min(B, n.y));
+        });
+        if(!moved) break;
+      }
+
+      /* 被弹开的点：细引线指回真实坐标
+         （真实坐标本身就在画布外——老外离搜索定位很远、蓝点被钳到边缘——时不画：
+           否则这条虚线会从画布一角斜穿整张地图，看着像「线跑出地图」） */
+      const inCanvas = (x, y) => x >= 3 && x <= W - 3 && y >= 3 && y <= H - 3;
+      let lead = '';
+      nodes.forEach(n => {
+        if(n.kind === 'chip') return;
+        const d = Math.sqrt(Math.pow(n.x - n.tx, 2) + Math.pow(n.y - n.ty, 2));
+        if(d > 6 && inCanvas(n.tx, n.ty)){
+          lead += '<line x1="' + n.tx + '" y1="' + n.ty + '" x2="' + n.x + '" y2="' + n.y + '" stroke="#b9c0cb" stroke-width="1" stroke-dasharray="2 2"/>'
+               +  '<circle cx="' + n.tx + '" cy="' + n.ty + '" r="2.2" fill="#b9c0cb"/>';
+        }
+      });
+
+      /* ---------- 4. 文字避让 ---------- */
+      const placed = [];
+      const reserve = (x, y, w, h) => {
+        if(x - w/2 < 1 || x + w/2 > W - 1 || y - h/2 < 1 || y + h/2 > H - 1) return false;
+        for(let k = 0; k < placed.length; k++){
+          const r = placed[k];
+          if(Math.abs(r.x - x) < (r.w + w)/2 - 1 && Math.abs(r.y - y) < (r.h + h)/2 - 1) return false;
+        }
+        placed.push({x:x, y:y, w:w, h:h});
+        return true;
+      };
+      nodes.forEach(n => reserve(n.x, n.y, n.kind === 'me' ? 30 : 24, n.kind === 'me' ? 30 : 24));
+      const markerBoxes = placed.slice();      /* 只含标记本体的占位，路线/标签要避开它们 */
+      const labelW = s => s.length * 11.4 + 10;
+      /* 返回 {x, y}；x 会「贴边收进画布」后再做避让，避免边缘点位的名字被裁掉 */
+      const fitLabel = (x, y, text, outward) => {
+        const w = labelW(text), h = 15;
+        /* 候选位置：下 / 上 / 右 / 左 / 更远的上下一档；都放不下就不画（靠编号 + 悬停看名字） */
+        const vUp = outward && y > H/2 ? -1 : 1;
+        const cand = [
+          {dx: 0, dy: 22 * vUp}, {dx: 0, dy: -20 * vUp},
+          {dx: w/2 + 16, dy: 0}, {dx: -(w/2 + 16), dy: 0},
+          {dx: 0, dy: 38 * vUp}, {dx: 0, dy: -36 * vUp}
+        ];
+        for(let c = 0; c < cand.length; c++){
+          const lx = x + cand[c].dx, ly = y + cand[c].dy;
+          if(lx - w/2 < 2 || lx + w/2 > W - 2) continue;
+          if(reserve(lx, ly, w, h)) return {x: lx, y: ly};
+        }
+        return null;
+      };
+      /* 导航路径先算出来：① 首尾吸附到「实际画出来」的标记位置（标记被弹开过，避免连线错位）
+         ② 路线本身参与文字避让，名字不会压在蓝线上 */
+      const meNode = nodes.filter(n => n.kind === 'me')[0];
+      const selNode = nodes.filter(n => n.kind === 'poi' && selZh && n.p.zh === selZh)[0];
+      let navPath = [], navPill = null;
+      if(navWalkable){
+        const r = txWalkRoute(t, st.pickup);
+        if(r && r.pts.length > 1){
+          /* 兜底：即使取景算错，也把每个拐点钳进画布内（留 6px 余量给描边/圆角），
+             蓝线不可能再画出地图 */
+          navPath = r.pts.map(pt => {
+            const q = XY(pt);
+            return {x: Math.max(INSET - 6, Math.min(W - INSET + 6, q.x)),
+                    y: Math.max(INSET - 6, Math.min(H - INSET + 6, q.y))};
+          });
+          if(meNode) navPath[0] = {x: meNode.x, y: meNode.y};
+          if(destMode && st.pickup){
+            const pq = XY(st.pickup);
+            navPath[navPath.length - 1] = {
+              x: Math.max(INSET - 6, Math.min(W - INSET + 6, pq.x)),
+              y: Math.max(INSET - 6, Math.min(H - INSET + 6, pq.y))
+            };
+          } else if(selNode){
+            navPath[navPath.length - 1] = {x: selNode.x, y: selNode.y};
+          }
+          /* 沿路径占位（每隔 16px 一个 20×20 的块），让文字绕开 */
+          for(let i = 1; i < navPath.length; i++){
+            const a = navPath[i-1], b = navPath[i];
+            const steps = Math.max(2, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 16));
+            for(let k = 0; k <= steps; k++){
+              placed.push({x: a.x + (b.x - a.x) * k / steps, y: a.y + (b.y - a.y) * k / steps, w: 20, h: 20});
+            }
+          }
+          /* 「步行 X 米 · 约 Y 分钟」小标签：挂在最长一段的旁边（不压标记、不出画布） */
+          let bi = 1, bl = 0;
+          for(let i = 1; i < navPath.length; i++){
+            const l = Math.hypot(navPath[i].x - navPath[i-1].x, navPath[i].y - navPath[i-1].y);
+            if(l > bl){ bl = l; bi = i; }
+          }
+          const pa = navPath[bi-1], pb = navPath[bi];
+          const vertical = Math.abs(pb.x - pa.x) < Math.abs(pb.y - pa.y);
+          const ptxt = '步行 ' + r.meters + ' m · 约 ' + r.minutes + ' 分钟';
+          /* 按中英混排估宽（中文按 11.5、其它按 6.2），比按字符数估算窄一些 */
+          const txtW = tx => {
+            let w2 = 0;
+            for(let i = 0; i < tx.length; i++) w2 += /[\u4e00-\u9fa5]/.test(tx[i]) ? 11.5 : 6.2;
+            return w2;
+          };
+          const pw = txtW(ptxt) + 18, ph = 20;
+          /* 候选位置：沿最长一段取多个挂点 × 几个外扩距离，取第一个不压标记、不出画布的。
+             只挂中点时，标记密集的场景会全部被拒 → 标签消失。 */
+          const fracs = [0.5, 0.34, 0.66, 0.22, 0.78, 0.12, 0.88];
+          const offs = [16, 26, 36, 46];
+          for(let fi = 0; fi < fracs.length && !navPill; fi++){
+            const ax2 = pa.x + (pb.x - pa.x) * fracs[fi];
+            const ay2 = pa.y + (pb.y - pa.y) * fracs[fi];
+            for(let oi = 0; oi < offs.length && !navPill; oi++){
+              const o = offs[oi];
+              const pcands = vertical
+                ? [{x: ax2 + o + pw/2, y: ay2}, {x: ax2 - o - pw/2, y: ay2}]
+                : [{x: ax2, y: ay2 - o - ph/2}, {x: ax2, y: ay2 + o + ph/2}];
+              for(let c = 0; c < pcands.length; c++){
+                const q = pcands[c];
+                if(q.x - pw/2 < 3 || q.x + pw/2 > W - 3 || q.y - ph/2 < 3 || q.y + ph/2 > H - 3) continue;
+                let hit = false;
+                markerBoxes.forEach(mb => {
+                  if(Math.abs(mb.x - q.x) < (mb.w + pw)/2 + 4 && Math.abs(mb.y - q.y) < (mb.h + ph)/2 + 4) hit = true;
+                });
+                if(hit) continue;
+                navPill = {x: q.x, y: q.y, w: pw, h: ph, txt: ptxt};
+                placed.push({x: q.x, y: q.y, w: pw, h: ph});
+                break;
+              }
+            }
+          }
+        }
+      }
+      const meLabel = meNode ? fitLabel(meNode.x, meNode.y, '老外当前定位') : null;
+      const ordered = nodes.filter(n => n.kind !== 'me').sort((a, b) => {
+        const sa = selZh && selZh === a.p.zh, sb = selZh && selZh === b.p.zh;
+        if(sa !== sb) return sa ? -1 : 1;
+        return a.i - b.i;
+      });
+      /* 导航视图下只标「当前上车点」的名字：5 个名字 + 蓝线会糊成一片 */
+      ordered.filter(n => !navWalkable || (selZh && n.p.zh === selZh))
+             .forEach(n => { n.lbl = fitLabel(n.x, n.y, n.p.zh, n.kind === 'chip'); });
+
+      /* 搜索定位十字（输入坐标与老外定位不同时） */
+      const originDiff = !destMode && !!(st.pickupOrigin && t && (Math.abs(st.pickupOrigin.lng - t.lng) > 1e-4 || Math.abs(st.pickupOrigin.lat - t.lat) > 1e-4));
+      let originHtml = '';
+      if(originDiff){
+        const ox = W / 2, oy = H / 2;
+        originHtml = '<g><circle cx="' + ox + '" cy="' + oy + '" r="6" fill="none" stroke="#8a94a6" stroke-width="1.5" stroke-dasharray="3 2"/>'
+          + '<line x1="' + (ox-11) + '" y1="' + oy + '" x2="' + (ox+11) + '" y2="' + oy + '" stroke="#8a94a6" stroke-width="1.1"/>'
+          + '<line x1="' + ox + '" y1="' + (oy-11) + '" x2="' + ox + '" y2="' + (oy+11) + '" stroke="#8a94a6" stroke-width="1.1"/>'
+          + '<text x="' + ox + '" y="' + (oy + 26) + '" font-size="10" fill="#8a94a6" text-anchor="middle" paint-order="stroke" stroke="#fff" stroke-width="3">'
+          + (st.pickupMode === 'kw' ? '所选 POI 位置' : '搜索定位') + '</text></g>';
+      }
+
+      /* ---------- 4.5 步行导航路线（「导航到上车点」打开时画） ---------- */
+      /* 拐角做圆角（半径 8），看起来像走街道而不是折尺 */
+      const roundPath = (pts, r) => {
+        let d = 'M' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+        for(let i = 1; i < pts.length - 1; i++){
+          const p0 = pts[i-1], p1 = pts[i], p2 = pts[i+1];
+          const v1x = p1.x - p0.x, v1y = p1.y - p0.y;
+          const v2x = p2.x - p1.x, v2y = p2.y - p1.y;
+          const l1 = Math.hypot(v1x, v1y) || 1, l2 = Math.hypot(v2x, v2y) || 1;
+          const rr = Math.min(r, l1 / 2, l2 / 2);
+          const ax = p1.x - v1x / l1 * rr, ay = p1.y - v1y / l1 * rr;
+          const bx = p1.x + v2x / l2 * rr, by = p1.y + v2y / l2 * rr;
+          d += ' L' + ax.toFixed(1) + ' ' + ay.toFixed(1)
+             + ' Q' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1) + ' ' + bx.toFixed(1) + ' ' + by.toFixed(1);
+        }
+        const lastP = pts[pts.length - 1];
+        d += ' L' + lastP.x.toFixed(1) + ' ' + lastP.y.toFixed(1);
+        return d;
+      };
+      let route = '';
+      /* 第③步点「预估价格」后：画「上车点 → 目的地」路线（白描边打底 + 亮蓝实线） */
+      if(destMode && st.quoteReq && st.dest && st.pickup){
+        const A0 = XY(st.pickup), B0 = XY(st.dest);
+        const dx0 = B0.x - A0.x, dy0 = B0.y - A0.y, len0 = Math.hypot(dx0, dy0) || 1;
+        const k0 = Math.min(46, len0 * 0.16);
+        const cx0 = (A0.x + B0.x) / 2 - dy0 / len0 * k0;
+        const cy0 = (A0.y + B0.y) / 2 + dx0 / len0 * k0;
+        const dd0 = 'M' + A0.x.toFixed(1) + ' ' + A0.y.toFixed(1)
+                  + ' Q' + cx0.toFixed(1) + ' ' + cy0.toFixed(1) + ' ' + B0.x.toFixed(1) + ' ' + B0.y.toFixed(1);
+        route += '<g class="pk-route pk-route-trip">'
+          + '<path d="' + dd0 + '" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>'
+          + '<path d="' + dd0 + '" fill="none" stroke="#2f6bff" stroke-width="5" stroke-linecap="round"/>'
+          + '</g>';
+      }
+      let walkSvg = '';
+      if(navPath.length > 1){
+        const d = roundPath(navPath, 8);
+        walkSvg = '<g class="pk-route pk-route-walk">'
+          + '<path d="' + d + '" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '<path d="' + d + '" fill="none" stroke="' + (destMode ? '#16a34a' : '#2f6bff') + '" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"'
+          +   (destMode ? ' stroke-dasharray="10 7"' : '') + '/>'
+          + '</g>';
+      }
+      route = walkSvg + route;   /* 步行线在下、车程线压在上面 */
+
+      /* ---------- 5. 上车点标记（编号与右侧列表一致） ---------- */
+      let mk = '';
+      nodes.filter(n => n.kind === 'poi').forEach(n => {
+        const p = n.p, on = selZh && selZh === p.zh;
+        const distTxt = (p.dist === undefined || p.dist === null) ? '' : '（距定位 ' + txDistTxt(p.dist) + '）';
+        const isChild = n.lvl === 1;
+        const num = n.label || (n.i + 1);
+        if(isChild){
+          /* 子 POI：小一号的浅蓝编号 chip（1.1 / 1.2…），与父点位区分开 */
+          const w = 26, h = 16;
+          mk += '<g class="pk-mk pk-mk-child" onclick="' + n.click + '" style="cursor:pointer;">'
+              + '<title>' + num + '. ' + p.zh + distTxt + '</title>'
+              + '<rect x="' + (n.x - w/2) + '" y="' + (n.y - h/2) + '" width="' + w + '" height="' + h + '" rx="8"'
+              +   ' fill="#ffffff" stroke="#8fb0ff" stroke-width="1.6"/>'
+              + '<text x="' + n.x + '" y="' + (n.y + 3.4) + '" font-size="9" font-weight="700" text-anchor="middle" fill="#2f6bff">' + num + '</text>'
+              + '</g>';
+          return;
+        }
+        mk += '<g class="pk-mk" onclick="' + n.click + '" style="cursor:pointer;">'
+            + '<title>' + num + '. ' + p.zh + distTxt + '</title>'
+            + (on ? '<circle cx="' + n.x + '" cy="' + n.y + '" r="17" fill="#2f6bff" opacity="0.13"/>' : '')
+            + '<circle cx="' + n.x + '" cy="' + n.y + '" r="11" fill="' + (on ? '#2f6bff' : '#ffffff') + '" stroke="' + (on ? '#ffffff' : '#2f6bff') + '" stroke-width="' + (on ? 2.6 : 2) + '"/>'
+            + '<text x="' + n.x + '" y="' + (n.y + 4) + '" font-size="11" font-weight="700" text-anchor="middle" fill="' + (on ? '#ffffff' : '#2f6bff') + '">' + num + '</text>'
+            + '</g>';
+      });
+      /* 视野外：虚线指示点（点击即跳过去并自动放大到能看到） */
+      nodes.filter(n => n.kind === 'chip').forEach(n => {
+        const p = n.p, on = selZh && selZh === p.zh;
+        const distTxt = (p.dist === undefined || p.dist === null) ? '' : '，距定位 ' + txDistTxt(p.dist);
+        const num = n.label || (n.i + 1);
+        const r = n.lvl === 1 ? 8 : 9.5;
+        mk += '<g class="pk-mk pk-mk-off" onclick="' + n.click + '" style="cursor:pointer;">'
+            + '<title>' + num + '. ' + p.zh + '（在视野外' + distTxt + '，点击可定位）</title>'
+            + '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + r + '" fill="#ffffff" stroke="' + (on ? '#2f6bff' : '#9aa3b0') + '" stroke-width="1.6" stroke-dasharray="3 2"/>'
+            + '<text x="' + n.x + '" y="' + (n.y + 3.4) + '" font-size="' + (n.lvl === 1 ? 8 : 10) + '" font-weight="700" text-anchor="middle" fill="' + (on ? '#2f6bff' : '#6b7280') + '">' + num + '</text>'
+            + '</g>';
+      });
+
+      /* 第③步预估后：在上车点画一个绿色起点标记（路线从这里出发） */
+      if(destMode && st.quoteReq && st.pickup){
+        const A = XY(st.pickup);
+        mk += '<g class="pk-mk pk-mk-origin">'
+            + '<circle cx="' + A.x + '" cy="' + A.y + '" r="13" fill="#16a34a" opacity="0.14"/>'
+            + '<circle cx="' + A.x + '" cy="' + A.y + '" r="6.5" fill="#16a34a" stroke="#ffffff" stroke-width="2.6"/>'
+            + '<text x="' + A.x + '" y="' + (A.y - 13) + '" font-size="10.5" fill="#137a37" text-anchor="middle" font-weight="700"'
+            +   ' paint-order="stroke" stroke="#ffffff" stroke-width="3.4">上车点</text>'
+            + '</g>';
+      }
+
+      /* ---------- 6. 老外当前定位 ---------- */
+      let meHtml = '';
+      if(meNode){
+        meHtml = '<g class="pk-me">'
+          + '<circle cx="' + meNode.x + '" cy="' + meNode.y + '" r="16" fill="#2f6bff" opacity="0.12"/>'
+          + '<circle cx="' + meNode.x + '" cy="' + meNode.y + '" r="9.5" fill="#2f6bff" opacity="0.22"/>'
+          + '<circle cx="' + meNode.x + '" cy="' + meNode.y + '" r="6" fill="#2f6bff" stroke="#ffffff" stroke-width="2.6"/>'
+          + '</g>';
+      }
+
+      /* 路线上方的「步行 X 米 · 约 Y 分钟」小标签（标记之上、名字之下） */
+      let pillHtml = '';
+      if(navPill){
+        pillHtml = '<g><rect x="' + (navPill.x - navPill.w/2) + '" y="' + (navPill.y - navPill.h/2)
+          + '" width="' + navPill.w + '" height="' + navPill.h + '" rx="10" fill="#ffffff" stroke="#d5e3ff"/>'
+          + '<text x="' + navPill.x + '" y="' + (navPill.y + 4) + '" font-size="11" fill="#2f6bff" text-anchor="middle" font-weight="600">'
+          + navPill.txt + '</text></g>';
+      }
+
+      /* ---------- 7. 文字层 ---------- */
+      let lb = '';
+      if(meLabel){
+        lb += '<text x="' + meLabel.x + '" y="' + (meLabel.y + 4) + '" font-size="11" fill="#2f6bff" text-anchor="middle" font-weight="700" paint-order="stroke" stroke="#ffffff" stroke-width="3.6">老外当前定位</text>';
+      }
+      ordered.forEach(n => {
+        if(!n.lbl) return;
+        const on = selZh && selZh === n.p.zh;
+        const isChip = n.kind === 'chip';
+        lb += '<text x="' + n.lbl.x + '" y="' + (n.lbl.y + 4) + '" font-size="11" fill="' + (on ? '#1f4fd8' : (isChip ? '#7c8698' : '#4b5563')) + '" text-anchor="middle" font-weight="' + (on ? 700 : 500) + '" paint-order="stroke" stroke="#ffffff" stroke-width="3.2">' + n.p.zh + '</text>';
+      });
+
+      /* ---------- 8. 比例尺 ---------- */
+      const nice = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10];
+      let barKm = nice[0];
+      for(let k = 0; k < nice.length; k++){ if(nice[k] * scale <= 90) barKm = nice[k]; }
+      const barPx = Math.max(26, Math.min(96, barKm * scale));
+      const barTxt = barKm < 1 ? Math.round(barKm * 1000) + ' m' : barKm + ' km';
+      let bar = '<line x1="16" y1="' + (H-22) + '" x2="' + (16+barPx) + '" y2="' + (H-22) + '" stroke="#8b95a3" stroke-width="1.5"/>'
+          + '<line x1="16" y1="' + (H-26) + '" x2="16" y2="' + (H-18) + '" stroke="#8b95a3" stroke-width="1.5"/>'
+          + '<line x1="' + (16+barPx) + '" y1="' + (H-26) + '" x2="' + (16+barPx) + '" y2="' + (H-18) + '" stroke="#8b95a3" stroke-width="1.5"/>'
+          + '<text x="' + (16+barPx/2) + '" y="' + (H-27) + '" font-size="9" fill="#8b95a3" text-anchor="middle">' + barTxt + '</text>'
+          + '<text x="' + (W-10) + '" y="' + (H-8) + '" font-size="9" fill="#9aa3b0" text-anchor="end">© 高德地图（原型模拟）</text>'
+          + (chips.length ? '<text x="' + (W-10) + '" y="' + (H-22) + '" font-size="9" fill="#a7aeba" text-anchor="end">虚线编号＝视野外点位，点击可定位</text>' : '');
+
+      return '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="周边推荐上车点地图">'
+        + bg + route + lead + originHtml + mk + meHtml + pillHtml + lb + bar + '</svg>';
+    }
+    /* 地图 + 右侧列表（经纬度/定位搜索用；无结果时地图只显示老外蓝点） */
+    /* 父 POI / 子 POI 列表行（第②步搜上车点、第③步搜目的地共用） */
+    function pkTreeRows(groups, offset, clickFn, sel){
+      let rows = '';
+      groups.forEach((g, j) => {
+        const gi = offset + j, kids = g.children || [];
+        const on = !!(sel && sel.zh === g.zh);
+        rows += '<div class="pk-li pk-li-parent' + (kids.length ? ' has-kids' : '') + (on ? ' active' : '') + '" onclick="' + clickFn + '(' + gi + ',null)">'
+          + '<span class="pk-idx">' + (gi+1) + '</span>'
+          + '<div class="pk-li-main">'
+          +   '<div class="pk-li-name">' + g.zh
+          +     (kids.length ? '<span class="pk-kid-num">含 ' + kids.length + ' 个子点位</span>' : '')
+          +     (on ? '<span class="pk-li-flag">已选</span>' : '') + '</div>'
+          +   '<div class="pk-li-sub">' + g.en + '</div>'
+          +   '<div class="pk-li-meta">距老外 <b>' + txDistTxt(g.dist) + '</b> · ' + g.lng.toFixed(4) + ', ' + g.lat.toFixed(4) + '</div>'
+          + '</div></div>';
+        kids.forEach((c, ci) => {
+          const con = !!(sel && sel.zh === c.zh);
+          rows += '<div class="pk-li pk-li-child' + (con ? ' active' : '') + '" onclick="' + clickFn + '(' + gi + ',' + ci + ')">'
+            + '<span class="pk-idx sub">' + (gi+1) + '.' + (ci+1) + '</span>'
+            + '<div class="pk-li-main">'
+            +   '<div class="pk-li-name">' + c.zh + (con ? '<span class="pk-li-flag">已选</span>' : '') + '</div>'
+            +   '<div class="pk-li-sub">' + c.en + '</div>'
+            +   '<div class="pk-li-meta">距老外 <b>' + txDistTxt(c.dist) + '</b> · ' + c.lng.toFixed(4) + ', ' + c.lat.toFixed(4) + '</div>'
+            + '</div></div>';
+        });
+      });
+      return rows;
+    }
+    /* 地图 + 右侧列表：scope='dest' 表示第③步「搜目的地」，否则是第②步（POI / 上车点） */
+    function txPickupMapHtml(scope){
+      const destMode = (scope === 'dest');
+      const st = txAgentState;
+      const poiStage = destMode ? true : (st.pickupMode === 'kw' && !st.pickupAnchor);
+      let rows = '', pi = null, listLen = 0;
+      if(destMode){
+        const groups = st.destPois || [];
+        listLen = groups.length;
+        pi = txPageInfo(st.destPage, groups.length, PK_LIST_PAGE);
+        st.destPage = pi.page;
+        rows = pkTreeRows(groups.slice(pi.offset, pi.offset + PK_LIST_PAGE), pi.offset, 'txSelectDestPoi', st.dest);
+      } else if(poiStage){
+        const groups = st.poiResults || [];
+        listLen = groups.length;
+        pi = txPageInfo(st.poiPage, groups.length, PK_LIST_PAGE);
+        st.poiPage = pi.page;
+        rows = pkTreeRows(groups.slice(pi.offset, pi.offset + PK_LIST_PAGE), pi.offset, 'txSelectPickupPoi', st.pickupAnchor);
+      } else {
+        const list = st.pickupPois || [];
+        listLen = list.length;
+        pi = txPageInfo(st.pickupPage, list.length, PK_LIST_PAGE);
+        st.pickupPage = pi.page;
+        rows = list.slice(pi.offset, pi.offset + PK_LIST_PAGE).map((p, j) => {
+          const i = pi.offset + j;
+          const on = !!(st.pickup && st.pickup.zh === p.zh);
+          return '<div class="pk-li' + (on ? ' active' : '') + '" onclick="txSelectPickup(' + i + ')">'
+            + '<span class="pk-idx">' + (i+1) + '</span>'
+            + '<div class="pk-li-main">'
+            +   '<div class="pk-li-name">' + p.zh + (on ? '<span class="pk-li-flag">已选</span>' : '') + '</div>'
+            +   '<div class="pk-li-sub">' + p.en + '</div>'
+            +   '<div class="pk-li-meta">距定位 <b>' + txDistTxt(p.dist) + '</b> · ' + p.lng + ', ' + p.lat + '</div>'
+            + '</div></div>';
+        }).join('');
+      }
+      const navHtml = ((destMode || !poiStage) && st.navOn && st.pickup) ? txNavPanelHtml() : '';
+      const kids_all = destMode ? txDestKidCount() : (poiStage ? txPoiKidCount() : 0);
+      const head = destMode ? '匹配的目的地 POI' : (poiStage ? '关键词匹配的 POI' : '周边推荐上车点');
+      const sub = destMode
+        ? '共 ' + listLen + ' 个' + (kids_all ? ' · ' + kids_all + ' 个子点位' : '')
+          + (st.quoteReq ? ' · 已按所选终点预估，点选可改终点（需重新预估）' : ' · 点选后作为目的地')
+        : poiStage
+          ? '共 ' + listLen + ' 个' + (kids_all ? ' · ' + kids_all + ' 个子点位' : '') + ' · 点选后展示周边上车点'
+          : '共 ' + listLen + ' 个 · 由近到远';
+      const emptyHint = destMode
+        ? '没有匹配的目的地，换个关键词再搜一次'
+        : poiStage
+          ? '没有匹配的 POI，换个关键词再搜一次'
+          : '输入<b>经纬度（老外定位）</b>后点「搜索上车点」<br>曹操会返回定位周边的推荐上车点，<br>系统默认选中距离最近的一个';
+      const sideHtml = listLen
+        ? '<div class="pk-list-head">' + head + '<span>' + sub + '</span></div>'
+          + '<div class="pk-list' + (poiStage ? ' pk-list-tree' : '') + '">' + rows + '</div>'
+          + txPagerHtml(destMode ? 'destPick' : (poiStage ? 'poiPick' : 'pickup'), pi.page, listLen, PK_LIST_PAGE)
+        : '<div class="pk-list-head">' + head + '</div>'
+          + '<div class="gp-empty" style="padding:30px 8px;">' + emptyHint + '</div>';
+      return '<div class="pk-split' + (navHtml ? ' has-nav' : '') + '">'
+        + '<div class="pk-map">' + txPickupMapSvg(destMode ? 'dest' : undefined) + '</div>'
+        + '<div class="pk-side">' + sideHtml + '</div>'
+        + (navHtml ? '<div class="pk-navcol">' + navHtml + '</div>' : '')
+        + '</div>';
+    }
+    function txSelectPickup(i){
+      const st = txAgentState, p = st.pickupPois[i];
+      if(!p) return;
+      st.pickup = p;
+      st.navPage = 1;              /* 换了上车点 = 换了一条路线，文字指引回到第 1 步 */
+      /* 地图视图中点标记选中：右侧列表自动翻到该项所在页 */
+      if(st.pickupMode === 'll') st.pickupPage = Math.floor(i / PK_LIST_PAGE) + 1;
+      /* 上车点变化 → 之前的预估作废（需在第③步重新点「预估价格」） */
+      txClearQuote();
+      renderTaxiAgent();
+    }
+    /* 上车点不再单独推送给老外（r353 修订）：客服选好即可，最后统一推送整单 */
+    /* ---------- 第③步：目的地 ---------- */
+    function txSearchDestAgent(){
+      const el = document.getElementById('tx-dest-kw2');
+      const kw = el && el.value ? el.value.trim() : '';
+      const st = txAgentState, t = st.tourist;
+      const all = (TX_PICKUP_POOL[t.city] || []).map(n => {
+        const p = txPlace(n);
+        const dist = Number((Math.abs(p.lng - t.lng) * 52 + Math.abs(p.lat - t.lat) * 60).toFixed(2));
+        return {zh: p.zh, en: p.en, lng: p.lng, lat: p.lat, dist: dist};
+      });
+      st.destKw = kw;
+      /* 与第②步「关键词搜上车点」完全一致：父 POI 命中 → 带出全部子 POI；
+         只有子 POI 命中 → 只带出命中的子 POI。搜索后才出地图 + 右侧 POI 列表。 */
+      const groups = [];
+      if(kw){
+        all.forEach(p => {
+          const kids = (TX_POI_CHILDREN[p.zh] || []).map(c => {
+            const lng = p.lng + c.dx / (PK_KM_LNG * 1000);
+            const lat = p.lat + c.dy / (PK_KM_LAT * 1000);
+            return { zh: c.zh, en: c.en, lng: lng, lat: lat,
+                     dist: Number((Math.abs(lng - t.lng) * 52 + Math.abs(lat - t.lat) * 60).toFixed(2)) };
+          });
+          const parentHit = txMatch(p.zh, kw) || txMatch(p.en, kw);
+          const kidHits = kids.filter(c => txMatch(c.zh, kw) || txMatch(c.en, kw));
+          if(parentHit) groups.push(Object.assign({}, p, { children: kids }));
+          else if(kidHits.length) groups.push(Object.assign({}, p, { children: kidHits }));
+        });
+        groups.sort((a, b) => a.dist - b.dist);
+      }
+      st.destPois = groups;
+      st.dest = null; st.destPage = 1; st.navOn = false;
+      txClearQuote();
+      renderTaxiAgent();
+      if(kw) showToast('关键词「' + kw + '」匹配到 ' + groups.length + ' 个目的地 POI'
+        + (txDestKidCount() ? '（含 ' + txDestKidCount() + ' 个子点位）' : '') + '，请选择目的地');
+    }
+    /* 目的地 POI 层级扁平化 / 子点位计数（与上车点侧同构） */
+    function txDestFlatList(){
+      const out = [];
+      (txAgentState.destPois || []).forEach((g, gi) => {
+        out.push({ p: g, gi: gi, ci: null, lvl: 0, label: String(gi + 1) });
+        (g.children || []).forEach((c, ci) => {
+          out.push({ p: c, gi: gi, ci: ci, lvl: 1, label: (gi + 1) + '.' + (ci + 1) });
+        });
+      });
+      return out;
+    }
+    function txDestKidCount(){
+      return (txAgentState.destPois || []).reduce((n, g) => n + ((g.children || []).length), 0);
+    }
+    /* 选中目的地 POI / 子 POI → 只记录目的地；预估价格由客服点右下角「预估价格」发起 */
+    function txSelectDestPoi(gi, ci){
+      const st = txAgentState, g = (st.destPois || [])[gi];
+      if(!g) return;
+      if(txIsLocked()){ showToast('已推送打车订单，等待老外确认，暂不可改目的地'); return; }
+      const p = (ci === undefined || ci === null) ? g : (g.children || [])[ci];
+      if(!p) return;
+      st.dest = p; st.navOn = false;
+      txClearQuote();
+      renderTaxiAgent();
+      showToast('目的地已选：「' + p.zh + '」，请点右下角「预估价格」');
+    }
+    function txDestPickPage(n){ txAgentState.destPage = n; renderTaxiAgent(); }
+    function txSelectDestAgent(i){
+      const st = txAgentState, p = st.destPois[i];
+      if(!p || txIsLocked()) return;
+      st.dest = p; st.navOn = false;
+      txClearQuote();
+      renderTaxiAgent();
+      showToast('目的地已选：「' + p.zh + '」，请点右下角「预估价格」');
+    }
+    /* ---------- 第③步：预估价格状态机 ----------
+       目的地选定 → 右下角「预估价格」→（点击）系统算 行程距离/时长 + 各车档报价 → 顶部起 9 分 50 秒倒计时
+       → 勾选车档（默认勾选 舒适型 / 豪华型 / 礼帽专车）→ 右下角变「推送打车订单给老外确认」
+       → 页面锁定等老外确认；确认 = 强制弹窗；拒绝 = 可重新推送；超时 = 按「预估价格已过期，请重新预估价格」画 */
+    function txIsLocked(){
+      const st = txAgentState;
+      return !!(st && st.pushedOrder && !st.quoteConfirmed && !st.quoteExpired);
+    }
+    /* 清空预估（改目的地 / 重新预估前调用）；pickedCars 是「上次客服勾选的车档」，换行程时一并清掉 */
+    function txClearQuote(){
+      const st = txAgentState;
+      st.quote = null; st.selectedCars = []; st.distKm = 0; st.durMin = 0;
+      st.quoteReq = false; st.quoteExpired = false; st.quoteDeadline = 0;
+      st.pushedOrder = false; st.quoteConfirmed = null;
+      st.pickedCars = [];
+      stopQuoteTimer();
+    }
+    /* 计算报价（2.6 预估价格带明细 mock）：行程距离/时长 + 各车档「曹操价格 + 服务费 10%」 */
+    function txRecomputeQuote(){
+      const st = txAgentState;
+      if(!st.pickup || !st.dest){ st.quote = null; st.selectedCars = []; st.distKm = 0; st.durMin = 0; return; }
+      const dLat = (st.dest.lat - st.pickup.lat), dLng = (st.dest.lng - st.pickup.lng);
+      const km = Math.max(1, Math.round(Math.sqrt(dLat*dLat + dLng*dLng) * 95 * 10) / 10);
+      const dur = Math.round(km * 2.0 + 6);
+      const bal = parseFloat(st.tourist.balance) || 0;
+      st.distKm = km; st.durMin = dur;
+      /* 预估价格模块只展示这三个车档：舒适型 / 豪华型 / 礼帽专车 */
+      st.quote = TX_DEFAULT_CARS.map(car => {
+        const cao = Math.round((TX_CAR_FLAGFALL[car] + TX_CAR_RATE[car] * km) * 10) / 10;
+        const svc = Math.round(cao * 0.1 * 10) / 10;
+        const total = Math.round((cao + svc) * 10) / 10;
+        return { car:car, cao:cao, svc:svc, total:total, affordable: total <= bal };
+      }).sort((a,b)=>a.total-b.total);
+      /* 三个车档默认全部勾选（余额不足的自动跳过） */
+      st.selectedCars = st.quote.map((q,i) => q.affordable ? i : -1).filter(i => i >= 0);
+    }
+    /* 点「预估价格」：重算 + 起 9 分 50 秒倒计时
+       —— 若之前客服勾过车档（拒绝 / 超时后重新预估），默认沿用上次勾选，而不是重新全选 */
+    function txRequestQuote(){
+      const st = txAgentState;
+      if(!st.tourist || !st.dest || txIsLocked()) return;
+      const prevPicked = (st.pickedCars || []).slice();
+      txRecomputeQuote();
+      if(prevPicked.length){
+        const idx = st.quote.map((q,i) => (prevPicked.indexOf(q.car) >= 0 && q.affordable) ? i : -1).filter(i => i >= 0);
+        if(idx.length) st.selectedCars = idx;   /* 上次勾的车档仍可下单 → 沿用；都不可下单则退回默认全选 */
+      }
+      st.pickedCars = st.selectedCars.map(i => st.quote[i].car);
+      st.quoteReq = true; st.quoteExpired = false;
+      st.navOn = true;   /* 预估后直接把「老外 → 上车点」步行导航一起展示出来，不用再点按钮 */
+      st.quoteDeadline = Date.now() + TX_QUOTE_TTL_MS;
+      st.pushedOrder = false; st.quoteConfirmed = null;
+      renderTaxiAgent();
+      startQuoteTimer();
+      showToast('已发起预估价格，有效期 9 分 50 秒（' + fmtClock(st.quoteDeadline) + ' 前完成推送）');
+      setTimeout(() => { const el = document.querySelector('#panelDache .tx-est'); if(el) el.scrollIntoView({block:'center', behavior:'smooth'}); }, 80);
+    }
+    /* 倒计时：每秒只改文本不整页重渲染；归零 → 置过期 + 本次推送作废 */
+    var txQuoteTimerId = null;   /* var：txResetAgentState 在脚本初始化阶段就会被调用，避免 let 的 TDZ */
+    function stopQuoteTimer(){ if(txQuoteTimerId){ clearInterval(txQuoteTimerId); txQuoteTimerId = null; } }
+    function startQuoteTimer(){
+      const st = txAgentState;
+      stopQuoteTimer();
+      if(!st || !st.quoteReq || !st.quoteDeadline || st.quoteExpired) return;
+      const tick = () => {
+        const left = st.quoteDeadline - Date.now();
+        if(left <= 0){
+          stopQuoteTimer();
+          st.quoteExpired = true;
+          if(st.pushedOrder && !st.quoteConfirmed){
+            st.pushedOrder = false;
+            const m = st.guestMsgs.find(x => x.seq === st.lastPushSeq);
+            if(m) m.status = '已过期';
+          }
+          renderTaxiAgent();
+          showToast('预估价格已过期，请重新预估价格');
+          return;
+        }
+        const el = document.getElementById('tx-quote-count');
+        if(el) el.textContent = fmtCountdown(left);
+      };
+      tick();
+      txQuoteTimerId = setInterval(tick, 1000);
+    }
+    /* 「3 搜索并选择目的地」标题行右侧：倒计时 / 已过期（重新预估价格 可点） */
+    function txQuoteHeadHtml(){
+      const st = txAgentState;
+      if(!st || !st.quoteReq) return '';
+      if(st.quoteExpired){
+        return '<span class="push-state rejected" style="margin-left:auto;flex-shrink:0;">预估价格已过期，请'
+          + '<a class="tx-link" href="javascript:void 0" onclick="txRequestQuote()">重新预估价格</a></span>';
+      }
+      return '<span class="addr-count-inline" title="预估价格有效期 9 分 50 秒，超时需重新预估">'
+        + '<span class="dot"></span>预估价格有效期 <b id="tx-quote-count">' + fmtCountdown(st.quoteDeadline - Date.now()) + '</b>'
+        + '<span class="left" style="color:var(--text-3);font-weight:400;">至 ' + fmtClock(st.quoteDeadline) + '</span></span>';
+    }
+    /* 演示用：一键把预估价格置为过期（等同倒计时结束），便于评审第 5.4 条超时态 */
+    function txExpireQuote(){
+      const st = txAgentState;
+      if(!st || !st.quoteReq || st.quoteExpired) return;
+      st.quoteDeadline = Date.now() - 1;
+      startQuoteTimer();
+    }
+    /* 车档勾选切换（余额不足不可选；已推送锁定；已过期需重新预估） */
+    function txToggleCar(i){
+      const st = txAgentState, q = st.quote && st.quote[i];
+      if(!q || !q.affordable || txIsLocked()) return;
+      if(st.quoteExpired){ showToast('预估价格已过期，请先重新预估价格'); return; }
+      const k = st.selectedCars.indexOf(i);
+      if(k >= 0) st.selectedCars.splice(k, 1); else st.selectedCars.push(i);
+      /* 记住客服本次勾选的车档：老外拒绝 / 超时后重新预估时沿用 */
+      st.pickedCars = st.selectedCars.map(x => st.quote[x].car);
+      renderTaxiAgent();
+    }
+    /* 第③步右下角悬浮按钮：
+       未预估 / 已过期 →「预估价格」；已预估 →「推送打车订单给老外确认」；已推送锁定 → 不展示 */
+    function txStep3FloatHtml(){
+      const st = txAgentState;
+      if(!st.dest || txIsLocked()) return '';
+      if(!st.quoteReq || st.quoteExpired){
+        return '<div class="tx-next-float"><button class="push-btn" onclick="txRequestQuote()">'
+          + (st.quoteExpired ? '重新预估价格' : '预估价格') + '</button></div>';
+      }
+      const ok = st.selectedCars.length > 0;
+      return '<div class="tx-next-float"><button class="push-btn" ' + (ok ? '' : 'disabled title="请先勾选至少一个车档"')
+        + ' onclick="txPushOrder()">推送打车订单给老外确认</button></div>';
+    }
+    /* 推送：直接推送并锁定页面 */
+    function txPushOrder(){
+      const st = txAgentState;
+      if(txIsLocked()) return;
+      if(!st.quoteReq || st.quoteExpired){ showToast('预估价格已过期，请先重新预估价格'); return; }
+      if(!st.selectedCars.length){ showToast('请至少勾选一个车档'); return; }
+      txPushOrderSubmit();
+    }
+    function txPushOrderSubmit(){
+      const st = txAgentState;
+      const lang = st.tourist.lang;
+      const picked = st.selectedCars.slice().sort((a,b)=>a-b).map(i => st.quote[i]);
+      const carList = picked.map(q => txMT(lang, q.car) + ' ' + q.total + ' ' + txMT(lang,'pts')).join(' · ');
+      const text = txMT(lang,'fare') + ': ' + carList
+                 + '<br>' + txMT(lang,'dist') + ' ' + st.distKm + ' ' + txMT(lang,'km')
+                 + ' · ' + txMT(lang,'dur') + ' ' + st.durMin + ' ' + txMT(lang,'min')
+                 + '<br>' + txMT(lang,'from') + ': ' + st.pickup.en
+                 + '<br>' + txMT(lang,'to') + ': ' + st.dest.en;
+      /* 右侧「老外硬件端」面板：只保留刚推送的这一单 */
+      st.guestMsgs = []; st.seq = 0;
+      const m = txGuestPush('订单', text);
+      m.order = true;
+      st.lastPushSeq = m.seq;
+      st.panelTourist = st.tourist;
+      st.pushedOrder = true; st.quoteConfirmed = null;
+      renderTaxiAgent();
+      startQuoteTimer();   /* 推送后倒计时继续：老外需在有效期内确认，超时按「预估价格已过期」画 */
+      showToast('已推送打车订单（' + picked.length + ' 个车档），等待老外确认');
+    }
+    /* 老外对整单的最终确认由 txGuestResolveOrder 处理（见上方） */
+    /* 第③步：点「预估价格」后，页面底部展示预估明细（行程距离 / 行程时长 / 车档名称 / 预估价格 / 服务费） */
+    function txEstimateHtml(){
+      const st = txAgentState;
+      if(!st.dest || !st.quote || !st.quoteReq) return '';
+      const bal = parseFloat(st.tourist.balance) || 0;
+      const expired = !!st.quoteExpired;
+      const locked = txIsLocked();
+      const allBad = st.quote.every(q => !q.affordable);
+      let h = '<div class="tx-est' + (expired ? ' expired' : '') + '">'
+        + '<div class="tx-est-title">预估价格'
+          + '<span class="tx-est-sub">' + (expired
+              ? '<span style="color:var(--red);font-weight:600;">已过期（' + fmtClock(st.quoteDeadline) + '）</span>'
+              : '2.6 预估价格带明细 · 有效期至 ' + fmtClock(st.quoteDeadline)) + '</span>'
+          + ((expired || locked) ? '' : '<button class="tx-demo-btn" onclick="txExpireQuote()" title="演示用：立即把预估价格置为过期，等同于 9 分 50 秒倒计时结束">演示超时</button>')
+          + '</div>'
+        + '<div class="tx-metrics">'
+          + '<div class="tx-metric"><span class="k">行程距离</span><span class="v">' + st.distKm + ' km</span></div>'
+          + '<div class="tx-metric"><span class="k">行程时长</span><span class="v">' + st.durMin + ' min</span></div>'
+          + '<div class="tx-metric"><span class="k">已选车档</span><span class="v">' + st.selectedCars.length + ' / ' + st.quote.length + '</span></div>'
+        + '</div>'
+        + '<div class="tx-est-cards">'
+        + st.quote.map((q,i) => {
+            const on = st.selectedCars.indexOf(i) >= 0;
+            const clickable = q.affordable && !locked && !expired;
+            const cls = (on ? 'on' : '') + (q.affordable ? '' : ' off') + (clickable ? '' : ' locked');
+            return '<div class="tx-est-card ' + cls + '"' + (clickable ? ' onclick="txToggleCar(' + i + ')"' : '') + '>'
+              + '<div class="qc-top"><span class="q-chk-c">' + (on ? '✓' : '') + '</span><span class="car-name">' + q.car + '</span>'
+              + (TX_CAR_SEATS[q.car] ? '<span class="tx-seat">' + TX_CAR_SEATS[q.car] + '</span>' : '')
+              + (q.affordable ? '' : '<span class="q-bad">积分不足</span>') + '</div>'
+              + '<div class="qc-price"><span>曹操价格</span><span class="num">' + q.cao + '</span></div>'
+              + '<div class="qc-price"><span>服务费</span><span class="num">' + q.svc + '</span></div>'
+              + '<div class="qc-tot"><span class="lab">预估总价</span><span class="num">' + q.total + '</span></div>'
+              + '</div>';
+          }).join('')
+        + '</div>'
+        + '<div class="wz-hint" style="margin:9px 0 0;">金额单位：积分；<b>预估总价 = 曹操价格 + 服务费</b>（老外端看到的就是预估总价），三个车档默认全选、可多选'
+          + (st.quote.some(q => !q.affordable) ? '；余额不足（' + bal + ' 积分）的车档置灰不可选' : '') + '。</div>';
+      if(expired){
+        h += '<div class="note r" style="margin-top:12px;">预估价格已过期，请点标题行或右下角的「重新预估价格」重新发起预估（有效期重新从 9 分 50 秒开始）。</div>';
+      } else if(locked){
+        h += '<div class="note i" style="margin-top:12px;">已推送打车订单，正在等待老外确认；期间车档不可修改。</div>';
+      } else if(st.quoteConfirmed === 'nsub'){
+        h += '<div class="note w" style="margin-top:12px;">老外已拒绝本次打车订单：可调整车档后直接<b>重新推送</b>，或 '
+          + '<a class="tx-link" href="javascript:void 0" onclick="txRequestQuote()">重新预估价格</a>（会沿用本次勾选的车档）。</div>';
+      } else if(allBad){
+        h += '<div class="note r" style="margin-top:12px;"><b>暂无法推送</b>：当前行程所有车档的预估价格均超出老外可用积分（' + bal + ' 积分），请更换上车点/目的地，或先让老外充值后再试。</div>';
+      }
+      h += '</div>';
+      return h;
+    }
+    /* ---------- 渲染：步骤 + 老外面板 ---------- */
+    function renderTaxiAgent(){
+      const st = txAgentState;
+      if(!st || !st.tourist && txAgentStep === 1){  /* nothing */ }
+      const s1 = document.getElementById('tx-step-1');
+      const s2 = document.getElementById('tx-step-2');
+      const s3 = document.getElementById('tx-step-3');
+      if(!s1) return;
+      const done = !!st.tourist;
+      /* 第①步：系统进入页面自动获取老外档案（已废弃客服搜老外） */
+      s1.className = 'agent-step';
+      s1.innerHTML = '<div class="step-head done">'
+        + '<span class="step-num">✓</span>已选老外'
+        + '<span class="step-sum">' + (done ? st.tourist.name + ' · 用户ID ' + userIdOf(st.tourist) + ' · ' + st.tourist.lang + ' · ' + st.tourist.deviceNo : '系统进入页面自动获取老外档案') + '</span>'
+        + '</div>';
+      if(!done){ [s2,s3].forEach(x => { x.className = 'agent-step hidden'; x.innerHTML = ''; }); renderTxGuestPanel(); return; }
+      /* 第②步：搜索上车点（输入经纬度或关键词；客服直接选，不推送老外） */
+      s2.className = 'agent-step' + (txAgentStep === 2 ? '' : '');
+      const pOk = !!st.pickup;
+      /* 地图只在「已搜索」之后出现：
+         · 经纬度搜索 → 搜完直接出地图；
+         · 关键词搜索 → 先只出 POI 列表，客服选中 POI 后才出地图。 */
+      const mapMode = (st.pickupMode === 'll') || (st.pickupMode === 'kw' && !!st.pickupAnchor);
+      const poiPickStage = (st.pickupMode === 'kw' && !st.pickupAnchor);
+      const canNav = !!(pOk && mapMode);   /* 步行导航只在地图视图下可用 */
+      const pHeadCls = (txAgentStep === 2) ? 'active' : (pOk ? 'done' : '');
+      const pSum = pOk ? '已选：' + st.pickup.zh + '（' + st.pickup.en + '）'
+        : poiPickStage ? '已匹配 ' + st.poiResults.length + ' 个 POI' + (txPoiKidCount() ? '（含 ' + txPoiKidCount() + ' 个子点位）' : '') + '，请选择上车点所在位置'
+        : (st.cityCode ? '输入经纬度或关键词搜索（city_code=' + st.cityCode + '）' : '该城市暂无可用车型');
+      s2.innerHTML = '<div class="step-head ' + pHeadCls + '" ' + (pOk ? 'onclick="txGotoStep(2)" style="cursor:pointer;"' : '') + '">'
+        + '<span class="step-num">' + (pOk ? '✓' : '2') + '</span>搜索上车点'
+        + '<span class="step-sum">' + pSum + '</span></div>'
+        + (txAgentStep === 2
+            ? '<div class="step-body"' + (pOk ? ' style="padding-bottom:66px;"' : '') + '>'
+              + '<div class="note i">对应流程：客服输入<b>经纬度（老外定位）</b>或<b>关键词</b>搜索上车点（高德「搜索 POI 2.0」/「2.29 推荐上车点」）。<b>默认不展示地图，搜索后才出现</b>：按<b>经纬度</b>搜索 → 直接调「推荐上车点」返回周边点位，渲染<b>地图 + 上车点列表</b>并默认选中最近的一个；按<b>关键词</b>搜索 → 先在地图上标出<b>匹配的 POI</b>（右侧为同序号 POI 列表），客服选中一个后，地图切换成该点位周边的<b>上车点</b>，右侧换成「周边推荐上车点」列表。客服也可点地图标记或右侧列表改选。<b>上车点无需推送给老外确认</b>。</div>'
+              + '<div class="search-box" style="margin-top:12px;flex-wrap:wrap;">'
+              +   '<input id="tx-pickup-ll" placeholder="经纬度，如 120.1612,30.2490" value="' + (st.pickupLL || '') + '" style="flex:0 0 210px;" onkeydown="if(event.key===\'Enter\')txPickupSearch()">'
+              +   '<input id="tx-pickup-kw" placeholder="或关键词，如「四季酒店」" value="' + (st.pickupKw || '') + '" style="flex:1;" onkeydown="if(event.key===\'Enter\')txPickupSearch()">'
+              +   '<button class="btn" onclick="txPickupSearch()">搜索上车点</button>'
+              +   '<button class="btn' + (st.navOn ? '' : ' ghost') + '"'
+              +     (canNav ? '' : ' disabled title="先搜索并选中一个上车点，再查看步行导航"')
+              +     ' onclick="txToggleNav()">' + (st.navOn ? '收起导航' : '导航到上车点') + '</button>'
+              + '</div>'
+              + (st.pickupMode === ''
+                  ? '<div class="pk-guide">'
+                    + '<div class="pk-guide-t">输入经纬度或关键词后，点「搜索上车点」</div>'
+                    + '<div class="pk-guide-s">按<b>经纬度（老外定位）</b>搜索：直接返回周边推荐上车点，并在地图上展示；<br>'
+                    + '按<b>关键词</b>搜索：先在地图上标出匹配的 POI，选中一个后展示它周边的上车点。</div></div>'
+                  : (st.pickupMode === 'kw' && !st.pickupAnchor && !st.poiResults.length)
+                    ? '<div class="gp-empty" style="margin-top:14px;">没有匹配「' + (st.pickupKw || '') + '」的 POI，换个关键词再搜一次</div>'
+                    : (st.pickupMode === 'kw' && st.pickupAnchor
+                        ? '<div class="pk-anchor-bar"><span>以「<b>' + st.pickupAnchor.zh + '</b>」为中心展示周边上车点</span>'
+                          + '<button class="pk-anchor-back" onclick="txBackToPoiList()">‹ 重新选 POI</button></div>'
+                        : '')
+                      + txPickupMapHtml())
+              + (pOk ? '<div class="tx-next-float">'
+                    + '<button class="push-btn" onclick="txGotoStep(3)">下一步：搜索目的地 ›</button>'
+                  + '</div>' : '')
+              + '</div>'
+            : '');
+      /* 第③步：搜索目的地 → 点「预估价格」（9 分 50 秒有效）→ 勾选车档 → 推送（session id）→ 锁定等待老外确认 */
+      /* 标题行只在第③步展示：停在第②步时不再提前出现「3 搜索并选择目的地」这一行 */
+      s3.className = 'agent-step' + ((pOk && txAgentStep === 3) ? '' : ' hidden');
+      if(pOk){
+        const dOk = !!st.dest;
+        const locked = txIsLocked();
+        const dHeadCls = st.pushedOrder ? 'done' : (txAgentStep === 3 ? 'active' : (dOk ? 'done' : ''));
+        const headSum = dOk
+          ? '已选：' + st.dest.zh + '（' + st.dest.en + '）' + (st.quoteReq ? ' · 预估 ' + st.distKm + ' km / ' + st.durMin + ' min' : '')
+          : '输入关键词搜索目的地（同高德「搜索 POI 2.0」）';
+        s3.innerHTML = '<div class="step-head ' + dHeadCls + '" ' + (dOk ? 'onclick="txGotoStep(3)" style="cursor:pointer;"' : '') + '">'
+          + '<span class="step-num">' + (st.pushedOrder ? '✓' : '3') + '</span>搜索并选择目的地'
+          + '<span class="step-sum">' + headSum + '</span>'
+          + txQuoteHeadHtml()
+          + '</div>'
+          + (txAgentStep === 3
+              ? '<div class="step-body"' + ((dOk && !locked) ? ' style="padding-bottom:66px;"' : '') + '>'
+                + '<div class="note i">对应流程：客服输入<b>目的地关键词</b> → 调「搜索 POI 2.0」→ 地图展示 POI 与子 POI 点位 + 右侧同序号列表（父子都可选）→ 选定目的地后点右下角<b>「预估价格」</b>（有效期 <b>9 分 50 秒</b>，超时需重新预估）→ 勾选车档 → 点右下角<b>「推送打车订单给老外确认」</b>。</div>'
+                + (locked
+                    ? '<div class="tx-lock-tip"><span class="lk">已锁定</span><span>打车订单已推送，<b>正在等待老外确认</b>。老外确认 / 拒绝前本页不可操作；若到 <b>' + fmtClock(st.quoteDeadline) + '</b> 仍未确认，预估价格过期，可重新预估后再次推送。</span>'
+                      + '<button class="tx-demo-btn" style="margin-left:auto;" onclick="txExpireQuote()" title="演示用：立即把预估价格置为过期，等同于 9 分 50 秒倒计时结束">演示超时</button></div>'
+                    : '')
+                + '<div class="search-box" style="margin-top:12px;">'
+                  + '<input id="tx-dest-kw2" placeholder="输入目的地关键词，如「萧山机场」「T4 停车楼」" value="' + (st.destKw || '') + '"'
+                    + (locked ? ' disabled' : ' onkeydown="if(event.key===\'Enter\')txSearchDestAgent()"') + '>'
+                  + '<button class="btn" ' + (locked ? 'disabled' : '') + ' onclick="txSearchDestAgent()">搜索目的地</button>'
+                  + '</div>'
+                + (st.destPois.length
+                    ? txPickupMapHtml('dest')
+                    : (st.destKw
+                        ? '<div class="gp-empty" style="margin-top:14px;">没有匹配「' + st.destKw + '」的目的地，换个关键词再搜一次</div>'
+                        : '<div class="gp-empty" style="margin-top:14px;">输入关键词搜索目的地，结果会以<b>高德地图 POI 点位 + 右侧 POI 列表</b>展示</div>'))
+                + (st.quoteReq
+                    ? txEstimateHtml()
+                    : (dOk ? '<div class="gp-empty" style="margin-top:14px;">已选目的地「' + st.dest.zh + '」，点右下角<b>「预估价格」</b>查看行程距离 / 行程时长 / 各车档预估价格与服务费</div>'
+                           : '<div class="gp-empty" style="margin-top:14px;">选择目的地后，点右下角「预估价格」查看预估明细</div>'))
+                + txStep3FloatHtml()
+                + '</div>'
+              : '');
+      } else { s3.className = 'agent-step hidden'; s3.innerHTML = ''; }
+      placeAddrFloat();   /* 悬浮按钮对齐主内容区右下角 */
+      startQuoteTimer();  /* 倒计时：每秒只改 #tx-quote-count，不整页重渲染 */
+      renderTxGuestPanel();
+    }
+    /* 老外硬件端模拟面板（仅展示客服推送的整单，外文） */
+    function renderTxGuestPanel(){
+      const el = document.getElementById('tx-guest-panel');
+      if(!el) return;
+      const st = txAgentState;
+      const t = st.panelTourist || st.tourist;   /* 推送后客服表单已重置，面板仍展示刚推送的老外 */
+      const lang = t ? t.lang : 'en';
+      const body = st.guestMsgs.length
+        ? st.guestMsgs.map(m => {
+            const isAction = !!(m.quote || m.order);
+            const done = (m.status === '已确认' || m.status === '已提交' || m.status === '已拒绝' || m.status === '已超时' || m.status === '已过期');
+            const cls = done ? 'done' : 'pending';
+            let act;
+            if(isAction && m.status === '待确认'){
+              act = '<div style="margin-top:9px;display:flex;gap:8px;">'
+                + '<button class="btn" style="padding:4px 12px;font-size:12px;" onclick="txGuestResolveOrder(' + m.seq + ',\'submit\')">' + txMT(lang,'submit') + '</button>'
+                + '<button style="padding:4px 12px;font-size:12px;border:1px solid var(--line-strong);background:#fff;color:var(--text-2);border-radius:6px;cursor:pointer;font-family:inherit;" onclick="txGuestResolveOrder(' + m.seq + ',\'nsub\')">' + txMT(lang,'nsub') + '</button>'
+                + '</div>';
+            } else if(m.status === '已过期'){
+              act = '<div style="margin-top:6px;font-size:12px;color:#a3271f;">✗ 未在有效期内确认 · 预估价格已过期（可重新预估后再次推送）</div>';
+            } else if(isAction){
+              const r = (m.status === '已提交') ? txMT(lang,'subOk') : txMT(lang,'subNo');
+              act = '<div style="margin-top:6px;font-size:12px;color:' + (m.status === '已提交' ? 'var(--green)' : '#a3271f') + ';">' + r + '</div>';
+            } else {
+              act = '';
+            }
+            return '<div class="gp-msg ' + cls + '">'
+              + '<div class="gm-kind">推送 ' + m.seq + ' · ' + m.kind + '　' + m.status + '</div>'
+              + '<div>' + m.text + '</div>'
+              + act
+              + '</div>';
+          }).join('')
+        : '<div class="gp-empty">暂无推送内容<br>客服在最后一步推送订单后，卡片会出现在这里</div>';
+      el.innerHTML = '<div class="gp-head"><span class="dot"></span> 老外硬件端<span class="gp-tag">模拟</span></div>'
+        + '<div class="gp-dev">' + (t
+            ? '设备 ' + t.deviceNo + ' · ' + t.name + ' · ' + t.lang + '<br>' + t.card + '<br>定位（GCJ-02）' + t.lng + ', ' + t.lat
+            : '未选择老外') + '</div>'
+        + '<div class="gp-body">' + body + '</div>';
+    }
+
+    /* ---------- 初始化：系统进入页面自动获取老外档案（与源页一致） ---------- */
+    txResetAgentState();
+    renderTaxiAgent();
+
+    /* 行内 onclick / onkeydown / 分页器函数字符串依赖全局名，逐个暴露 */
+    Object.assign(window, {
+      txPickupSearch:txPickupSearch, txToggleNav:txToggleNav, txGotoStep:txGotoStep,
+      txSelectPickup:txSelectPickup, txSelectPickupPoi:txSelectPickupPoi, txBackToPoiList:txBackToPoiList,
+      txPickupPage:txPickupPage, txPoiPage:txPoiPage, txDestPage:txDestPage,
+      txDestPickPage:txDestPickPage, txNavPage:txNavPage,
+      txSearchDestAgent:txSearchDestAgent, txSelectDestPoi:txSelectDestPoi, txSelectDestAgent:txSelectDestAgent,
+      txRequestQuote:txRequestQuote, txExpireQuote:txExpireQuote, txToggleCar:txToggleCar,
+      txPushOrder:txPushOrder, txGuestResolveOrder:txGuestResolveOrder, closeTxDoneModal:closeTxDoneModal
+    });
+})();
+</script>
 </body></html>
