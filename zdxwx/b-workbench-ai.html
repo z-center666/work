@@ -2478,11 +2478,71 @@ body {
           </div>
         </div>
 
-        <!-- 打车订单面板 -->
-        <div class="dz-custprofile" id="panelDacheOrder" hidden="">
-          <div class="dz-custprofile__empty">
-            <i class="bi bi-inbox"></i>
-            <div>暂无数据</div>
+        <!-- 打车订单面板（复用「外卖打车管理后台」打车订单列表页：筛选条 + 11 列表格 + 分页） -->
+        <div class="dz-custprofile" id="panelDacheOrder" hidden="" style="padding:0;overflow:auto;min-height:auto;">
+          <div class="wo-wrap">
+            <div class="wo-filters">
+              <input class="wo-input" id="wtx-cao" placeholder="曹操订单号">
+              <input class="wo-input wo-input-wide" id="wtx-foreigner" placeholder="老外手机号 / 护照号 / 设备号 / 用户ID">
+              <select class="wo-select" id="wtx-status">
+                <option value="">全部订单状态</option>
+                <option>未派单</option>
+                <option>开始服务</option>
+                <option>司机已到达</option>
+                <option>乘客上车·计费开始</option>
+                <option>行程结束·计费结束</option>
+                <option>订单待支付</option>
+                <option>订单已支付</option>
+                <option>订单系统取消</option>
+                <option>订单取消·待付款</option>
+                <option>订单取消·已支付</option>
+                <option>订单取消已免责取消费</option>
+                <option>用户取消</option>
+                <option>曹操客服取消</option>
+                <option>司机取消</option>
+              </select>
+              <select class="wo-select" id="wtx-city"><option value="">全部城市</option><option>杭州</option><option>上海</option></select>
+              <select class="wo-select" id="wtx-source"><option value="">全部订单来源</option><option>AI对话</option><option>客服代下单</option></select>
+              <input class="wo-input wo-date" type="date" id="wtx-start" title="下单开始日期">
+              <span class="wo-sep">~</span>
+              <input class="wo-input wo-date" type="date" id="wtx-end" title="下单结束日期">
+              <button class="wo-btn wo-btn-primary" id="wtx-query">查询</button>
+              <button class="wo-btn wo-btn-ghost" id="wtx-reset">重置</button>
+              <button class="wo-btn wo-btn-ghost" id="wtx-export">导出</button>
+              <span class="wo-sep" id="wtx-summary" style="margin-left:auto;">共 0 条</span>
+            </div>
+            <div class="wo-table-wrap">
+              <table class="wo-table wtx-table" style="min-width:1124px;">
+                <thead>
+                  <tr>
+                    <th style="width:120px;">曹操订单号</th>
+                    <th style="width:118px;">老外用户</th>
+                    <th style="width:60px;">用户ID</th>
+                    <th style="width:96px;">设备号</th>
+                    <th style="width:84px;">租户名称</th>
+                    <th style="width:92px;">行程</th>
+                    <th style="width:72px;">司机信息</th>
+                    <th style="width:104px;">订单金额</th>
+                    <th style="width:84px;">订单来源</th>
+                    <th style="width:118px;">订单状态</th>
+                    <th style="width:176px;">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="wtx-body"></tbody>
+              </table>
+            </div>
+            <div class="wo-pager">
+              <span id="wtx-page-info">第 1/1 页</span>
+              <span class="wo-pager-btns" style="display:flex;align-items:center;">
+                <select class="wo-select" id="wtx-page-size" style="height:26px;margin-right:6px;">
+                  <option value="10">每页 10 条</option>
+                  <option value="20">每页 20 条</option>
+                  <option value="50">每页 50 条</option>
+                </select>
+                <button id="wtx-prev" disabled>上一页</button>
+                <button id="wtx-next" disabled>下一页</button>
+              </span>
+            </div>
           </div>
         </div>
 
@@ -3563,6 +3623,289 @@ body {
       if (otherPane) otherPane.hidden = isFollow;
     });
   });
+})();
+
+// 打车订单列表（复用「外卖打车管理后台」view-taxi-list：筛选 + 11 列表格 + 分页 + 导出 + 详情抽屉）
+(function () {
+  var body = document.getElementById('wtx-body');
+  if (!body) return;
+
+  /* 曹操司机库 */
+  var DRIVERS = [
+    { name: '王建国', plate: '浙A·1D2F3', model: '吉利帝豪EV' },
+    { name: '李国强', plate: '浙A·7K9M2', model: '几何A Pro' },
+    { name: '张伟民', plate: '浙A·3F8H1', model: '曹操60' },
+    { name: '陈建华', plate: '沪A·5N2Q7', model: '极氪001' },
+    { name: '刘志远', plate: '浙A·9B4C6', model: '吉利几何G6' },
+    { name: '赵海涛', plate: '浙A·2W6E8', model: '威马E.5' }
+  ];
+  /* 点位：中文名 → [展示中文名, 外文名] */
+  var PLACES = {
+    '西湖景区': ['西湖景区', 'West Lake Scenic Area'],
+    '灵隐寺': ['灵隐寺', 'Lingyin Temple'],
+    '杭州东站': ['杭州东站到达层', 'Hangzhou East Railway Station · Arrivals'],
+    '萧山国际机场': ['萧山国际机场 T4 航站楼', 'Xiaoshan Intl Airport · Terminal 4'],
+    '杭州君悦酒店': ['杭州君悦酒店', 'Grand Hyatt Hangzhou'],
+    '杭州柏悦酒店': ['杭州柏悦酒店', 'Park Hyatt Hangzhou'],
+    '西子湖四季酒店': ['杭州西子湖四季酒店正门', 'Four Seasons Hotel Hangzhou'],
+    '河坊街': ['河坊街历史街区', 'Hefang Street Historic Block'],
+    '武林广场': ['武林广场', 'Wulin Square'],
+    '西溪湿地': ['西溪国家湿地公园', 'Xixi National Wetland Park'],
+    '城站火车站': ['杭州城站火车站', 'Hangzhou Railway Station'],
+    '湖滨银泰': ['湖滨银泰 in77', 'Intime in77 · Hubin'],
+    '西湖文化广场': ['西湖文化广场', 'West Lake Cultural Square'],
+    '外滩': ['外滩', 'The Bund'],
+    '虹桥火车站': ['上海虹桥站', 'Shanghai Hongqiao Railway Station'],
+    '浦东国际机场': ['浦东国际机场 T2', 'Pudong Intl Airport · T2'],
+    '南京路步行街': ['南京路步行街', 'Nanjing Road Pedestrian Street'],
+    '上海环球金融中心': ['上海环球金融中心', 'Shanghai World Financial Center'],
+    '静安寺': ['静安寺', 'Jing an Temple'],
+    '陆家嘴': ['陆家嘴环路', 'Lujiazui Ring Road']
+  };
+  /* 曹操 status → 我方业务状态（枚举名对齐状态机第 3 章） */
+  var STATUS = {
+    1: '未派单', 9: '开始服务', 12: '司机已到达', 3: '乘客上车·计费开始',
+    8: '行程结束·计费结束', 5: '订单待支付', 7: '订单已支付', 4: '订单系统取消',
+    10: '订单取消·待付款', 13: '订单取消·已支付', 14: '订单取消已免责取消费',
+    20: '用户取消', 21: '曹操客服取消', 26: '司机取消'
+  };
+  var CAN_CANCEL = [1, 9, 12], CAN_DEST = [9, 12, 3], SHOW_TRACK = [8, 5, 7], SHOW_COMP = [7, 13];
+
+  /* 种子订单（est/bill = [基础价, 服务费]，金额 = 基础价 + 服务费；1 元 = 1 积分） */
+  var SEED = [
+    { cno: '1140671095002201', nm: 'James Miller', lang: '英语', pp: 'US8812001', ph: '13901120001', dev: 'DEV-2026-0101', tenant: '杭州趣游科技', city: '杭州', pu: '杭州君悦酒店', dst: '萧山国际机场', car: '舒适型', drv: -1, src: 'AI对话', cao: 1, tm: '2026-10-14 09:10:01', est: [38.0, 3.8], bill: null },
+    { cno: '1140671095002202', nm: 'Sofia Rossi', lang: '意大利语', pp: 'IT4451202', ph: '13901120002', dev: 'DEV-2026-0102', tenant: '杭州趣游科技', city: '杭州', pu: '西子湖四季酒店', dst: '杭州东站', car: '舒适型', drv: 0, src: 'AI对话', cao: 9, tm: '2026-10-14 09:18:02', est: [46.0, 4.6], bill: null },
+    { cno: '1140671095002203', nm: 'Hans Weber', lang: '德语', pp: 'DE2231003', ph: '13901120003', dev: 'DEV-2026-0103', tenant: '浙江文投数媒', city: '杭州', pu: '杭州柏悦酒店', dst: '灵隐寺', car: '商务型', drv: 1, src: 'AI对话', cao: 12, tm: '2026-10-14 09:03:03', est: [88.0, 8.8], bill: null },
+    { cno: '1140671095002204', nm: 'Emma Wilson', lang: '英语', pp: 'GB7765404', ph: '13901120004', dev: 'DEV-2026-0104', tenant: '杭州趣游科技', city: '杭州', pu: '灵隐寺', dst: '西湖景区', car: '舒适型', drv: 2, src: '客服代下单', cao: 3, tm: '2026-10-14 08:46:04', est: [52.0, 5.2], bill: null },
+    { cno: '1140671095002205', nm: '佐藤健太', lang: '日语', pp: 'JP3312005', ph: '13901120005', dev: 'DEV-2026-0105', tenant: '上海入境通', city: '上海', pu: '外滩', dst: '浦东国际机场', car: '豪华型', drv: 3, src: '客服代下单', cao: 9, tm: '2026-10-14 09:29:05', est: [132.0, 13.2], bill: null },
+    { cno: '1140671095002206', nm: 'Lucas Martin', lang: '法语', pp: 'FR9901206', ph: '13901120006', dev: 'DEV-2026-0106', tenant: '杭州趣游科技', city: '杭州', pu: '武林广场', dst: '西湖景区', car: '新能源', drv: 4, src: 'AI对话', cao: 12, tm: '2026-10-14 09:33:06', est: [29.0, 2.9], bill: null },
+    { cno: '1140671095002207', nm: 'Anna Schmidt', lang: '德语', pp: 'DE1122007', ph: '13901120007', dev: 'DEV-2026-0107', tenant: '杭州趣游科技', city: '杭州', pu: '河坊街', dst: '杭州东站', car: '舒适型', drv: 2, src: 'AI对话', cao: 5, tm: '2026-10-14 08:20:07', est: [44.0, 4.4], bill: [47.0, 4.7] },
+    { cno: '1140671095002208', nm: 'Kim Min-jun', lang: '韩语', pp: 'KR5567008', ph: '13901120008', dev: 'DEV-2026-0108', tenant: '浙江文投数媒', city: '杭州', pu: '西湖文化广场', dst: '城站火车站', car: '优选', drv: 5, src: 'AI对话', cao: 8, tm: '2026-10-14 07:55:08', est: [36.0, 3.6], bill: [36.0, 3.6] },
+    { cno: '1140671095002209', nm: 'John Smith', lang: '英语', pp: 'US6642009', ph: '13901120009', dev: 'DEV-2026-0109', tenant: '杭州趣游科技', city: '杭州', pu: '西湖景区', dst: '萧山国际机场', car: '豪华型', drv: 1, src: 'AI对话', cao: 7, tm: '2026-10-14 07:38:09', est: [126.0, 12.6], bill: [118.0, 11.8] },
+    { cno: '1140671095002210', nm: 'Maria Garcia', lang: '西班牙语', pp: 'ES7788010', ph: '13901120010', dev: 'DEV-2026-0110', tenant: '浙江文投数媒', city: '杭州', pu: '杭州柏悦酒店', dst: '萧山国际机场', car: '商务型', drv: 0, src: '客服代下单', cao: 7, tm: '2026-10-13 21:05:10', est: [96.0, 9.6], bill: [108.0, 10.8] },
+    { cno: '1140671095002211', nm: 'Pierre Dubois', lang: '法语', pp: 'FR2233011', ph: '13901120011', dev: 'DEV-2026-0111', tenant: '上海入境通', city: '上海', pu: '南京路步行街', dst: '静安寺', car: '舒适型', drv: 3, src: 'AI对话', cao: 7, tm: '2026-10-13 18:42:11', est: [61.0, 6.1], bill: [61.0, 6.1] },
+    { cno: '1140671095002212', nm: 'Olga Petrova', lang: '俄语', pp: 'RU4455012', ph: '13901120012', dev: 'DEV-2026-0112', tenant: '杭州趣游科技', city: '杭州', pu: '杭州东站', dst: '西湖景区', car: '舒适型', drv: -1, src: 'AI对话', cao: 4, tm: '2026-10-13 16:30:12', est: [42.0, 4.2], bill: null },
+    { cno: '1140671095002213', nm: 'David Chen', lang: '英语', pp: 'CA8877013', ph: '13901120013', dev: 'DEV-2026-0113', tenant: '浙江文投数媒', city: '杭州', pu: '湖滨银泰', dst: '西溪湿地', car: '优选', drv: 5, src: 'AI对话', cao: 10, tm: '2026-10-13 15:45:13', est: [33.0, 3.3], bill: null },
+    { cno: '1140671095002214', nm: 'Elena Novak', lang: '捷克语', pp: 'CZ1144014', ph: '13901120014', dev: 'DEV-2026-0114', tenant: '杭州趣游科技', city: '杭州', pu: '城站火车站', dst: '灵隐寺', car: '舒适型', drv: 2, src: 'AI对话', cao: 13, tm: '2026-10-13 15:02:14', est: [39.0, 3.9], bill: null },
+    { cno: '1140671095002215', nm: 'Thomas Müller', lang: '德语', pp: 'DE5533015', ph: '13901120015', dev: 'DEV-2026-0115', tenant: '上海入境通', city: '上海', pu: '陆家嘴', dst: '虹桥火车站', car: '新能源', drv: 4, src: '客服代下单', cao: 14, tm: '2026-10-13 14:28:15', est: [26.0, 2.6], bill: null },
+    { cno: '1140671095002216', nm: 'Yuki Tanaka', lang: '日语', pp: 'JP6677016', ph: '13901120016', dev: 'DEV-2026-0116', tenant: '杭州趣游科技', city: '杭州', pu: '西湖景区', dst: '河坊街', car: '优选', drv: 5, src: 'AI对话', cao: 20, tm: '2026-10-13 13:50:16', est: [31.0, 3.1], bill: null },
+    { cno: '1140671095002217', nm: 'Marco Bianchi', lang: '意大利语', pp: 'IT2233017', ph: '13901120017', dev: 'DEV-2026-0117', tenant: '浙江文投数媒', city: '杭州', pu: '西溪湿地', dst: '武林广场', car: '舒适型', drv: 1, src: '客服代下单', cao: 20, tm: '2026-10-13 12:55:17', est: [37.0, 3.7], bill: null },
+    { cno: '1140671095002218', nm: 'Sarah Johnson', lang: '英语', pp: 'US3344018', ph: '13901120018', dev: 'DEV-2026-0118', tenant: '杭州趣游科技', city: '杭州', pu: '杭州君悦酒店', dst: '杭州东站', car: '豪华型', drv: 3, src: 'AI对话', cao: 21, tm: '2026-10-13 11:40:18', est: [124.0, 12.4], bill: null },
+    { cno: '1140671095002219', nm: 'Ahmed Hassan', lang: '阿拉伯语', pp: 'EG1122019', ph: '13901120019', dev: 'DEV-2026-0119', tenant: '上海入境通', city: '上海', pu: '上海环球金融中心', dst: '浦东国际机场', car: '商务型', drv: 0, src: 'AI对话', cao: 26, tm: '2026-10-13 10:15:19', est: [92.0, 9.2], bill: null },
+    { cno: '1140671095002220', nm: 'Nina Kowalski', lang: '波兰语', pp: 'PL9988020', ph: '13901120020', dev: 'DEV-2026-0120', tenant: '杭州趣游科技', city: '杭州', pu: '西湖景区', dst: '湖滨银泰', car: '舒适型', drv: 4, src: 'AI对话', cao: 7, tm: '2026-10-13 09:48:20', est: [28.0, 2.8], bill: [28.0, 2.8] }
+  ];
+
+  function place(k) { return PLACES[k] || [k, k]; }
+  function userId(o) { var d = o.ph.replace(/\D/g, ''); return d.length >= 6 ? 'U' + d.slice(-6) : '—'; }
+  function maskPhone(p) { return p.slice(0, 3) + '****' + p.slice(-4); }
+  function maskPP(p) { return p.slice(0, 1) + '****' + p.slice(-4); }
+  function statusOf(o) { return STATUS[o.cao] || '—'; }
+  function money(o) { var b = o.bill || o.est; return b[0] + b[1]; }
+  function yuan(v) { return '¥' + Number(v).toFixed(2); }
+  function has(a, v) { return a.indexOf(v) >= 0; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  var pushed = {};   // cno → 已推送
+  var page = 1;
+
+  function val(id) { var el = document.getElementById(id); return el && el.value ? String(el.value).trim() : ''; }
+  function pageSize() { return parseInt(val('wtx-page-size'), 10) || 10; }
+
+  function filtered() {
+    var cao = val('wtx-cao').toLowerCase(), fx = val('wtx-foreigner').toLowerCase();
+    var st = val('wtx-status'), city = val('wtx-city'), src = val('wtx-source');
+    var ds = val('wtx-start'), de = val('wtx-end');
+    var list = SEED.slice().sort(function (a, b) { return a.tm < b.tm ? 1 : (a.tm > b.tm ? -1 : 0); });
+    return list.filter(function (o) {
+      if (cao && o.cno.toLowerCase().indexOf(cao) < 0) return false;
+      if (fx) {
+        var hay = (o.ph + ' ' + maskPhone(o.ph) + ' ' + o.pp + ' ' + maskPP(o.pp) + ' ' + o.dev + ' ' + o.nm + ' ' + userId(o)).toLowerCase();
+        if (hay.indexOf(fx) < 0) return false;
+      }
+      if (st && statusOf(o) !== st) return false;
+      if (city && o.city !== city) return false;
+      if (src && o.src !== src) return false;
+      var d = o.tm.slice(0, 10);
+      if (ds && d < ds) return false;
+      if (de && d > de) return false;
+      return true;
+    });
+  }
+
+  function tripHtml(o) {
+    var pu = place(o.pu), dst = place(o.dst);
+    return '<div class="wtx-trip">'
+      + '<div class="wtx-trip-city">' + esc(o.city) + '</div>'
+      + '<div class="wtx-pt from"><span class="wtx-pt-tag">起</span><div class="wtx-pt-tx">' + esc(pu[0]) + '<i class="wtx-pt-en">' + esc(pu[1]) + '</i></div></div>'
+      + '<div class="wtx-pt to"><span class="wtx-pt-tag">终</span><div class="wtx-pt-tx">' + esc(dst[0]) + '<i class="wtx-pt-en">' + esc(dst[1]) + '</i></div></div>'
+      + '</div>';
+  }
+  function driverHtml(o) {
+    var d = o.drv >= 0 ? DRIVERS[o.drv] : null;
+    var h = d
+      ? '<div class="wtx-drv-nm">' + esc(d.name) + '</div><div class="wtx-drv-plate">' + esc(d.plate) + '</div>'
+      : '<div class="wtx-drv-none">— 未接单</div>';
+    h += '<div class="wtx-drv-car">' + esc(o.car) + '</div>';
+    if (d) h += '<div class="wtx-drv-model">' + esc(d.model) + '</div>';
+    return h;
+  }
+  function opsHtml(o) {
+    var a = [];
+    a.push('<a data-act="详情" data-cno="' + o.cno + '">详情</a>');
+    if (has(CAN_CANCEL, o.cao)) a.push('<a data-act="取消" data-cno="' + o.cno + '">取消</a>');
+    if (has(CAN_DEST, o.cao)) a.push('<a data-act="改目的地" data-cno="' + o.cno + '">改目的地</a>');
+    if (has(SHOW_TRACK, o.cao)) a.push('<a data-act="查看轨迹" data-cno="' + o.cno + '">查看轨迹</a>');
+    if (has(SHOW_COMP, o.cao)) a.push('<a data-act="补偿积分" data-cno="' + o.cno + '">补偿积分</a>');
+    a.push(pushed[o.cno]
+      ? '<a class="wtx-pushed" data-act="推送订单" data-cno="' + o.cno + '">已推送</a>'
+      : '<a data-act="推送订单" data-cno="' + o.cno + '">推送订单</a>');
+    return a.join('');
+  }
+  function rowHtml(o) {
+    return '<tr>'
+      + '<td class="wo-mono">' + o.cno + '</td>'
+      + '<td><div class="wtx-user"><span class="wtx-flag">🌐</span><div><div class="wtx-nm">' + esc(o.nm) + '</div><div class="wtx-phone">' + maskPhone(o.ph) + '</div></div></div></td>'
+      + '<td class="wo-mono">' + userId(o) + '</td>'
+      + '<td><div class="wtx-dev">' + o.dev + '</div><div class="wtx-dev-lang">' + esc(o.lang) + '</div><div class="wtx-dev-pp">' + maskPP(o.pp) + '</div></td>'
+      + '<td style="font-size:11.5px;">' + esc(o.tenant) + '</td>'
+      + '<td>' + tripHtml(o) + '</td>'
+      + '<td>' + driverHtml(o) + '</td>'
+      + '<td><div class="wtx-money">' + yuan(money(o)) + '</div><div class="wtx-money-sub">含 ' + o.est[1].toFixed(1) + ' 积分服务费</div></td>'
+      + '<td>' + esc(o.src) + '</td>'
+      + '<td>' + esc(statusOf(o)) + '</td>'
+      + '<td class="wo-ops">' + opsHtml(o) + '</td>'
+      + '</tr>';
+  }
+
+  function render() {
+    var list = filtered(), size = pageSize();
+    var total = Math.max(1, Math.ceil(list.length / size));
+    if (page > total) page = total;
+    var slice = list.slice((page - 1) * size, page * size);
+    body.innerHTML = slice.length
+      ? slice.map(rowHtml).join('')
+      : '<tr><td colspan="11" style="text-align:center;color:#86909c;padding:34px 0;">没有符合条件的打车订单</td></tr>';
+    document.getElementById('wtx-page-info').textContent = '第 ' + page + '/' + total + ' 页';
+    document.getElementById('wtx-prev').disabled = page <= 1;
+    document.getElementById('wtx-next').disabled = page >= total;
+    document.getElementById('wtx-summary').textContent = '共 ' + list.length + ' 条';
+  }
+
+  /* ---------- toast ---------- */
+  var toast = document.createElement('div');
+  toast.className = 'wtx-toast';
+  document.body.appendChild(toast);
+  var toastTimer = null;
+  function say(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+  }
+
+  /* ---------- 详情抽屉 ---------- */
+  var scrim = document.createElement('div');
+  scrim.className = 'wtx-scrim';
+  var drawer = document.createElement('div');
+  drawer.className = 'wtx-drawer';
+  drawer.innerHTML = '<div class="wtx-drawer-head"><div class="wtx-drawer-title">打车订单详情</div><button class="wtx-drawer-close" type="button">×</button></div><div class="wtx-drawer-body"></div>';
+  document.body.appendChild(scrim);
+  document.body.appendChild(drawer);
+  var drawerBody = drawer.querySelector('.wtx-drawer-body');
+  function closeDrawer() { scrim.classList.remove('show'); drawer.classList.remove('show'); }
+  scrim.addEventListener('click', closeDrawer);
+  drawer.querySelector('.wtx-drawer-close').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+  function dRow(k, v) { return '<div class="wtx-d-row"><span class="wtx-d-k">' + k + '</span><span class="wtx-d-v">' + v + '</span></div>'; }
+  function dSec(t, rows) { return '<div class="wtx-d-sec"><div class="wtx-d-sec-t">' + t + '</div>' + rows + '</div>'; }
+  function openDetail(o) {
+    var pu = place(o.pu), dst = place(o.dst), d = o.drv >= 0 ? DRIVERS[o.drv] : null;
+    var h = '';
+    h += dSec('订单信息',
+      dRow('曹操订单号', '<span style="font-family:\'SF Mono\',Menlo,monospace;">' + o.cno + '</span>')
+      + dRow('订单状态', '<span class="wtx-d-status">' + esc(statusOf(o)) + '</span>')
+      + dRow('订单来源', esc(o.src))
+      + dRow('下单时间', o.tm)
+      + dRow('租户名称', esc(o.tenant))
+      + dRow('城市', esc(o.city)));
+    h += dSec('老外用户',
+      dRow('姓名', esc(o.nm))
+      + dRow('语言', esc(o.lang))
+      + dRow('用户ID', userId(o))
+      + dRow('设备号', o.dev)
+      + dRow('手机号', maskPhone(o.ph))
+      + dRow('护照号', maskPP(o.pp)));
+    h += dSec('行程',
+      dRow('起点', esc(pu[0]) + '<br><span style="color:#86909c;font-size:11px;font-style:italic;">' + esc(pu[1]) + '</span>')
+      + dRow('终点', esc(dst[0]) + '<br><span style="color:#86909c;font-size:11px;font-style:italic;">' + esc(dst[1]) + '</span>')
+      + dRow('车型档位', esc(o.car)));
+    h += dSec('司机车辆', d
+      ? dRow('司机', esc(d.name)) + dRow('车牌号', esc(d.plate)) + dRow('车辆型号', esc(d.model))
+      : dRow('司机', '<span style="color:#86909c;">— 未接单</span>'));
+    h += dSec('费用',
+      dRow('订单金额', '<b>' + yuan(money(o)) + '</b>')
+      + dRow('服务费', o.est[1].toFixed(1) + ' 积分')
+      + dRow('价格类型', o.bill ? '实际账单' : '预估价格'));
+    drawerBody.innerHTML = h;
+    drawerBody.scrollTop = 0;
+    scrim.classList.add('show');
+    drawer.classList.add('show');
+  }
+
+  /* ---------- 行操作（事件委托） ---------- */
+  function orderOf(cno) { for (var i = 0; i < SEED.length; i++) if (SEED[i].cno === cno) return SEED[i]; return null; }
+  body.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-act]');
+    if (!a) return;
+    var o = orderOf(a.getAttribute('data-cno'));
+    if (!o) return;
+    var act = a.getAttribute('data-act');
+    if (act === '详情') { openDetail(o); return; }
+    if (act === '推送订单') {
+      if (pushed[o.cno]) { say('订单 ' + o.cno + ' 已在老外硬件端展示'); return; }
+      pushed[o.cno] = true;
+      render();
+      say('订单 ' + o.cno + ' 已推送至老外硬件端，等待确认');
+      return;
+    }
+    if (act === '取消') { say('订单 ' + o.cno + '（' + statusOf(o) + '）：取消申请已提交，等待老外确认'); return; }
+    if (act === '改目的地') { say('订单 ' + o.cno + '：已打开更改目的地流程（当前状态 ' + statusOf(o) + '）'); return; }
+    if (act === '查看轨迹') { say('订单 ' + o.cno + '：行程轨迹 ' + place(o.pu)[0] + ' → ' + place(o.dst)[0]); return; }
+    if (act === '补偿积分') { say('订单 ' + o.cno + '：补偿积分申请已提交，等待主管审核'); return; }
+  });
+
+  /* ---------- 筛选 / 分页 / 导出 ---------- */
+  document.getElementById('wtx-query').addEventListener('click', function () { page = 1; render(); });
+  document.getElementById('wtx-reset').addEventListener('click', function () {
+    ['wtx-cao', 'wtx-foreigner', 'wtx-start', 'wtx-end'].forEach(function (id) { document.getElementById(id).value = ''; });
+    ['wtx-status', 'wtx-city', 'wtx-source'].forEach(function (id) { document.getElementById(id).value = ''; });
+    page = 1; render();
+  });
+  ['wtx-cao', 'wtx-foreigner'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') { page = 1; render(); } });
+  });
+  document.getElementById('wtx-page-size').addEventListener('change', function () { page = 1; render(); });
+  document.getElementById('wtx-prev').addEventListener('click', function () { page = Math.max(1, page - 1); render(); });
+  document.getElementById('wtx-next').addEventListener('click', function () { page = page + 1; render(); });
+  document.getElementById('wtx-export').addEventListener('click', function () {
+    var list = filtered();
+    var head = ['曹操订单号', '老外姓名', '语言', '护照号', '手机号', '设备号', '用户ID', '租户', '城市', '车型档位', '起点', '终点', '外文起点', '外文终点', '司机', '车牌', '车辆型号', '订单金额', '服务费积分', '订单来源', '订单状态', '下单时间'];
+    function csvCell(v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var rows = list.map(function (o) {
+      var d = o.drv >= 0 ? DRIVERS[o.drv] : null, pu = place(o.pu), dst = place(o.dst);
+      return [o.cno, o.nm, o.lang, o.pp, o.ph, o.dev, userId(o), o.tenant, o.city, o.car, pu[0], dst[0], pu[1], dst[1], d ? d.name : '', d ? d.plate : '', d ? d.model : '', money(o).toFixed(2), o.est[1].toFixed(1), o.src, statusOf(o), o.tm].map(csvCell).join(',');
+    });
+    var csv = '\uFEFF' + head.map(csvCell).join(',') + '\n' + rows.join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url; link.download = '打车订单导出.csv';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    say('已导出 ' + list.length + ' 条打车订单');
+  });
+
+  render();
 })();
 
 // 会话计时（01:37:09 起走秒，时分秒格式）
@@ -4839,6 +5182,52 @@ var kbDetails = {
   padding: 4px 10px; cursor: pointer; margin-left: 6px; font-size: 12px; color: #4e5969;
 }
 .wo-pager-btns button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ============ 打车订单面板（列表单元格） ============ */
+.wtx-table td { vertical-align: top; }
+.wtx-user { display: flex; align-items: flex-start; gap: 6px; min-width: 0; }
+.wtx-flag { font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+.wtx-nm { font-weight: 600; font-size: 12.5px; color: #1f2329; line-height: 1.35; overflow-wrap: break-word; }
+.wtx-phone { font-family: "SF Mono", Menlo, monospace; font-size: 11px; color: #86909c; white-space: nowrap; }
+.wtx-dev { font-family: "SF Mono", Menlo, monospace; font-size: 10.5px; color: #4e5969; line-height: 1.5; }
+.wtx-dev-lang { font-size: 11px; color: #4e5969; line-height: 1.45; }
+.wtx-dev-pp { font-family: "SF Mono", Menlo, monospace; font-size: 10.5px; color: #86909c; }
+.wtx-trip { display: flex; flex-direction: column; gap: 3px; }
+.wtx-trip-city { font-size: 10.5px; color: #86909c; line-height: 1.25; }
+.wtx-pt { display: flex; align-items: flex-start; gap: 4px; }
+.wtx-pt-tag { flex-shrink: 0; width: 17px; height: 17px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; margin-top: 1px; }
+.wtx-pt.from .wtx-pt-tag { background: #2fbf4e; }
+.wtx-pt.to .wtx-pt-tag { background: #f53f3f; }
+.wtx-pt-tx { font-size: 11.5px; color: #1f2329; line-height: 1.35; }
+.wtx-pt-en { color: #86909c; font-size: 10.5px; line-height: 1.25; display: block; font-style: italic; }
+.wtx-drv-nm { font-weight: 600; font-size: 12px; line-height: 1.45; color: #1f2329; }
+.wtx-drv-plate { font-family: "SF Mono", Menlo, monospace; font-size: 11px; color: #4e5969; }
+.wtx-drv-car { font-size: 11px; color: #4e5969; line-height: 1.45; }
+.wtx-drv-model { font-size: 10.5px; color: #86909c; line-height: 1.4; }
+.wtx-drv-none { font-size: 11.5px; color: #86909c; line-height: 1.45; }
+.wtx-money { font-weight: 700; font-size: 12.5px; color: #1f2329; }
+.wtx-money-sub { font-size: 10.5px; color: #86909c; line-height: 1.4; }
+.wtx-table .wo-ops a { margin-right: 6px; }
+.wtx-table .wo-ops a.wtx-pushed { color: #86909c; cursor: default; }
+/* 打车订单操作反馈 toast */
+.wtx-toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-16px); background: #1f2733; color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; opacity: 0; visibility: hidden; transition: opacity .2s, transform .2s; z-index: 400; max-width: 80vw; }
+.wtx-toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+/* 打车订单详情抽屉 */
+.wtx-scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, .35); z-index: 300; opacity: 0; visibility: hidden; transition: opacity .2s; }
+.wtx-scrim.show { opacity: 1; visibility: visible; }
+.wtx-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 92vw; background: #fff; z-index: 301; box-shadow: -8px 0 30px rgba(15, 23, 42, .18); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
+.wtx-drawer.show { transform: translateX(0); }
+.wtx-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e5e6eb; flex-shrink: 0; }
+.wtx-drawer-title { font-size: 15px; font-weight: 700; color: #1f2329; }
+.wtx-drawer-close { border: none; background: none; font-size: 24px; line-height: 1; color: #86909c; cursor: pointer; padding: 0 4px; }
+.wtx-drawer-close:hover { color: #1f2329; }
+.wtx-drawer-body { flex: 1; overflow: auto; padding: 18px 20px; }
+.wtx-d-sec { margin-bottom: 18px; }
+.wtx-d-sec-t { font-size: 12px; font-weight: 700; color: #86909c; margin-bottom: 8px; letter-spacing: .5px; }
+.wtx-d-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed #f2f3f5; }
+.wtx-d-k { color: #86909c; flex-shrink: 0; }
+.wtx-d-v { color: #1f2329; text-align: right; font-weight: 500; overflow-wrap: break-word; }
+.wtx-d-status { display: inline-block; font-size: 12px; font-weight: 600; color: #1f2329; background: #f2f3f5; border-radius: 4px; padding: 2px 10px; }
 
 /* ============ 外卖代下单面板 ============ */
 .wo-agent-wrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
