@@ -2699,13 +2699,14 @@ body {
           <div class="dz-rail__item" data-tip="AI助手" data-panel="aiAssist"><i class="bi bi-stars"></i></div>
         </aside>
 
+        <!-- ============ 右栏锚点单页：rail 全部面板堆叠在同一滚动页，点击图标锚点定位 ============ -->
+        <div class="dz-rpage" id="railPage">
         <!-- ============ 客户详情面板：历史聊天总结、客户画像 ============ -->
-        <aside class="dz-customer" id="custDetail" hidden="">
+        <aside class="dz-customer" id="custDetail">
           <div class="dz-customer__head">
-            <span class="dz-customer__avatar"><i class="bi bi-person-lines-fill"></i></span>
-            <span class="dz-customer__title">客户详情</span>
+            <span class="dz-customer__title"><i class="bi bi-person-lines-fill" style="color: var(--dzglobal-primary-color);"></i> 客户详情</span>
           </div>
-          <div class="dz-customer__body" style="padding: 12px 16px; overflow-y: auto; flex: 1;">
+          <div class="dz-customer__body" style="padding: 12px 16px;">
             <div style="margin-bottom: 16px;">
               <div style="font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 8px;">客户画像</div>
               <div style="font-size: 12px; color: #4e5969; line-height: 1.8;">
@@ -2769,9 +2770,7 @@ body {
         <!-- ============ 右侧客户信息栏 ============ -->
         <aside class="dz-customer" id="custInfo">
           <div class="dz-customer__head">
-            <span class="dz-customer__avatar"><i class="bi bi-person-fill"></i></span>
-            <span class="dz-customer__title">客户信息</span>
-            <span class="dz-customer__more"></span>
+            <span class="dz-customer__title"><i class="bi bi-person-fill" style="color: var(--dzglobal-primary-color);"></i> 客户信息</span>
           </div>
           <div class="dz-customer__body">
             <div class="dz-field">
@@ -2797,7 +2796,7 @@ body {
         </aside>
 
         <!-- 业务记录面板 -->
-        <aside class="dz-customer dz-todopanel" id="bizRecord" hidden="">
+        <aside class="dz-customer dz-todopanel" id="bizRecord">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-journal-text" style="color: var(--dzglobal-primary-color);"></i> 业务记录</span>
           </div>
@@ -2813,7 +2812,7 @@ body {
         </aside>
 
         <!-- 访问信息面板 -->
-        <aside class="dz-customer dz-todopanel" id="visitInfo" hidden="">
+        <aside class="dz-customer dz-todopanel" id="visitInfo">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-box-arrow-in-right" style="color: var(--dzglobal-primary-color);"></i> 访问信息</span>
           </div>
@@ -2877,7 +2876,7 @@ body {
         </aside>
 
         <!-- 联络历史面板 -->
-        <aside class="dz-customer dz-todopanel" id="contactHistory" hidden="">
+        <aside class="dz-customer dz-todopanel" id="contactHistory">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-clock-history" style="color: var(--dzglobal-primary-color);"></i> 联络历史</span>
           </div>
@@ -2901,7 +2900,7 @@ body {
         </aside>
 
         <!-- 关联工单面板 -->
-        <aside class="dz-customer dz-todopanel" id="relatedTicket" hidden="">
+        <aside class="dz-customer dz-todopanel" id="relatedTicket">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-ticket-perforated" style="color: var(--dzglobal-primary-color);"></i> 关联工单</span>
           </div>
@@ -2916,7 +2915,7 @@ body {
         </aside>
 
         <!-- AI知识库面板 -->
-        <aside class="dz-customer dz-todopanel" id="aiKb" hidden="">
+        <aside class="dz-customer dz-todopanel" id="aiKb">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-robot" style="color: var(--dzglobal-primary-color);"></i> AI知识库</span>
           </div>
@@ -2941,7 +2940,7 @@ body {
         </aside>
 
         <!-- AI助手面板：AI 问答（深度思考 + 引用文档 + 复制） -->
-        <aside class="dz-customer dz-todopanel" id="aiAssist" hidden="">
+        <aside class="dz-customer dz-todopanel" id="aiAssist">
           <div class="dz-customer__head">
             <span class="dz-customer__title"><i class="bi bi-stars" style="color: var(--dzglobal-primary-color);"></i> AI助手</span>
           </div>
@@ -2983,6 +2982,7 @@ body {
             </div>
           </div>
         </aside>
+        </div><!-- /railPage 右栏锚点单页 -->
 
         <!-- AI知识库详情弹窗：点击眼睛图标查看中文详情 -->
         <div class="dz-kb-modal" id="kbModal">
@@ -4128,29 +4128,46 @@ body {
   stream.scrollTop = stream.scrollHeight;
 })();
 
-// 右侧 rail 导航：点击图标切换右栏面板（客户详情 / 客户信息 / 业务记录 / 访问信息 / 联络历史 / 关联工单）
+// 右侧 rail 导航：锚点模式 —— 8 个面板堆叠在同一滚动页 #railPage，
+// 点击图标平滑滚动到对应区块锚点；手动滚动时联动高亮当前区块图标
 (function () {
-  var items = document.querySelectorAll('#railNav .dz-rail__item');
-  var panes = {
-    custDetail: document.getElementById('custDetail'),
-    custInfo: document.getElementById('custInfo'),
-    bizRecord: document.getElementById('bizRecord'),
-    visitInfo: document.getElementById('visitInfo'),
-    contactHistory: document.getElementById('contactHistory'),
-    relatedTicket: document.getElementById('relatedTicket'),
-    aiKb: document.getElementById('aiKb'),
-    aiAssist: document.getElementById('aiAssist')
-  };
-  items.forEach(function (item) {
+  var page = document.getElementById('railPage');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#railNav .dz-rail__item'));
+  if (!page || !items.length) return;
+  var secs = items.map(function (it) { return document.getElementById(it.getAttribute('data-panel')); });
+  var lockUntil = 0, lockTimer = 0;
+  function setActive(key) {
+    items.forEach(function (i) { i.classList.toggle('active', i.getAttribute('data-panel') === key); });
+  }
+  function spy() {
+    var st = page.scrollTop, idx = 0;
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i] && secs[i].offsetTop - 12 <= st) idx = i;
+    }
+    if (page.clientHeight && st + page.clientHeight >= page.scrollHeight - 4) idx = secs.length - 1;
+    setActive(items[idx].getAttribute('data-panel'));
+  }
+  items.forEach(function (item, n) {
     item.addEventListener('click', function () {
-      var key = item.getAttribute('data-panel');
-      items.forEach(function (i) { i.classList.toggle('active', i === item); });
-      if (!key) return;
-      Object.keys(panes).forEach(function (k) {
-        if (panes[k]) panes[k].hidden = (k !== key);
-      });
+      var sec = secs[n];
+      if (!sec) return;
+      setActive(item.getAttribute('data-panel'));
+      lockUntil = Date.now() + 900;
+      clearTimeout(lockTimer);
+      lockTimer = setTimeout(function () { lockUntil = 0; spy(); }, 950);
+      page.scrollTo({ top: Math.max(0, sec.offsetTop - 6), behavior: 'smooth' });
     });
   });
+  page.addEventListener('scroll', function () { if (Date.now() >= lockUntil) spy(); }, { passive: true });
+  // 首帧布局/样式就绪后再校准高亮；工作台从隐藏恢复显示时重新校准
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { spy(); });
+  else spy();
+  requestAnimationFrame(function () { spy(); });
+  var wrap = document.querySelector('.dz-chat-wrap');
+  if (wrap && window.MutationObserver) {
+    new MutationObserver(function () { if (!wrap.hidden) requestAnimationFrame(function () { spy(); }); })
+      .observe(wrap, { attributes: true, attributeFilter: ['hidden'] });
+  }
 })();
 
 // AI知识库中文文案数据（详情弹窗与「引用」共用）
@@ -4357,7 +4374,10 @@ var kbDetails = {
     function p(n) { return n < 10 ? '0' + n : n; }
     return d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
   }
-  function scrollBottom() { body.scrollTop = body.scrollHeight; }
+  function scrollBottom() {
+    var pg = document.getElementById('railPage');
+    if (pg) pg.scrollTop = pg.scrollHeight; else body.scrollTop = body.scrollHeight;
+  }
   function addUserMsg(innerHTML) {
     var msg = document.createElement('div');
     msg.className = 'dz-aiq__msg dz-aiq__msg--user';
@@ -4949,6 +4969,23 @@ var kbDetails = {
 }
 .dz-customer__edit { font-size: 12px; color: var(--dz-text-secondary); cursor: pointer; display: flex; align-items: center; gap: 4px; }
 .dz-customer__edit:hover { color: var(--dzglobal-primary-color); }
+/* ---- 右栏锚点模式：8 个面板堆叠在同一滚动页 #railPage，rail 点击锚点定位 + 滚动联动高亮 ---- */
+.dz-rpage {
+  width: 264px; flex-shrink: 0; min-height: 0; position: relative;
+  background: #fff; overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin; scrollbar-color: #c9d2e0 transparent;
+}
+.dz-rpage::-webkit-scrollbar { width: 6px; }
+.dz-rpage::-webkit-scrollbar-track { background: transparent; }
+.dz-rpage::-webkit-scrollbar-thumb { background: #c9d2e0; border-radius: 3px; }
+.dz-rpage::-webkit-scrollbar-thumb:hover { background: #aeb9cc; }
+#railPage > .dz-customer { width: 100%; display: block; }
+#railPage > .dz-customer + .dz-customer { border-top: 1px solid var(--dz-table-border); }
+#railPage .dz-customer__head { height: auto; padding: 14px 14px 6px; border-bottom: none; }
+#railPage .dz-customer__title { font-size: 15px; display: flex; align-items: center; gap: 7px; }
+#railPage .dz-customer__title i { font-size: 16px; }
+#railPage .dz-customer__body { flex: none; min-height: auto; overflow: visible; padding: 6px 14px 16px; }
+#railPage .dz-customer__foot { border-top: none; padding-top: 4px; }
 /* hidden 属性优先：确保带 display:flex 的区块（聊天头部条等）也能被隐藏 */
 .dz-chat [hidden] { display: none !important; }
 /* 工作台整体隐藏（打开报表页时）：dzim/chat-wrap 自身有 display:flex，需强制覆盖 */
