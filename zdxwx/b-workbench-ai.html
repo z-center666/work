@@ -2686,6 +2686,21 @@ body {
         </div>
         </div>
 
+        <!-- ============ 右栏整体：顶部「快捷工具」tab 导航 + 下部 rail/锚点单页 ============ -->
+        <div class="dz-rcol">
+          <div class="dz-rcol__tools" id="rcolTools">
+            <button class="dz-rcol__toolstab" id="toolsTab" type="button" aria-expanded="false">
+              <i class="bi bi-lightning-charge-fill"></i> 快捷工具
+              <i class="bi bi-chevron-down dz-rcol__chev"></i>
+            </button>
+            <div class="dz-rcol__grid" id="toolsGrid" hidden="">
+              <button class="dz-toolbtn" type="button" data-fs="panelWaimaiOrder" data-title="外卖订单"><i class="bi bi-receipt"></i><span>外卖订单</span></button>
+              <button class="dz-toolbtn" type="button" data-fs="panelWaimai" data-title="外卖代下单"><i class="bi bi-bag-plus"></i><span>外卖代下单</span></button>
+              <button class="dz-toolbtn" type="button" data-fs="panelDacheOrder" data-title="打车订单"><i class="bi bi-taxi-front"></i><span>打车订单</span></button>
+              <button class="dz-toolbtn" type="button" data-fs="panelDache" data-title="打车代下单"><i class="bi bi-car-front"></i><span>打车代下单</span></button>
+            </div>
+          </div>
+          <div class="dz-rcol__body">
         <!-- ============ 右侧窄图标栏：面板快捷入口（客户详情 / 客户信息 / 待拨打 / 待跟进 / 联络历史 / 关联工单 / AI知识库） ============ -->
         <aside class="dz-rail" id="railNav">
           <div class="dz-rail__item" data-tip="客户详情" data-panel="custDetail"><i class="bi bi-person-lines-fill"></i></div>
@@ -2983,6 +2998,20 @@ body {
           </div>
         </aside>
         </div><!-- /railPage 右栏锚点单页 -->
+          </div><!-- /dz-rcol__body -->
+        </div><!-- /dz-rcol -->
+
+        <!-- ============ 快捷工具全屏页：复用中间栏 tab 面板节点，状态双向同步 ============ -->
+        <div class="dz-fs" id="fsOverlay" hidden="">
+          <div class="dz-fs__head">
+            <span class="dz-fs__crumb"><i class="bi bi-lightning-charge-fill"></i> 快捷工具</span>
+            <span class="dz-fs__sep">/</span>
+            <span class="dz-fs__title" id="fsTitle">外卖订单</span>
+            <span class="dz-fs__hint">与中间栏同名 tab 共用同一页面实例，筛选/流程状态实时同步</span>
+            <button class="dz-fs__close" id="fsClose" type="button"><i class="bi bi-fullscreen-exit"></i> 退出全屏</button>
+          </div>
+          <div class="dz-fs__body" id="fsBody"></div>
+        </div>
 
         <!-- AI知识库详情弹窗：点击眼睛图标查看中文详情 -->
         <div class="dz-kb-modal" id="kbModal">
@@ -4170,6 +4199,47 @@ body {
   }
 })();
 
+// 快捷工具：顶部 tab 导航展开/收起；4 按钮全屏复用中间栏同名 tab 的面板节点（同一实例，状态同步）
+(function () {
+  var tools = document.getElementById('rcolTools');
+  var tab = document.getElementById('toolsTab');
+  var grid = document.getElementById('toolsGrid');
+  var overlay = document.getElementById('fsOverlay');
+  var fsBody = document.getElementById('fsBody');
+  var fsTitle = document.getElementById('fsTitle');
+  var closeBtn = document.getElementById('fsClose');
+  if (!tools || !tab || !grid || !overlay || !fsBody || !closeBtn) return;
+  tab.addEventListener('click', function () {
+    var open = grid.hidden;
+    grid.hidden = !open;
+    tools.classList.toggle('open', open);
+    tab.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  var moved = null;
+  function closeFs() {
+    if (!moved) return;
+    var m = moved; moved = null;
+    m.parent.insertBefore(m.node, m.next && m.next.parentNode === m.parent ? m.next : null);
+    overlay.hidden = true;
+    var act = document.querySelector('.dz-chat__tab.active');
+    if (act) act.click(); // 按中间栏当前 tab 恢复各面板显隐
+  }
+  grid.addEventListener('click', function (e) {
+    var btn = e.target.closest('.dz-toolbtn');
+    if (!btn) return;
+    var node = document.getElementById(btn.getAttribute('data-fs'));
+    if (!node) return;
+    if (moved) closeFs();
+    moved = { node: node, parent: node.parentNode, next: node.nextSibling };
+    node.hidden = false;
+    fsBody.appendChild(node);
+    fsTitle.textContent = btn.getAttribute('data-title') || '';
+    overlay.hidden = false;
+  });
+  closeBtn.addEventListener('click', closeFs);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeFs(); });
+})();
+
 // AI知识库中文文案数据（详情弹窗与「引用」共用）
 var kbDetails = {
   points: {
@@ -4986,6 +5056,36 @@ var kbDetails = {
 #railPage .dz-customer__title i { font-size: 16px; }
 #railPage .dz-customer__body { flex: none; min-height: auto; overflow: visible; padding: 6px 14px 16px; }
 #railPage .dz-customer__foot { border-top: none; padding-top: 4px; }
+/* ---- 右栏整体包装：顶部「快捷工具」tab 导航 + 下部 rail/锚点单页 ---- */
+.dz-rcol { width: 305px; box-sizing: border-box; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-left: 1px solid var(--dz-table-border); }
+.dz-rcol .dz-rail { border-left: none; }
+.dz-rcol__body { flex: 1; min-height: 0; display: flex; flex-direction: row; }
+.dz-rcol__tools { flex-shrink: 0; background: #fbfcfe; border-bottom: 1px solid var(--dz-table-border); }
+.dz-rcol__toolstab { width: 100%; display: flex; align-items: center; gap: 7px; padding: 9px 12px; border: none; background: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--dz-text-heading); }
+.dz-rcol__toolstab > i:first-child { font-size: 14px; color: var(--dzglobal-primary-color); }
+.dz-rcol__toolstab:hover { background: #f0f5ff; }
+.dz-rcol__chev { margin-left: auto; font-size: 12px; color: var(--dz-text-secondary); transition: transform .2s; }
+.dz-rcol__tools.open .dz-rcol__toolstab { color: var(--dzglobal-primary-color); background: #eef4ff; box-shadow: inset 0 -2px 0 var(--dzglobal-primary-color); }
+.dz-rcol__tools.open .dz-rcol__chev { transform: rotate(180deg); }
+.dz-rcol__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px 12px; }
+.dz-rcol__grid[hidden] { display: none; }
+.dz-toolbtn { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; border: 1px solid var(--dz-input-border); border-radius: 8px; background: #fff; cursor: pointer; font-family: inherit; font-size: 12px; color: var(--dz-text-regular); transition: border-color .15s, color .15s, box-shadow .15s, transform .05s; }
+.dz-toolbtn i { font-size: 18px; color: var(--dzglobal-primary-color); }
+.dz-toolbtn:hover { border-color: var(--dzglobal-primary-color); color: var(--dzglobal-primary-color); box-shadow: 0 2px 8px rgba(0,104,255,.16); }
+.dz-toolbtn:active { transform: scale(.97); }
+/* ---- 快捷工具全屏页：复用中间栏面板节点，状态双向同步 ---- */
+.dz-fs { position: fixed; inset: 0; z-index: 6000; display: flex; flex-direction: column; background: #fff; animation: dzFsIn .16s ease; }
+.dz-fs[hidden] { display: none !important; }
+@keyframes dzFsIn { from { opacity: 0; } to { opacity: 1; } }
+.dz-fs__head { flex-shrink: 0; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--dz-table-border); background: linear-gradient(90deg, #f4f8ff, #fff 60%); }
+.dz-fs__crumb { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--dzglobal-primary-color); background: #e8f1ff; border: 1px solid #bcd7ff; border-radius: 12px; padding: 2px 10px; }
+.dz-fs__sep { color: var(--dz-placeholder); font-size: 12px; }
+.dz-fs__title { font-size: 15px; font-weight: 700; color: var(--dz-text-heading); }
+.dz-fs__hint { font-size: 12px; color: var(--dz-text-secondary); }
+.dz-fs__close { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border: 1px solid var(--dz-input-border); border-radius: 6px; background: #fff; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--dz-text-regular); }
+.dz-fs__close:hover { color: var(--dzglobal-primary-color); border-color: var(--dzglobal-primary-color); }
+.dz-fs__body { flex: 1; min-height: 0; overflow: hidden; background: #fff; }
+.dz-fs__body > * { width: 100%; height: 100%; }
 /* hidden 属性优先：确保带 display:flex 的区块（聊天头部条等）也能被隐藏 */
 .dz-chat [hidden] { display: none !important; }
 /* 工作台整体隐藏（打开报表页时）：dzim/chat-wrap 自身有 display:flex，需强制覆盖 */
@@ -5258,12 +5358,12 @@ var kbDetails = {
 .wtx-table .wo-ops a { margin-right: 6px; }
 .wtx-table .wo-ops a.wtx-pushed { color: #86909c; cursor: default; }
 /* 打车订单操作反馈 toast */
-.wtx-toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-16px); background: #1f2733; color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; opacity: 0; visibility: hidden; transition: opacity .2s, transform .2s; z-index: 400; max-width: 80vw; }
+.wtx-toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-16px); background: #1f2733; color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 13px; opacity: 0; visibility: hidden; transition: opacity .2s, transform .2s; z-index: 6600; max-width: 80vw; }
 .wtx-toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 /* 打车订单详情抽屉 */
-.wtx-scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, .35); z-index: 300; opacity: 0; visibility: hidden; transition: opacity .2s; }
+.wtx-scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, .35); z-index: 6500; opacity: 0; visibility: hidden; transition: opacity .2s; }
 .wtx-scrim.show { opacity: 1; visibility: visible; }
-.wtx-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 92vw; background: #fff; z-index: 301; box-shadow: -8px 0 30px rgba(15, 23, 42, .18); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
+.wtx-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 92vw; background: #fff; z-index: 6510; box-shadow: -8px 0 30px rgba(15, 23, 42, .18); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; }
 .wtx-drawer.show { transform: translateX(0); }
 .wtx-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e5e6eb; flex-shrink: 0; }
 .wtx-drawer-title { font-size: 15px; font-weight: 700; color: #1f2329; }
