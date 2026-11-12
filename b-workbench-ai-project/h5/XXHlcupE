@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>补偿积分审核</title>
+<script src="./h5-shared-data.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background:#f6f7f9;
+    color:#1f2329;
+    max-width:480px;
+    margin:0 auto;
+    overflow-x:hidden;
+  }
+
+  /* ---------- 顶部导航 ---------- */
+  .navbar {
+    position:fixed; top:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px; height:52px;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    border-bottom:1px solid #f0f0f0;
+    z-index:100;
+  }
+  .navbar-title { font-size:17px; font-weight:600; }
+  .navbar-badge {
+    position:absolute; right:16px; top:50%; transform:translateY(-50%);
+    min-width:18px; height:18px; padding:0 5px;
+    background:#ff4d4f; color:#fff;
+    border-radius:9px;
+    font-size:11px; line-height:18px; text-align:center;
+    display:none;
+  }
+  .navbar-badge.show { display:inline-block; }
+
+  /* ---------- 统计卡片 ---------- */
+  .stats {
+    margin:64px 12px 10px;
+    display:flex; gap:10px;
+  }
+  .stat-card {
+    flex:1; background:#fff; border-radius:12px; padding:14px 8px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .stat-num { font-size:22px; font-weight:700; line-height:1.2; }
+  .stat-num.pending { color:#0669FF; }
+  .stat-num.approved { color:#2ba471; }
+  .stat-num.rejected { color:#f04142; }
+  .stat-label { font-size:12px; color:#8a919f; margin-top:4px; }
+
+  /* ---------- 筛选 Tab ---------- */
+  .tabs-wrap {
+    position:sticky; top:52px; z-index:90;
+    background:#f6f7f9;
+    padding:8px 12px;
+  }
+  .tabs {
+    display:flex; gap:8px;
+    overflow-x:auto; scrollbar-width:none;
+    background:#fff; border-radius:12px; padding:6px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab {
+    flex:0 0 auto;
+    padding:8px 16px;
+    border-radius:8px;
+    font-size:14px; color:#5e6673;
+    cursor:pointer;
+    transition:all .25s ease;
+    white-space:nowrap;
+  }
+  .tab.active {
+    background:#0669FF; color:#fff; font-weight:600;
+    box-shadow:0 2px 6px rgba(255,107,53,.3);
+  }
+  .tab-count {
+    display:inline-block; margin-left:4px;
+    font-size:11px; padding:0 5px; border-radius:8px;
+    background:rgba(0,0,0,.06);
+  }
+  .tab.active .tab-count { background:rgba(255,255,255,.25); }
+
+  /* ---------- 卡片列表 ---------- */
+  .list { padding:0 12px 96px; }
+  .list.animating { animation: fadeSlideIn .28s ease; }
+  @keyframes fadeSlideIn {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .card {
+    background:#fff; border-radius:14px;
+    padding:14px;
+    margin-bottom:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+    transition:box-shadow .2s;
+  }
+  .card:active { box-shadow:0 4px 14px rgba(0,0,0,.08); }
+
+  .card-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .card-id { font-size:14px; font-weight:600; }
+  .badge {
+    font-size:11px; padding:3px 9px; border-radius:10px;
+    font-weight:500;
+  }
+  .badge.pending  { background:#fff1e8; color:#0669FF; }
+  .badge.approved { background:#e8f7ef; color:#2ba471; }
+  .badge.rejected { background:#fdecec; color:#f04142; }
+
+  .card-row {
+    display:flex; align-items:flex-start;
+    font-size:13px; line-height:1.7;
+    margin-bottom:6px;
+  }
+  .card-row:last-child { margin-bottom:0; }
+  .row-label {
+    flex:0 0 72px;
+    color:#8a919f;
+  }
+  .row-value { flex:1; color:#1f2329; word-break:break-all; }
+  .row-value.sub { color:#5e6673; font-size:12px; }
+
+  .order-link {
+    color:#0669FF; text-decoration:underline;
+    cursor:pointer;
+    word-break:break-all;
+  }
+
+  /* 复制按钮 */
+  .copy-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    margin-left:6px; padding:2px 6px;
+    background:#E6EFFF; color:#0669FF;
+    border:1px solid #B3D1FF; border-radius:6px;
+    font-size:11px; line-height:1.4; cursor:pointer;
+    vertical-align:middle; user-select:none;
+  }
+  .copy-btn:active { background:#B3D1FF; }
+
+  /* 业态徽标（外卖橙 / 打车蓝） */
+  .biz-tag {
+    display:inline-block; margin-right:6px; padding:1px 7px;
+    border-radius:4px; font-size:11px; font-weight:600;
+    vertical-align:middle;
+  }
+  .biz-tag.waimai { background:#E6EFFF; color:#0669FF; }
+  .biz-tag.dache  { background:#E6F4FF; color:#0669FF; }
+
+  .points-num {
+    color:#0669FF; font-weight:700; font-size:15px;
+  }
+
+  .reason-text {
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    cursor:pointer;
+    transition:color .2s;
+  }
+  .reason-text.expanded {
+    -webkit-line-clamp:unset;
+    display:block;
+  }
+  .reason-toggle {
+    color:#0669FF; font-size:12px;
+    margin-left:6px;
+    cursor:pointer;
+  }
+
+  .card-actions {
+    display:flex; gap:10px;
+    margin-top:12px; padding-top:12px;
+    border-top:1px solid #f5f5f5;
+  }
+  .btn {
+    flex:1; height:38px; border:none; border-radius:20px;
+    font-size:14px; font-weight:500; cursor:pointer;
+    transition:opacity .15s, transform .1s;
+  }
+  .btn:active { opacity:.8; transform:scale(.97); }
+  .btn-approve { background:#2ba471; color:#fff; }
+  .btn-reject  { background:#fff; color:#f04142; border:1px solid #f04142; }
+
+  .reviewed-info {
+    margin-top:10px; padding-top:10px;
+    border-top:1px dashed #f0f0f0;
+    font-size:12px; color:#8a919f;
+  }
+  .reviewed-info .cmt {
+    color:#5e6673; margin-top:4px;
+    word-break:break-all;
+  }
+
+  /* ---------- 空状态 ---------- */
+  .empty {
+    text-align:center; padding:80px 20px;
+    color:#8a919f;
+  }
+  .empty-icon { font-size:56px; margin-bottom:14px; }
+  .empty-text { font-size:15px; }
+
+  /* ---------- Bottom Sheet ---------- */
+  .sheet-mask {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:200;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s;
+  }
+  .sheet-mask.open { opacity:1; pointer-events:auto; }
+
+  .sheet {
+    position:fixed; bottom:0; left:50%;
+    width:100%; max-width:480px;
+    background:#fff;
+    border-radius:18px 18px 0 0;
+    z-index:201;
+    transform:translate(-50%, 100%);
+    transition:transform .3s cubic-bezier(.32,.72,.35,1);
+    max-height:80vh;
+    display:flex; flex-direction:column;
+  }
+  .sheet.open { transform:translate(-50%, 0); }
+
+  .sheet-header {
+    padding:18px 16px 12px;
+    border-bottom:1px solid #f5f5f5;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .sheet-title { font-size:16px; font-weight:600; }
+  .sheet-title .sheet-title-tag {
+    display:inline-block; margin-left:8px;
+    font-size:11px; padding:2px 8px; border-radius:10px;
+    vertical-align:2px;
+  }
+  .sheet-title-tag.approve { background:#e8f7ef; color:#2ba471; }
+  .sheet-title-tag.reject  { background:#fdecec; color:#f04142; }
+  .sheet-close {
+    width:28px; height:28px; border:none; background:none;
+    font-size:20px; color:#8a919f; cursor:pointer; line-height:1;
+  }
+
+  .sheet-body { padding:14px 16px; overflow-y:auto; flex:1; }
+
+  .sheet-summary {
+    background:#f8f9fa; border-radius:10px;
+    padding:12px; margin-bottom:14px;
+    font-size:13px; line-height:1.8;
+  }
+  .sheet-summary .s-row { display:flex; }
+  .sheet-summary .s-label { flex:0 0 76px; color:#8a919f; }
+  .sheet-summary .s-value { flex:1; color:#1f2329; word-break:break-all; }
+
+  .sheet-label {
+    font-size:13px; color:#5e6673; margin-bottom:8px;
+  }
+  .sheet-label .req { color:#f04142; }
+  .sheet-input {
+    width:100%; min-height:88px;
+    border:1px solid #e5e7eb; border-radius:10px;
+    padding:10px; font-size:14px;
+    font-family:inherit; resize:none;
+    outline:none;
+    transition:border-color .2s;
+  }
+  .sheet-input:focus { border-color:#0669FF; }
+  .sheet-input.err { border-color:#f04142; }
+
+  .sheet-footer {
+    padding:12px 16px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid #f5f5f5;
+  }
+  .sheet-confirm {
+    width:100%; height:44px; border:none; border-radius:22px;
+    font-size:15px; font-weight:600; color:#fff;
+    cursor:pointer; transition:opacity .15s;
+  }
+  .sheet-confirm.approve { background:#2ba471; }
+  .sheet-confirm.reject  { background:#f04142; }
+  .sheet-confirm:active { opacity:.85; }
+
+  /* ---------- 订单弹层 ---------- */
+  .order-sheet .sheet-summary .s-label { flex:0 0 64px; }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position:fixed; top:45%; left:50%;
+    transform:translate(-50%, -50%) scale(.9);
+    background:rgba(0,0,0,.78); color:#fff;
+    padding:12px 22px; border-radius:10px;
+    font-size:14px;
+    z-index:300;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s;
+    white-space:nowrap;
+  }
+  .toast.show { opacity:1; transform:translate(-50%, -50%) scale(1); }
+
+  /* ---------- 订单号搜索 ---------- */
+  .search-wrap { padding:10px 14px 0; }
+  .search-box {
+    display:flex; align-items:center; gap:8px;
+    background:#fff; border:1px solid #e8e8e8; border-radius:10px;
+    padding:8px 12px;
+  }
+  .search-icon { font-size:14px; color:#999; flex-shrink:0; }
+  .search-input {
+    flex:1; border:none; outline:none; font-size:14px;
+    color:#1f2329; background:transparent;
+  }
+  .search-input::placeholder { color:#bbb; }
+  .search-btn {
+    flex-shrink:0; padding:4px 14px;
+    background:#0669FF; color:#fff;
+    border:none; border-radius:8px;
+    font-size:13px; cursor:pointer;
+  }
+  .search-btn:active { background:#e55f2a; }
+
+  /* ---------- 申请凭证小图 ---------- */
+  .evidence-row { align-items:flex-start !important; }
+  .evidence-list {
+    display:flex; flex-wrap:wrap; gap:8px;
+    flex:1; padding-top:2px;
+  }
+  .evidence-thumb {
+    width:64px; height:64px; border-radius:8px;
+    overflow:hidden; cursor:pointer;
+    border:1px solid #eee; background:#f5f5f5;
+    transition:transform .15s;
+  }
+  .evidence-thumb:active { transform:scale(.93); }
+  .evidence-thumb img {
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .evidence-empty { flex:1; color:#bbb; font-size:12px; padding-top:4px; }
+
+  /* ---------- 大图查看器 ---------- */
+  .viewer-mask {
+    position:fixed; inset:0; z-index:200;
+    background:rgba(0,0,0,.92);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s;
+  }
+  .viewer-mask.show { opacity:1; pointer-events:auto; }
+  .viewer-body {
+    position:relative; width:100%; max-width:480px; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .viewer-track {
+    display:flex; height:70%;
+    transition:transform .3s cubic-bezier(.32,.72,.35,1);
+    will-change:transform;
+  }
+  .viewer-slide {
+    flex:0 0 100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 10px; box-sizing:border-box;
+  }
+  .viewer-slide img {
+    max-width:100%; max-height:100%;
+    border-radius:8px; object-fit:contain;
+    box-shadow:0 4px 24px rgba(0,0,0,.4);
+    user-select:none; -webkit-user-drag:none;
+  }
+  .viewer-close {
+    position:absolute; top:14px; right:14px; z-index:210;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.15); color:#fff;
+    border:none; font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .viewer-nav {
+    position:absolute; top:50%; transform:translateY(-50%); z-index:210;
+    padding:8px 16px; border-radius:8px;
+    background:rgba(255,255,255,.12); color:#fff;
+    border:none; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+    white-space:nowrap; user-select:none;
+  }
+  .viewer-nav:hover { background:rgba(255,255,255,.22); }
+  .viewer-nav:active { background:rgba(255,255,255,.28); }
+  .viewer-nav.prev { left:14px; }
+  .viewer-nav.next { right:14px; }
+  .viewer-nav.hidden { display:none; }
+  .viewer-counter {
+    position:absolute; bottom:24px; left:50%; transform:translateX(-50%); z-index:210;
+    color:rgba(255,255,255,.75); font-size:13px;
+    background:rgba(0,0,0,.35); padding:3px 12px; border-radius:12px;
+  }
+
+  /* ---------- 原因展开动效 ---------- */
+  .reason-text { transition:all .2s; }
+</style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <div class="navbar">
+    <div class="navbar-title">补偿积分审核</div>
+  </div>
+
+  <!-- 订单号搜索 -->
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="orderSearch" placeholder="搜索订单号 / 流水号">
+      <button class="search-btn" id="searchBtn">搜索</button>
+    </div>
+  </div>
+
+  <!-- 筛选 Tab -->
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabs">
+      <div class="tab" data-filter="all">全部<span class="tab-count" id="cntAll">0</span></div>
+      <div class="tab active" data-filter="pending">待审核<span class="tab-count" id="cntPending">0</span></div>
+      <div class="tab" data-filter="approved">已通过<span class="tab-count" id="cntApproved">0</span></div>
+      <div class="tab" data-filter="rejected">已驳回<span class="tab-count" id="cntRejected">0</span></div>
+    </div>
+  </div>
+
+  <!-- 卡片列表 -->
+  <div class="list" id="list"></div>
+
+  <!-- 空状态 -->
+  <div class="empty" id="empty" style="display:none;">
+    <div class="empty-icon">📋</div>
+    <div class="empty-text">暂无相关审核单</div>
+  </div>
+
+  <!-- 审核操作 Bottom Sheet -->
+  <div class="sheet-mask" id="sheetMask"></div>
+  <div class="sheet" id="reviewSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">
+        审核确认
+        <span class="sheet-title-tag approve" id="sheetTag">通过</span>
+      </div>
+      <button class="sheet-close" id="sheetClose">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-summary" id="sheetSummary"></div>
+      <div class="sheet-label" id="commentLabel">审核备注（选填）</div>
+      <textarea class="sheet-input" id="commentInput" placeholder="请输入审核意见…"></textarea>
+    </div>
+    <div class="sheet-footer">
+      <button class="sheet-confirm approve" id="confirmBtn">确认通过</button>
+    </div>
+  </div>
+
+  <!-- 订单详情弹层 -->
+  <div class="sheet order-sheet" id="orderSheet">
+    <div class="sheet-header">
+      <div class="sheet-title">关联订单信息</div>
+      <button class="sheet-close" id="orderSheetClose">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-summary" id="orderSheetBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- 凭证大图查看器 -->
+  <div class="viewer-mask" id="viewerMask">
+    <div class="viewer-body">
+      <button class="viewer-close" id="viewerClose">&times;</button>
+      <div class="viewer-track" id="viewerTrack"></div>
+      <button class="viewer-nav prev" id="viewerPrev">上一张</button>
+      <button class="viewer-nav next" id="viewerNext">下一张</button>
+      <div class="viewer-counter" id="viewerCounter"></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 数据自检 ---------- */
+  console.log('[补偿积分审核] 数据加载自检');
+  console.log('COMP_REVIEWS 条数：', (typeof COMP_REVIEWS !== 'undefined') ? COMP_REVIEWS.length : '未定义');
+  console.log('ORDERS 条数：', (typeof ORDERS !== 'undefined') ? Object.keys(ORDERS).length : '未定义');
+  console.log('TAXI_ORDERS 条数：', (typeof TAXI_ORDERS !== 'undefined') ? Object.keys(TAXI_ORDERS).length : '未定义');
+  console.log('fmtPoints(30) =', (typeof fmtPoints === 'function') ? fmtPoints(30) : '未定义');
+
+  if (typeof COMP_REVIEWS === 'undefined') {
+    document.getElementById('list').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#f04142;font-size:14px;">共享数据 h5-shared-data.js 未加载，请检查路径</div>';
+    return;
+  }
+
+  /* ---------- 状态映射 ---------- */
+  var STATUS_MAP = {
+    '待审核': 'pending',
+    '已通过': 'approved',
+    '已驳回': 'rejected'
+  };
+  var STATUS_TEXT = { pending:'待审核', approved:'已通过', rejected:'已驳回' };
+
+  /* ---------- DOM ---------- */
+  var $list       = document.getElementById('list');
+  var $empty      = document.getElementById('empty');
+  var $cntAll     = document.getElementById('cntAll');
+  var $cntP       = document.getElementById('cntPending');
+  var $cntA       = document.getElementById('cntApproved');
+  var $cntR       = document.getElementById('cntRejected');
+
+  var $sheetMask    = document.getElementById('sheetMask');
+  var $reviewSheet  = document.getElementById('reviewSheet');
+  var $sheetTag     = document.getElementById('sheetTag');
+  var $sheetSummary = document.getElementById('sheetSummary');
+  var $commentLabel = document.getElementById('commentLabel');
+  var $commentInput = document.getElementById('commentInput');
+  var $confirmBtn   = document.getElementById('confirmBtn');
+  var $sheetClose   = document.getElementById('sheetClose');
+
+  /* ===== 复制工具 ===== */
+  function doCopyText(txt){
+    if (!txt) return;
+    function ok(){ if (typeof showToast === 'function') showToast('已复制：' + txt); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); ok(); } catch(e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(ok).catch(fallback);
+    } else { fallback(); }
+  }
+  // 弹层内复制按钮（事件代理）
+  $reviewSheet.addEventListener('click', function(e){
+    var copyBtn = e.target.closest('.copy-btn');
+    if (copyBtn) {
+      doCopyText(copyBtn.getAttribute('data-copy') || '');
+    }
+  });
+
+  var $orderSheet      = document.getElementById('orderSheet');
+  var $orderSheetBody  = document.getElementById('orderSheetBody');
+  var $orderSheetClose = document.getElementById('orderSheetClose');
+
+  var $toast = document.getElementById('toast');
+  var $tabs  = document.getElementById('tabs');
+
+  /* ---------- 内部状态 ---------- */
+  var currentFilter = 'pending';
+  var currentSearch = '';
+  var currentReviewId = null;
+  var currentAction = null; // 'approved' | 'rejected'
+
+  /* ---------- 工具 ---------- */
+  function esc(s) {
+    if (typeof escHtml === 'function') return escHtml(s);
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function getOrder(orderId) {
+    if (typeof ORDERS !== 'undefined' && ORDERS[orderId]) return ORDERS[orderId];
+    if (typeof TAXI_ORDERS !== 'undefined' && TAXI_ORDERS[orderId]) return TAXI_ORDERS[orderId];
+    return null;
+  }
+
+  function getStatusKey(item) {
+    return STATUS_MAP[item.status] || 'pending';
+  }
+
+  function showToast(msg) {
+    $toast.textContent = msg;
+    $toast.classList.add('show');
+    setTimeout(function(){ $toast.classList.remove('show'); }, 1800);
+  }
+
+  /* ---------- 统计 ---------- */
+  function todayStr() {
+    var d = new Date();
+    var p = function(n){ return (n<10?'0':'')+n; };
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  }
+
+  function updateStats() {
+    var today = todayStr();
+    var cP=0, cA=0, cR=0, totalApproved=0;
+    COMP_REVIEWS.forEach(function(it){
+      var sk = getStatusKey(it);
+      var isTodayApply = (it.applyTm || '').indexOf(today) === 0;
+      var isTodayReview = (it.reviewTm || '').indexOf(today) === 0;
+      if (sk === 'pending') { cP++; }
+      else if (sk === 'approved') {
+        if (isTodayApply || isTodayReview) cA++;
+        totalApproved += Number(it.points) || 0;
+      }
+      else if (sk === 'rejected') {
+        if (isTodayApply || isTodayReview) cR++;
+      }
+    });
+    // tab counts
+    $cntAll.textContent = COMP_REVIEWS.length;
+    $cntP.textContent = cP;
+    $cntA.textContent = cA;
+    $cntR.textContent = cR;
+  }
+
+  /* ---------- 列表渲染 ---------- */
+  function filteredList() {
+    var list = currentFilter === 'all' ? COMP_REVIEWS.slice() : COMP_REVIEWS.filter(function(it){ return getStatusKey(it) === currentFilter; });
+    if (currentSearch) {
+      var q = currentSearch.toLowerCase();
+      list = list.filter(function(it){
+        return (it.orderId || '').toLowerCase().indexOf(q) >= 0 ||
+               (it.id || '').toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    return list;
+  }
+
+  function renderList() {
+    var items = filteredList();
+    $list.innerHTML = '';
+    $empty.style.display = items.length ? 'none' : 'block';
+
+    items.forEach(function(item){
+      var order = getOrder(item.orderId);
+      var sk = getStatusKey(item);
+      var touristName = order ? order.name : '—';
+      var passport = order ? order.passport : '';
+      var phone = order ? order.phone : '';
+      var mp = (typeof maskPassport === 'function') ? maskPassport(passport) : passport;
+      var mph = (typeof maskPhone === 'function') ? maskPhone(phone) : phone;
+
+      var reasonText = esc(item.reason || '');
+      var needToggle = (item.reason || '').length > 36;
+
+      var html = '';
+      html += '<div class="card" data-id="'+ esc(item.id) +'">';
+
+      // 头部：单号 + 徽标
+      html += '  <div class="card-head">';
+      html += '    <div class="card-id">流水号 '+ esc(item.id) +'</div>';
+      html += '    <div class="badge '+ sk +'">'+ STATUS_TEXT[sk] +'</div>';
+      html += '  </div>';
+
+      // 关联订单（含业态徽标 + 复制按钮）
+      var wOrder = getOrder(item.orderId);
+      var wBiz = wOrder ? (wOrder.biz || '') : '';
+      if (!wBiz) wBiz = item.orderId.indexOf('SG') === 0 ? '外卖' : (item.orderId.indexOf('CC') === 0 ? '打车' : '');
+      var wBizHtml = wBiz === '外卖' ? '<span class="biz-tag waimai">外卖</span>' : (wBiz === '打车' ? '<span class="biz-tag dache">打车</span>' : '');
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">关联订单</div>';
+      html += '    <div class="row-value">' + wBizHtml + '<span class="order-link" data-order="'+ esc(item.orderId) +'">'+ esc(item.orderId) +'</span><span class="copy-btn" data-copy="'+ esc(item.orderId) +'">📋 复制</span></div>';
+      html += '  </div>';
+
+      // 用户信息（脱敏）
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">用户信息</div>';
+      html += '    <div class="row-value">';
+      html += esc(touristName);
+      if (mp)  html += '　护照 '+ esc(mp);
+      if (mph) html += '<br>手机 '+ esc(mph);
+      html += '    </div>';
+      html += '  </div>';
+
+      // 补偿积分
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">补偿积分</div>';
+      html += '    <div class="row-value"><span class="points-num">'+ (typeof fmtPoints==='function'?fmtPoints(item.points):item.points) +'</span></div>';
+      html += '  </div>';
+
+      // 申请原因（可展开）
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">申请原因</div>';
+      html += '    <div class="row-value">';
+      html += '      <span class="reason-text" data-reason>'+ reasonText +'</span>';
+      if (needToggle) html += '<span class="reason-toggle">展开</span>';
+      html += '    </div>';
+      html += '  </div>';
+
+      // 申请凭证（小图，点击看大图）
+      var evs = item.evidences || [];
+      html += '  <div class="card-row evidence-row">';
+      html += '    <div class="row-label">申请凭证</div>';
+      if (evs.length) {
+        html += '    <div class="evidence-list">';
+        evs.forEach(function(ev, idx){
+          html += '<div class="evidence-thumb" data-ev-idx="'+ idx +'" data-review-id="'+ esc(item.id) +'"><img src="'+ esc(ev.thumb) +'" alt="凭证'+(idx+1)+'" loading="lazy"></div>';
+        });
+        html += '    </div>';
+      } else {
+        html += '    <div class="evidence-empty">未上传凭证</div>';
+      }
+      html += '  </div>';
+
+      // 申请人 + 时间
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">申请人</div>';
+      html += '    <div class="row-value">'+ esc(item.applicant || '—');
+      if (item.applicantAccount) html += '（'+ esc(item.applicantAccount) +'）';
+      html += '    </div>';
+      html += '  </div>';
+      html += '  <div class="card-row">';
+      html += '    <div class="row-label">申请时间</div>';
+      html += '    <div class="row-value sub">'+ esc(item.applyTm || '—') +'</div>';
+      html += '  </div>';
+
+      // 已审核的，显示审核信息
+      if (sk !== 'pending') {
+        html += '  <div class="reviewed-info">';
+        html += '    <div>审核人：'+ esc(item.reviewer || '—') + (item.reviewerAccount ? '（'+ esc(item.reviewerAccount) +'）' : '') +'　'+ esc(item.reviewTm || '') +'</div>';
+        if (item.comment) html += '    <div class="cmt">审核意见：'+ esc(item.comment) +'</div>';
+        html += '  </div>';
+      }
+
+      // 操作按钮
+      if (sk === 'pending') {
+        html += '  <div class="card-actions">';
+        html += '    <button class="btn btn-approve" data-action="approved">通过</button>';
+        html += '    <button class="btn btn-reject"  data-action="rejected">驳回</button>';
+        html += '  </div>';
+      }
+
+      html += '</div>';
+      $list.insertAdjacentHTML('beforeend', html);
+    });
+  }
+
+  /* ---------- 订单号搜索 ---------- */
+  var $orderSearch = document.getElementById('orderSearch');
+  var $searchBtn   = document.getElementById('searchBtn');
+  function applySearch(){
+    currentSearch = $orderSearch ? $orderSearch.value.trim() : '';
+    renderList();
+  }
+  if ($orderSearch) {
+    $orderSearch.addEventListener('input', applySearch);
+    $orderSearch.addEventListener('keydown', function(e){ if (e.key === 'Enter') applySearch(); });
+  }
+  if ($searchBtn) {
+    $searchBtn.addEventListener('click', applySearch);
+  }
+
+  /* ---------- Tab 切换 ---------- */
+  $tabs.addEventListener('click', function(e){
+    var tab = e.target.closest('.tab');
+    if (!tab) return;
+    var filter = tab.getAttribute('data-filter');
+    if (filter === currentFilter) return;
+    currentFilter = filter;
+
+    var all = $tabs.querySelectorAll('.tab');
+    for (var i=0; i<all.length; i++) all[i].classList.remove('active');
+    tab.classList.add('active');
+
+    $list.classList.remove('animating');
+    void $list.offsetWidth; // 触发重排以重启动画
+    $list.classList.add('animating');
+    renderList();
+  });
+
+  /* ---------- 卡片事件（事件委托） ---------- */
+  $list.addEventListener('click', function(e){
+    // 展开/收起原因
+    var toggle = e.target.closest('.reason-toggle');
+    if (toggle) {
+      var reasonEl = toggle.previousElementSibling;
+      if (reasonEl && reasonEl.hasAttribute('data-reason')) {
+        var expanded = reasonEl.classList.toggle('expanded');
+        toggle.textContent = expanded ? '收起' : '展开';
+      }
+      return;
+    }
+
+    // 点击原因文字也可切换
+    if (e.target.hasAttribute('data-reason')) {
+      var tEl = e.target.nextElementSibling;
+      if (tEl && tEl.classList.contains('reason-toggle')) tEl.click();
+      return;
+    }
+
+    // 申请凭证小图点击 → 打开大图查看器
+    var evThumb = e.target.closest('.evidence-thumb');
+    if (evThumb) {
+      var rid = evThumb.getAttribute('data-review-id');
+      var eidx = parseInt(evThumb.getAttribute('data-ev-idx'), 10) || 0;
+      openViewer(rid, eidx);
+      return;
+    }
+
+    // 复制按钮（事件代理，卡片 + 弹层通用）
+    var copyBtn = e.target.closest('.copy-btn');
+    if (copyBtn) {
+      var txt = copyBtn.getAttribute('data-copy') || '';
+      doCopyText(txt);
+      return;
+    }
+
+    // 订单号点击
+    var orderLink = e.target.closest('.order-link');
+    if (orderLink) {
+      var orderId = orderLink.getAttribute('data-order');
+      openOrderSheet(orderId);
+      return;
+    }
+
+    // 通过 / 驳回按钮
+    var actionBtn = e.target.closest('[data-action]');
+    if (actionBtn) {
+      var card = actionBtn.closest('.card');
+      var id = card ? card.getAttribute('data-id') : null;
+      var action = actionBtn.getAttribute('data-action');
+      if (id && action) openReviewSheet(id, action);
+    }
+  });
+
+  /* ---------- 审核 Bottom Sheet ---------- */
+  function openReviewSheet(id, action) {
+    var item = null;
+    for (var i=0; i<COMP_REVIEWS.length; i++) {
+      if (COMP_REVIEWS[i].id === id) { item = COMP_REVIEWS[i]; break; }
+    }
+    if (!item) return;
+
+    currentReviewId = id;
+    currentAction = action;
+
+    // 标签 & 按钮
+    if (action === 'approved') {
+      $sheetTag.textContent = '通过';
+      $sheetTag.className = 'sheet-title-tag approve';
+      $confirmBtn.textContent = '确认通过';
+      $confirmBtn.className = 'sheet-confirm approve';
+      $commentLabel.innerHTML = '审核备注（选填）';
+    } else {
+      $sheetTag.textContent = '驳回';
+      $sheetTag.className = 'sheet-title-tag reject';
+      $confirmBtn.textContent = '确认驳回';
+      $confirmBtn.className = 'sheet-confirm reject';
+      $commentLabel.innerHTML = '审核备注<span class="req">（驳回必填）</span>';
+    }
+
+    // 摘要
+    var order = getOrder(item.orderId);
+    var touristName = order ? order.name : '—';
+    var sHtml = '';
+    var sBiz = order ? (order.biz || '') : '';
+    if (!sBiz) sBiz = item.orderId.indexOf('SG') === 0 ? '外卖' : (item.orderId.indexOf('CC') === 0 ? '打车' : '');
+    var sBizHtml = sBiz === '外卖' ? '<span class="biz-tag waimai">外卖</span>' : (sBiz === '打车' ? '<span class="biz-tag dache">打车</span>' : '');
+    sHtml += '<div class="s-row"><div class="s-label">流水号</div><div class="s-value">'+ esc(item.id) +'<span class="copy-btn" data-copy="'+ esc(item.id) +'">📋 复制</span></div></div>';
+    sHtml += '<div class="s-row"><div class="s-label">关联订单</div><div class="s-value">'+ sBizHtml + esc(item.orderId) +'<span class="copy-btn" data-copy="'+ esc(item.orderId) +'">📋 复制</span></div></div>';
+    sHtml += '<div class="s-row"><div class="s-label">用户</div><div class="s-value">'+ esc(touristName) +'</div></div>';
+    sHtml += '<div class="s-row"><div class="s-label">补偿积分</div><div class="s-value" style="color:#0669FF;font-weight:600;">'+ (typeof fmtPoints==='function'?fmtPoints(item.points):item.points) +'</div></div>';
+    sHtml += '<div class="s-row"><div class="s-label">申请原因</div><div class="s-value">'+ esc(item.reason) +'</div></div>';
+    sHtml += '<div class="s-row"><div class="s-label">申请人</div><div class="s-value">'+ esc(item.applicant || '—') +'　'+ esc(item.applyTm || '') +'</div></div>';
+    $sheetSummary.innerHTML = sHtml;
+
+    // 清空输入
+    $commentInput.value = '';
+    $commentInput.classList.remove('err');
+    $commentInput.placeholder = action === 'approved' ? '请输入审核意见（选填）…' : '请填写驳回原因（必填）…';
+
+    $sheetMask.classList.add('open');
+    $reviewSheet.classList.add('open');
+  }
+
+  function closeReviewSheet() {
+    $sheetMask.classList.remove('open');
+    $reviewSheet.classList.remove('open');
+    currentReviewId = null;
+    currentAction = null;
+  }
+
+  $sheetClose.addEventListener('click', closeReviewSheet);
+  $sheetMask.addEventListener('click', function(){
+    closeReviewSheet();
+    closeOrderSheet();
+  });
+
+  /* ---------- 提交审核 ---------- */
+  $confirmBtn.addEventListener('click', function(){
+    if (!currentReviewId || !currentAction) return;
+    var comment = $commentInput.value.trim();
+
+    if (currentAction === 'rejected' && !comment) {
+      $commentInput.classList.add('err');
+      showToast('驳回时必须填写审核意见');
+      setTimeout(function(){ $commentInput.classList.remove('err'); }, 1600);
+      return;
+    }
+
+    var item = null;
+    for (var i=0; i<COMP_REVIEWS.length; i++) {
+      if (COMP_REVIEWS[i].id === currentReviewId) { item = COMP_REVIEWS[i]; break; }
+    }
+    if (!item) { closeReviewSheet(); return; }
+
+    // 更新数据
+    item.status = (currentAction === 'approved') ? '已通过' : '已驳回';
+    item.reviewer = '当前客服';
+    item.reviewerAccount = '';
+    item.reviewTm = (typeof nowStr === 'function') ? nowStr() : new Date().toISOString();
+    item.comment = comment;
+
+    closeReviewSheet();
+    updateStats();
+    renderList();
+
+    showToast(currentAction === 'approved' ? '已通过并补偿积分' : '已驳回该申请');
+  });
+
+  /* ---------- 订单详情弹层 ---------- */
+  function openOrderSheet(orderId) {
+    var order = getOrder(orderId);
+    if (!order) { showToast('未找到关联订单'); return; }
+
+    var isTaxi = (order.biz === '打车');
+    var h = '';
+    h += '<div class="s-row"><div class="s-label">订单号</div><div class="s-value">'+ esc(order.id) +'</div></div>';
+    h += '<div class="s-row"><div class="s-label">业务类型</div><div class="s-value">'+ (isTaxi ? '打车' : '外卖') +'</div></div>';
+    h += '<div class="s-row"><div class="s-label">状态</div><div class="s-value">'+ esc(order.status || '—') +'</div></div>';
+    h += '<div class="s-row"><div class="s-label">老外</div><div class="s-value">'+ esc(order.name || '—');
+    if (order.lang) h += '（'+ esc(order.lang) +'）';
+    h += '</div></div>';
+    if (order.merchant) {
+      h += '<div class="s-row"><div class="s-label">'+(isTaxi?'服务商':'商家')+'</div><div class="s-value">'+ esc(order.merchant) +'</div></div>';
+    }
+    if (order.summary) {
+      h += '<div class="s-row"><div class="s-label">摘要</div><div class="s-value">'+ esc(order.summary) +'</div></div>';
+    }
+    if (order.money) {
+      h += '<div class="s-row"><div class="s-label">订单金额</div><div class="s-value">'+ (typeof fmtMoney==='function'?fmtMoney(order.money.total):order.money.total) +'</div></div>';
+    }
+    if (order.balance) {
+      h += '<div class="s-row"><div class="s-label">当前余额</div><div class="s-value">'+ esc(order.balance) +' 积分</div></div>';
+    }
+    if (order.addr && order.addr.label) {
+      h += '<div class="s-row"><div class="s-label">地址</div><div class="s-value">'+ esc(order.addr.label) +'<br><span style="color:#8a919f;font-size:12px;">'+ esc(order.addr.detail || '') +'</span></div></div>';
+    }
+    if (isTaxi && order.tPickup && order.tDest) {
+      h += '<div class="s-row"><div class="s-label">行程</div><div class="s-value">'+ esc(order.tPickup.zh) +' → '+ esc(order.tDest.zh) +'</div></div>';
+    }
+    if (!isTaxi && order.meta) {
+      h += '<div class="s-row"><div class="s-label">下单时间</div><div class="s-value">'+ esc(order.meta.replace(/^下单\s*/, '')) +'</div></div>';
+    }
+    if (isTaxi && order.tCreated) {
+      h += '<div class="s-row"><div class="s-label">下单时间</div><div class="s-value">'+ esc(order.tCreated) +'</div></div>';
+    }
+
+    $orderSheetBody.innerHTML = h;
+    $sheetMask.classList.add('open');
+    $orderSheet.classList.add('open');
+  }
+
+  function closeOrderSheet() {
+    $orderSheet.classList.remove('open');
+    if (!$reviewSheet.classList.contains('open')) {
+      $sheetMask.classList.remove('open');
+    }
+  }
+
+  $orderSheetClose.addEventListener('click', closeOrderSheet);
+
+  /* ---------- 凭证大图查看器 ---------- */
+  var $viewerMask    = document.getElementById('viewerMask');
+  var $viewerTrack   = document.getElementById('viewerTrack');
+  var $viewerClose   = document.getElementById('viewerClose');
+  var $viewerPrev    = document.getElementById('viewerPrev');
+  var $viewerNext    = document.getElementById('viewerNext');
+  var $viewerCounter = document.getElementById('viewerCounter');
+  var viewerImages = [];
+  var viewerIndex  = 0;
+  var viewerTouchX = null;
+
+  function renderViewer(){
+    $viewerTrack.innerHTML = viewerImages.map(function(src){
+      return '<div class="viewer-slide"><img src="'+ esc(src) +'" draggable="false"></div>';
+    }).join('');
+    updateViewer();
+  }
+  function updateViewer(){
+    $viewerTrack.style.transform = 'translateX(-' + (viewerIndex * 100) + '%)';
+    $viewerCounter.textContent = (viewerIndex + 1) + ' / ' + viewerImages.length;
+    $viewerPrev.classList.toggle('hidden', viewerIndex <= 0);
+    $viewerNext.classList.toggle('hidden', viewerIndex >= viewerImages.length - 1);
+  }
+  function openViewer(reviewId, startIdx){
+    var item = null;
+    for (var i = 0; i < COMP_REVIEWS.length; i++) {
+      if (COMP_REVIEWS[i].id === reviewId) { item = COMP_REVIEWS[i]; break; }
+    }
+    if (!item || !item.evidences || !item.evidences.length) return;
+    viewerImages = item.evidences.map(function(ev){ return ev.large; });
+    viewerIndex  = Math.max(0, Math.min(startIdx || 0, viewerImages.length - 1));
+    renderViewer();
+    $viewerMask.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeViewer(){
+    $viewerMask.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function stepViewer(dir){
+    var ni = viewerIndex + dir;
+    if (ni < 0 || ni >= viewerImages.length) return;
+    viewerIndex = ni;
+    updateViewer();
+  }
+
+  $viewerClose.addEventListener('click', closeViewer);
+  $viewerPrev.addEventListener('click', function(){ stepViewer(-1); });
+  $viewerNext.addEventListener('click', function(){ stepViewer(1); });
+  $viewerMask.addEventListener('click', function(e){ if (e.target === $viewerMask) closeViewer(); });
+
+  // 左右滑动切换
+  $viewerTrack.addEventListener('touchstart', function(e){
+    viewerTouchX = e.touches[0].clientX;
+  }, { passive:true });
+  $viewerTrack.addEventListener('touchend', function(e){
+    if (viewerTouchX === null) return;
+    var dx = e.changedTouches[0].clientX - viewerTouchX;
+    if (Math.abs(dx) > 40) stepViewer(dx < 0 ? 1 : -1);
+    viewerTouchX = null;
+  }, { passive:true });
+
+  // 键盘左右切换
+  document.addEventListener('keydown', function(e){
+    if (!$viewerMask.classList.contains('show')) return;
+    if (e.key === 'Escape') closeViewer();
+    else if (e.key === 'ArrowLeft') stepViewer(-1);
+    else if (e.key === 'ArrowRight') stepViewer(1);
+  });
+
+  /* ---------- 初始化 ---------- */
+  updateStats();
+  renderList();
+
+  console.log('[补偿积分审核] 初始化完成，待审核单数：',
+    COMP_REVIEWS.filter(function(i){ return getStatusKey(i)==='pending'; }).length);
+})();
+</script>
+</body>
+</html>
