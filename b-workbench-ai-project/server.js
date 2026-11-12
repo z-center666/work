@@ -8,8 +8,8 @@ const mime = {
 };
 
 const server = http.createServer((req, res) => {
-  let p = path.join(base, req.url === '/' ? '/index.html' : req.url.split('?')[0]);
-  if (!fs.existsSync(p)) { res.writeHead(404); res.end(); return; }
+  let p = path.join(base, decodeURIComponent(req.url === '/' ? '/index.html' : req.url.split('?')[0]));
+  if (!fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); res.end(); return; }
   res.writeHead(200, { 'Content-Type': mime[path.extname(p)] || 'application/octet-stream' });
   res.end(fs.readFileSync(p));
 });
