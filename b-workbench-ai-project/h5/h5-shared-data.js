@@ -220,45 +220,45 @@ const TOURISTS = [
   {id:'T001', userId:'U346620', name:'John Smith', lang:'英语', passport:'E12345678', phone:'13812346620', deviceNo:'DEV-2026-0001', city:'杭州', lng:120.1551, lat:30.2741, balance:'412.5', loc:'杭州湖滨银泰 in77',
    diet:'不吃辣；忌花生、香菜', pref:'少油少盐；餐具要 2 份，送到前台请致电',
    addrs:[
-    {label:'杭州君悦酒店 1212 房', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'放前台，到了打电话', lng:120.1622, lat:30.2490},
-    {label:'杭州君悦酒店 行政酒廊 8F', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'送至 8 层行政酒廊', lng:120.1622, lat:30.2490},
-    {label:'杭州西子湖四季酒店 3205 房', detail:'杭州市西湖区灵隐路 5 号', contact:'John / 13812346620', note:'前次入住，备用地址', lng:120.1288, lat:30.2570},
-    {label:'杭州东站维也纳酒店 706 房', detail:'杭州市上城区东站西广场 1 号', contact:'John / 13812346620', note:'备用地址', lng:120.2130, lat:30.2885},
-    {label:'杭州湖滨银泰 in77 公寓 1806', detail:'杭州市上城区延安路 98 号', contact:'John / 13812346620', note:'楼下有门禁，到了请致电', lng:120.1655, lat:30.2488},
-    {label:'杭州黄龙饭店 1508 房', detail:'杭州市西湖区曙光路 120 号', contact:'John / 13812346620', note:'备用地址', lng:120.1349, lat:30.2686},
-    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'John / 13812346620', note:'周末度假住址', lng:120.1305, lat:30.2385},
-    {label:'杭州城站汉庭酒店 512 房', detail:'杭州市上城区清泰街 152 号', contact:'John / 13812346620', note:'临时住一晚', lng:120.1802, lat:30.2436},
-    {label:'杭州萧山机场亚朵酒店 908 房', detail:'杭州市萧山区机场路 66 号', contact:'John / 13812346620', note:'次日早班机，送前台', lng:120.4341, lat:30.2361}
+    {label:'杭州君悦酒店 1212 房', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'放前台，到了打电话', lng:120.1622, lat:30.2490, distance:'350m'},
+    {label:'杭州君悦酒店 行政酒廊 8F', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'送至 8 层行政酒廊', lng:120.1622, lat:30.2490, distance:'350m'},
+    {label:'杭州西子湖四季酒店 3205 房', detail:'杭州市西湖区灵隐路 5 号', contact:'John / 13812346620', note:'前次入住，备用地址', lng:120.1288, lat:30.2570, distance:'3.2km'},
+    {label:'杭州东站维也纳酒店 706 房', detail:'杭州市上城区东站西广场 1 号', contact:'John / 13812346620', note:'备用地址', lng:120.2130, lat:30.2885, distance:'6.8km'},
+    {label:'杭州湖滨银泰 in77 公寓 1806', detail:'杭州市上城区延安路 98 号', contact:'John / 13812346620', note:'楼下有门禁，到了请致电', lng:120.1655, lat:30.2488, distance:'280m'},
+    {label:'杭州黄龙饭店 1508 房', detail:'杭州市西湖区曙光路 120 号', contact:'John / 13812346620', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
+    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'John / 13812346620', note:'周末度假住址', lng:120.1305, lat:30.2385, distance:'4.5km'},
+    {label:'杭州城站汉庭酒店 512 房', detail:'杭州市上城区清泰街 152 号', contact:'John / 13812346620', note:'临时住一晚', lng:120.1802, lat:30.2436, distance:'3.6km'},
+    {label:'杭州萧山机场亚朵酒店 908 房', detail:'杭州市萧山区机场路 66 号', contact:'John / 13812346620', note:'次日早班机，送前台', lng:120.4341, lat:30.2361, distance:'27km'}
   ]},
   {id:'T002', userId:'U342210', name:'佐藤健', lang:'日语', passport:'T12345678', phone:'13712342210', deviceNo:'DEV-2026-0002', city:'杭州', lng:120.1551, lat:30.2741, balance:'704.8', loc:'杭州湖滨银泰 in77',
    diet:'不吃香菜、不吃动物内脏', pref:'口味清淡；不要放味精；需要一次性筷子',
    addrs:[
-    {label:'杭州柏悦酒店 808 房', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'不要香菜', lng:120.1640, lat:30.2521},
-    {label:'杭州柏悦酒店 37F 会所', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'送至 37 层会所前台', lng:120.1640, lat:30.2521},
-    {label:'杭州城中香格里拉 1501 房', detail:'杭州市下城区长寿路 6 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1637, lat:30.2673},
-    {label:'杭州黄龙饭店 508 房', detail:'杭州市西湖区曙光路 120 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1349, lat:30.2686},
-    {label:'杭州湖滨银泰 in77 服务中心', detail:'杭州市上城区延安路 98 号', contact:'佐藤健 / 13712342210', note:'送至 1 层服务中心', lng:120.1655, lat:30.2488},
-    {label:'杭州萧山机场希尔顿 2201 房', detail:'杭州市萧山区机场路 88 号', contact:'佐藤健 / 13712342210', note:'转机过夜', lng:120.4341, lat:30.2361}
+    {label:'杭州柏悦酒店 808 房', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'不要香菜', lng:120.1640, lat:30.2521, distance:'520m'},
+    {label:'杭州柏悦酒店 37F 会所', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'送至 37 层会所前台', lng:120.1640, lat:30.2521, distance:'520m'},
+    {label:'杭州城中香格里拉 1501 房', detail:'杭州市下城区长寿路 6 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1637, lat:30.2673, distance:'1.1km'},
+    {label:'杭州黄龙饭店 508 房', detail:'杭州市西湖区曙光路 120 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
+    {label:'杭州湖滨银泰 in77 服务中心', detail:'杭州市上城区延安路 98 号', contact:'佐藤健 / 13712342210', note:'送至 1 层服务中心', lng:120.1655, lat:30.2488, distance:'280m'},
+    {label:'杭州萧山机场希尔顿 2201 房', detail:'杭州市萧山区机场路 88 号', contact:'佐藤健 / 13712342210', note:'转机过夜', lng:120.4341, lat:30.2361, distance:'27km'}
   ]},
   {id:'T003', userId:'U343381', name:'Emma Wilson', lang:'英语', passport:'G76543210', phone:'15912343381', deviceNo:'DEV-2026-0003', city:'杭州', lng:120.1551, lat:30.2741, balance:'186.2', loc:'杭州湖滨银泰 in77',
    diet:'素食（不吃任何肉类）', pref:'偏好甜口；不要葱姜蒜；送到房间门口即可',
    addrs:[
-    {label:'杭州温德姆酒店 1506 房', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'放房间门口', lng:120.1685, lat:30.2748},
-    {label:'杭州温德姆酒店 2F 大堂吧', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'送至大堂吧', lng:120.1685, lat:30.2748},
-    {label:'杭州武林万怡酒店 2108 房', detail:'杭州市拱墅区体育场路 333 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.1620, lat:30.2790},
-    {label:'杭州湖滨银泰附近民宿', detail:'杭州市上城区平海路 124 号', contact:'Emma / 15912343381', note:'备用地址，需提前电话', lng:120.1660, lat:30.2500},
-    {label:'杭州西子湖四季酒店 2208 房', detail:'杭州市西湖区灵隐路 5 号', contact:'Emma / 15912343381', note:'朋友代收', lng:120.1288, lat:30.2570},
-    {label:'杭州城站维也纳 903 房', detail:'杭州市上城区东站西广场 1 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.2130, lat:30.2885}
+    {label:'杭州温德姆酒店 1506 房', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'放房间门口', lng:120.1685, lat:30.2748, distance:'950m'},
+    {label:'杭州温德姆酒店 2F 大堂吧', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'送至大堂吧', lng:120.1685, lat:30.2748, distance:'950m'},
+    {label:'杭州武林万怡酒店 2108 房', detail:'杭州市拱墅区体育场路 333 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.1620, lat:30.2790, distance:'1.3km'},
+    {label:'杭州湖滨银泰附近民宿', detail:'杭州市上城区平海路 124 号', contact:'Emma / 15912343381', note:'备用地址，需提前电话', lng:120.1660, lat:30.2500, distance:'310m'},
+    {label:'杭州西子湖四季酒店 2208 房', detail:'杭州市西湖区灵隐路 5 号', contact:'Emma / 15912343381', note:'朋友代收', lng:120.1288, lat:30.2570, distance:'3.2km'},
+    {label:'杭州城站维也纳 903 房', detail:'杭州市上城区东站西广场 1 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.2130, lat:30.2885, distance:'6.8km'}
   ]},
   {id:'T004', userId:'U349045', name:'Kim Min-jun', lang:'韩语', passport:'M12345678', phone:'18612349045', deviceNo:'DEV-2026-0004', city:'杭州', lng:120.1551, lat:30.2741, balance:'258.0', loc:'杭州湖滨银泰 in77',
    diet:'忌海鲜（含虾蟹贝类）', pref:'偏辣；需要湿巾；联系前台转房间',
    addrs:[
-    {label:'杭州湖滨大酒店 602 房', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'联系前台', lng:120.1601, lat:30.2503},
-    {label:'杭州湖滨大酒店 1F 商务中心', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'送至商务中心', lng:120.1601, lat:30.2503},
-    {label:'杭州索菲特西湖大酒店 1203 房', detail:'杭州市上城区西湖大道 333 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1655, lat:30.2455},
-    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1305, lat:30.2385},
-    {label:'杭州黄龙饭店 1206 房', detail:'杭州市西湖区曙光路 120 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1349, lat:30.2686},
-    {label:'杭州东站维也纳酒店 508 房', detail:'杭州市上城区东站西广场 1 号', contact:'Kim / 18612349045', note:'返程前住址', lng:120.2130, lat:30.2885}
+    {label:'杭州湖滨大酒店 602 房', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'联系前台', lng:120.1601, lat:30.2503, distance:'420m'},
+    {label:'杭州湖滨大酒店 1F 商务中心', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'送至商务中心', lng:120.1601, lat:30.2503, distance:'420m'},
+    {label:'杭州索菲特西湖大酒店 1203 房', detail:'杭州市上城区西湖大道 333 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1655, lat:30.2455, distance:'1.8km'},
+    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1305, lat:30.2385, distance:'4.5km'},
+    {label:'杭州黄龙饭店 1206 房', detail:'杭州市西湖区曙光路 120 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
+    {label:'杭州东站维也纳酒店 508 房', detail:'杭州市上城区东站西广场 1 号', contact:'Kim / 18612349045', note:'返程前住址', lng:120.2130, lat:30.2885, distance:'6.8km'}
   ]}
 ];
 

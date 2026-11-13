@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>外卖代下单 · 入境游客服工作台</title>
+<style>
+/* ========== 基础 ========== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:#EEF0F3;color:#262626;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:#F7F8FA;position:relative;
+  box-shadow:0 0 24px rgba(0,0,0,.06)}
+button{font-family:inherit;border:none;background:none;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:.875rem;border:1px solid #E5E6EB;border-radius:10px;
+  background:#fff;color:#262626;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#0669FF}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.8rem;letter-spacing:.2px}
+.hidden{display:none!important}
+
+/* ========== 顶部 ========== */
+.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #F0F0F0;
+  padding:14px 16px 12px}
+.topbar .tt{font-size:1.05rem;font-weight:700}
+.topbar .sub{font-size:.72rem;color:#8C8C8C;margin-top:2px}
+
+/* ========== 步骤条 ========== */
+.stepbar{display:flex;align-items:center;padding:14px 16px 4px;gap:0}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.step-item .dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;background:#E5E6EB;color:#8C8C8C;border:2px solid #fff;
+  box-shadow:0 0 0 1px #E5E6EB;z-index:2;transition:all .3s}
+.step-item .lbl{font-size:.68rem;color:#8C8C8C;font-weight:500}
+.step-item .line{position:absolute;top:13px;left:calc(-50% + 13px);right:calc(50% + 13px);height:2px;background:#E5E6EB;z-index:1}
+.step-item:first-child .line{display:none}
+.step-item.active .dot{background:#0669FF;color:#fff;box-shadow:0 0 0 4px rgba(255,107,53,.15)}
+.step-item.active .lbl{color:#0669FF;font-weight:700}
+.step-item.done .dot{background:#52C41A;color:#fff;box-shadow:0 0 0 1px #52C41A}
+.step-item.done .lbl{color:#52C41A}
+.step-item.done .line{background:#52C41A}
+.step-item.active .line{background:#0669FF}
+
+/* ========== 通用卡片 ========== */
+.card{background:#fff;border:1px solid #F0F0F0;border-radius:14px;padding:14px;
+  margin:12px 12px 0;box-shadow:0 2px 10px rgba(31,45,61,.04)}
+.card-t{font-size:.72rem;color:#8C8C8C;font-weight:600;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px}
+.card-t::before{content:'';width:3px;height:12px;border-radius:2px;background:#0669FF}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;padding:5px 0}
+.kv .k{color:#8C8C8C;flex:none}
+.kv .v{color:#262626;text-align:right;word-break:break-all}
+
+/* ========== 用户信息（参考打车：姓名左 / 积分右） ========== */
+.balance-bar{display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(135deg,#0669FF 0%,#4AA3FF 100%);color:#fff;
+  border-radius:12px;padding:12px 14px;margin:12px 12px 0;
+  box-shadow:0 4px 12px rgba(24,144,255,.25)}
+.balance-bar .bv{font-size:1.05rem;font-weight:700}
+.balance-bar .bv small{font-size:.68rem;font-weight:400;opacity:.85;margin-left:3px}
+.balance-bar .ba-user{font-size:.95rem;font-weight:700;flex:1;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;padding-right:14px}
+
+.addr-list{padding:12px 12px 0}
+.addr-item{background:#fff;border:1.5px solid #F0F0F0;border-radius:12px;padding:12px;
+  margin-bottom:10px;cursor:pointer;transition:all .2s;position:relative}
+.addr-item.selected{border-color:#0669FF;background:#FFF9F5;box-shadow:0 2px 8px rgba(255,107,53,.1)}
+.addr-item.selected::after{content:'';position:absolute;top:10px;right:10px;width:20px;height:20px;
+  border-radius:50%;background:#0669FF;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+  background-size:14px;background-position:center;background-repeat:no-repeat}
+.addr-label{font-size:.85rem;font-weight:700;padding-right:28px}
+.addr-detail{font-size:.75rem;color:#595959;margin-top:3px}
+.addr-contact{font-size:.72rem;color:#8C8C8C;margin-top:3px}
+.addr-note{margin-top:6px;font-size:.7rem;color:#D4380D;background:#FFF7F0;border-radius:6px;padding:5px 8px}
+
+/* ========== 倒计时条（参考打车 .estimate-timer） ========== */
+.count-bar{display:flex;align-items:center;gap:6px;background:#FFF7E6;border:1px solid #FFD591;
+  border-radius:10px;padding:8px 10px;margin:10px 12px 0;font-size:.75rem;color:#D4380D;font-weight:600}
+.count-bar .clock{width:14px;height:14px;flex:none}
+.count-bar .cb-text{flex:1}
+.count-bar .cb-refresh{flex:none;font-size:.68rem;font-weight:700;color:#D4380D;background:#fff;
+  border:1px solid #FFD591;border-radius:8px;padding:4px 10px;min-height:28px;
+  display:flex;align-items:center;cursor:pointer;transition:all .2s}
+.count-bar .cb-refresh:hover{background:#FFF7E6}
+.count-bar .cb-refresh:active{transform:scale(.95)}
+
+/* 当前定位 */
+.loc-row{display:flex;align-items:center;gap:6px;margin:12px 12px 0;font-size:.82rem;color:#262626}.loc-row .loc-pin{color:#0669FF;flex:none}
+.loc-row .loc-label{color:#8C8C8C;flex:none}
+.loc-row .loc-name{font-weight:600}
+.loc-row{display:flex;align-items:center;gap:6px;background:#F5F9FF;border:1px solid #E6F0FF;
+  border-radius:10px;padding:9px 12px}
+
+/* 地址搜索（关键词匹配 闪购收货地址 + 附近地址） */
+.addr-search{margin:10px 12px 0;display:flex;align-items:center;gap:8px;background:#fff;
+  border:1px solid #ECECF0;border-radius:12px;padding:0 12px;height:44px;
+  box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.addr-search svg{flex:none}
+.addr-search input{flex:1;border:none;height:42px;font-size:.85rem;background:transparent}
+.addr-search .addr-search-btn{flex:none;background:#0669FF;color:#fff;font-size:.8rem;font-weight:600;
+  border-radius:8px;padding:0 14px;height:32px;line-height:32px}
+.addr-empty{text-align:center;color:#B0B3B8;font-size:.78rem;padding:20px 0}
+
+/* 地址列表：组件内上下滑动 */
+.addr-list-wrap{margin:10px 12px 0;background:#fff;border:1px solid #F0F0F0;border-radius:12px;
+  overflow:hidden;box-shadow:0 2px 10px rgba(31,45,61,.04)}
+.addr-list-wrap .alw-head{padding:10px 12px;font-size:.75rem;font-weight:700;color:#8C8C8C;
+  border-bottom:1px solid #F5F5F5}
+#addrListExist,#addrListRec{max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:8px}
+#addrListExist .addr-item,#addrListRec .addr-item{margin-bottom:8px}
+#addrListExist .addr-item:last-child,#addrListRec .addr-item:last-child{margin-bottom:0}
+
+/* 忌口偏好：必填高亮 + 字数统计 */
+#prefCard{border-color:#FFD591;background:#FFFDF5}
+#prefCard .card-t{color:#D4380D}
+#prefCard .card-t::before{background:#FF7A45}
+.card-t-tag{margin-left:auto;font-size:.62rem;font-weight:600;color:#FF7A45;
+  background:#FFF2E8;border-radius:10px;padding:2px 8px}
+.pref-count{text-align:right;font-size:.68rem;color:#B0B3B8;margin-top:2px}
+.pref-count b{color:#8C8C8C;font-weight:600}
+
+/* 附近地址搜索 */
+.rec-search{margin:12px 12px 0;display:flex;align-items:center;gap:8px;background:#fff;
+  border:1px solid #ECECF0;border-radius:12px;padding:0 12px;height:44px;
+  box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.rec-search svg{flex:none}
+.rec-search input{flex:1;border:none;height:42px;font-size:.85rem;background:transparent}
+.rec-empty{text-align:center;color:#B0B3B8;font-size:.78rem;padding:32px 0}
+
+/* 补全表单 */
+.complete-form{background:#fff;border:1.5px solid #0669FF;border-radius:12px;
+  padding:14px;margin:12px;box-shadow:0 2px 8px rgba(255,107,53,.08)}
+.complete-form .cf-t{font-size:.82rem;font-weight:700;color:#0669FF;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px}
+.complete-form label{display:block;font-size:.72rem;color:#8C8C8C;margin:10px 0 5px}
+.complete-form input,.complete-form textarea{width:100%;padding:10px 12px;font-size:.85rem;border-radius:10px}
+.complete-form textarea{min-height:64px;resize:none}
+.complete-form .cf-hint{font-size:.68rem;color:#B0B3B8;margin-top:4px}
+
+/* 忌口偏好 */
+.pref-section{padding:12px 12px 0}
+.pref-row{margin-bottom:10px}
+.pref-row label{display:block;font-size:.75rem;color:#8C8C8C;margin-bottom:6px;font-weight:600}
+.pref-row textarea{width:100%;padding:10px 12px;font-size:.82rem;border-radius:10px;min-height:52px;resize:none}
+
+/* ========== 用户硬件端模拟面板 ========== */
+.hw-panel{margin:12px 12px 0;background:#1a1a2e;border-radius:14px;overflow:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.hw-head{background:#16213e;color:#fff;padding:12px 14px;display:flex;align-items:center;gap:8px}
+.hw-head .hw-dot{width:8px;height:8px;border-radius:50%;background:#52C41A;animation:pulse 2s infinite}
+.hw-head .hw-title{font-size:.82rem;font-weight:700;flex:1}
+.hw-head .hw-device{font-size:.68rem;color:#8b9dc3}
+.hw-body{padding:12px;max-height:320px;overflow-y:auto}
+.hw-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hw-card:last-child{margin-bottom:0}
+.hw-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hw-card-type{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.hw-card-type.addr{background:#E6F7FF;color:#0669FF}
+.hw-card-type.order{background:#FFF2E8;color:#0669FF}
+.hw-card-status{font-size:.68rem;color:#8C8C8C}
+.hw-card-status.confirmed{color:#52C41A}
+.hw-card-status.rejected{color:#FF4D4F}
+.hw-card-body{font-size:.75rem;color:#434343;line-height:1.6}
+.hw-card-body .row{display:flex;gap:6px;padding:2px 0}
+.hw-card-body .row .rk{color:#8C8C8C;flex:none}
+.hw-card-body .row .rv{flex:1;word-break:break-all}
+.hw-card-body .money-line{margin-top:6px;padding-top:6px;border-top:1px dashed #F0F0F0;
+  font-weight:700;color:#0669FF;font-size:.82rem}
+.hw-card-ops{display:flex;gap:8px;margin-top:10px}
+.hw-card-ops button{flex:1;min-height:44px;border-radius:8px;font-size:.8rem;font-weight:600}
+.hw-btn-ok{background:#52C41A;color:#fff}
+.hw-btn-no{background:#fff;border:1px solid #FF4D4F!important;color:#FF4D4F!important}
+.hw-empty{color:#8b9dc3;font-size:.75rem;text-align:center;padding:24px 0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ========== 商家列表 ========== */
+.shop-list{padding:12px 12px 0}
+.shop-card{background:#fff;border:1px solid #F0F0F0;border-radius:14px;margin-bottom:12px;
+  overflow:hidden;box-shadow:0 2px 10px rgba(31,45,61,.04);transition:all .2s}
+.shop-card.expanded{border-color:#0669FF;box-shadow:0 4px 16px rgba(255,107,53,.12)}
+.shop-head{display:flex;gap:12px;padding:14px;cursor:pointer;min-height:44px}
+.shop-logo{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex:none;border:1px solid rgba(0,0,0,.04)}
+.shop-info{flex:1;min-width:0}
+.shop-name{font-size:.88rem;font-weight:700}
+.shop-cat{display:inline-block;font-size:.62rem;color:#0669FF;background:#E6F7FF;border-radius:4px;
+  padding:1px 6px;margin-left:6px;font-weight:600;vertical-align:2px}
+.shop-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:.72rem;color:#8C8C8C;flex-wrap:wrap}
+.shop-meta .sep{width:1px;height:10px;background:#E5E6EB}
+.shop-meta .score{color:#0669FF;font-weight:600}
+.shop-meta .sales{color:#595959}
+.shop-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.shop-fees{font-size:.7rem;color:#8C8C8C}
+.shop-fees .fee{color:#0669FF;font-weight:600}
+.shop-arrow{width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  color:#B0B3B8;transition:transform .25s}
+.shop-card.expanded .shop-arrow{transform:rotate(180deg);color:#0669FF}
+.shop-menu{border-top:1px solid #F7F7F8;padding:8px 14px 12px}
+.menu-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F7F7F8}
+.menu-item:last-child{border-bottom:none}
+.menu-img{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;border:1px solid #F0F0F0}
+.menu-info{flex:1;min-width:0}
+.menu-name{font-size:.85rem;font-weight:600}
+.menu-desc{font-size:.72rem;color:#B0B3B8;margin-top:3px}
+.menu-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.menu-price{font-size:.88rem;font-weight:700;color:#0669FF}
+.menu-add{width:32px;height:32px;border-radius:50%;background:#0669FF;color:#fff;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(255,107,53,.3);
+  transition:transform .15s}
+.menu-add:active{transform:scale(.9)}
+.menu-add.disabled{background:#D9D9D9;box-shadow:none}
+
+/* 翻页控件（店铺 / 菜品通用） */
+.pager{display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 0 2px}
+.pager button{font-size:.75rem;font-weight:600;color:#0669FF;background:#fff;
+  border:1px solid #D6E9FF;border-radius:8px;padding:0 14px;height:30px;line-height:30px}
+.pager button:disabled{color:#B0B3B8;border-color:#E5E6EB;background:#F5F5F5}
+.pager .pg-info{font-size:.72rem;color:#8C8C8C}
+
+/* 购物车信息常驻明细块（页面底部，非弹层） */
+.cart-detail{background:#fff;border-top:1px solid #F0F0F0;padding:4px 16px 12px}
+.cart-detail.hidden{display:none}
+.cart-detail .cd-t{font-size:.78rem;font-weight:700;color:#262626;padding:10px 0 6px;
+  display:flex;align-items:center;gap:6px}
+.cart-detail .cd-t::before{content:'';width:3px;height:12px;border-radius:2px;background:#0669FF}
+.cart-detail .cd-shop{font-size:.72rem;color:#8C8C8C;padding-bottom:6px}
+.cart-detail .cd-shop b{color:#262626}
+.cart-detail .cd-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #F7F7F8}
+.cart-detail .cd-item-info{flex:1;min-width:0}
+.cart-detail .cd-item-name{font-size:.8rem;font-weight:600}
+.cart-detail .cd-item-price{font-size:.72rem;color:#0669FF;font-weight:700;margin-top:2px}
+.cart-detail .cd-fee{margin-top:8px}
+.cart-detail .cd-remark{margin-top:8px;padding-top:8px;border-top:1px dashed #F0F0F0;
+  font-size:.75rem;color:#434343;line-height:1.6;word-break:break-all}
+.cart-detail .cd-remark .rk{color:#8C8C8C}
+
+/* ========== 底部按钮（页面最下方，非悬浮） ========== */
+.action-bar{background:#fff;border-top:1px solid #F0F0F0;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.action-bar .main-btn{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
+  font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;box-shadow:0 4px 12px rgba(255,107,53,.25)}
+.action-bar .main-btn:disabled{background:#D9D9D9;box-shadow:none}
+.action-bar .main-btn.busy{opacity:.75}
+.action-bar .main-btn .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:none}
+.action-bar .main-btn.busy .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.action-bar .sub-btn{width:100%;min-height:44px;border-radius:12px;border:1px solid #E5E6EB;
+  color:#595959;font-size:.82rem;margin-top:8px;background:#fff}
+
+/* ========== 购物车明细（底部常驻块 #cartDetail，弹层已移除） ========== */
+.cart-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F7F7F8}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-size:.82rem;font-weight:600}
+.cart-item-price{font-size:.75rem;color:#0669FF;font-weight:700;margin-top:2px}
+.cart-qty{display:flex;align-items:center;gap:10px;flex:none}
+.cart-qty button{width:28px;height:28px;border-radius:50%;border:1px solid #E5E6EB;
+  background:#fff;color:#595959;font-size:.9rem;display:flex;align-items:center;justify-content:center;
+  transition:all .15s}
+.cart-qty button:active{background:#F5F5F5}
+.cart-qty .qty-num{font-size:.85rem;font-weight:700;min-width:20px;text-align:center}
+.cart-qty .qty-del{width:28px;height:28px;border-radius:50%;border:1px solid #FFCDD2;
+  background:#FFF1F0;color:#FF4D4F;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.fee-detail{margin-top:12px;padding-top:12px;border-top:1px dashed #F0F0F0}
+.fee-row{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;color:#595959}
+.fee-row.total{font-weight:700;color:#262626;font-size:.9rem;border-top:1px dashed #F0F0F0;
+  margin-top:6px;padding-top:10px}
+.fee-row.total .v{color:#0669FF}
+.cart-empty{text-align:center;color:#B0B3B8;font-size:.78rem;padding:32px 0}
+
+/* 备注 */
+.remark-section{padding:12px 12px 0}
+.remark-section label{display:block;font-size:.75rem;color:#8C8C8C;margin-bottom:6px;font-weight:600}
+.remark-section textarea{width:100%;padding:10px 12px;font-size:.82rem;border-radius:10px;
+  min-height:64px;resize:none}
+.remark-limit{font-size:.68rem;color:#B0B3B8;margin-top:4px;text-align:right}
+.remark-limit b{color:#0669FF}
+
+/* ========== 确认弹窗 ========== */
+.confirm-mask{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;
+  align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.confirm-mask.show{opacity:1;pointer-events:auto}
+.confirm-box{background:#fff;border-radius:18px;padding:24px 20px;max-width:340px;width:100%;
+  transform:scale(.9);transition:transform .25s;text-align:center}
+.confirm-mask.show .confirm-box{transform:scale(1)}
+.confirm-icon{width:64px;height:64px;border-radius:50%;background:#F6FFED;border:2px solid #52C41A;
+  display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px}
+.confirm-title{font-size:1rem;font-weight:700;margin-bottom:8px}
+.confirm-desc{font-size:.8rem;color:#595959;margin-bottom:16px;line-height:1.6}
+.confirm-summary{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px;
+  font-size:.75rem;color:#595959;text-align:left;margin-bottom:16px}
+.confirm-summary .row{display:flex;gap:6px;padding:3px 0}
+.confirm-summary .row .rk{color:#8C8C8C;flex:none;width:56px}
+.confirm-summary .row .rv{flex:1;word-break:break-all}
+.confirm-summary .money{color:#0669FF;font-weight:700}
+.confirm-btn{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
+  font-size:.9rem;font-weight:700}
+
+/* ========== Toast ========== */
+.toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-12px);z-index:80;
+  background:rgba(38,38,38,.92);color:#fff;font-size:.8rem;padding:11px 20px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:all .25s;max-width:80%;text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ========== 页面主体 ========== */
+.page-body{padding-bottom:12px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶部 -->
+  <div class="topbar">
+    <div class="tt">外卖代下单</div>
+  </div>
+
+  <!-- 步骤条 -->
+  <div class="stepbar" id="stepbar">
+    <div class="step-item active" data-step="1">
+      <div class="line"></div>
+      <div class="dot">1</div>
+      <div class="lbl">选收货地址</div>
+    </div>
+    <div class="step-item" data-step="2">
+      <div class="line"></div>
+      <div class="dot">2</div>
+      <div class="lbl">选店选菜</div>
+    </div>
+  </div>
+
+  <!-- 页面主体 -->
+  <div class="page-body" id="pageBody">
+
+    <!-- 第①步：选收货地址 -->
+    <div id="step1">
+      <!-- 用户信息：姓名 / 积分余额（参考打车代下单） -->
+      <div class="balance-bar">
+        <div class="ba-user" id="tName">-</div>
+        <div style="text-align:right">
+          <div class="bv" id="tBalance">-</div>
+        </div>
+      </div>
+
+      <!-- 倒计时条：地址 / 忌口 / 偏好推送有效期（参考打车） -->
+      <div class="count-bar" id="countBar">
+        <svg class="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span class="cb-text" id="countTime">地址/忌口/偏好有效期至 --:--（-- 分 -- 秒）</span>
+        <button class="cb-refresh" id="countRefreshBtn">刷新</button>
+      </div>
+
+      <!-- 收货地址模块 -->
+      <div class="card">
+        <div class="card-t">收货地址</div>
+        <!-- 当前定位 -->
+        <div class="loc-row" style="margin:0">
+          <svg class="loc-pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="loc-label">当前定位：</span>
+          <span class="loc-name" id="locName">-</span>
+        </div>
+        <!-- 关键词搜索（匹配 闪购收货地址 + 附近地址） -->
+        <div class="addr-search" style="margin:10px 0 0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0B3B8" stroke-width="2">
+            <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input type="text" id="addrSearchInput" placeholder="搜索地址关键词，匹配闪购收货地址与附近地址…">
+          <button class="addr-search-btn" id="addrSearchBtn">查询</button>
+        </div>
+      </div>
+
+      <!-- 闪购收货地址（组件内滑动） -->
+      <div class="addr-list-wrap">
+        <div class="alw-head">闪购收货地址</div>
+        <div class="addr-list" id="addrListExist" style="padding:8px;margin:0"></div>
+      </div>
+
+      <!-- 附近地址（组件内滑动） -->
+      <div class="addr-list-wrap">
+        <div class="alw-head">附近地址</div>
+        <div class="addr-list" id="addrListRec" style="padding:8px;margin:0"></div>
+
+        <!-- 补全表单 -->
+        <div id="completeForm" class="complete-form hidden" style="margin:8px;border-width:1px">
+          <div class="cf-t">📍 补全收货信息</div>
+          <div class="kv" style="padding:4px 0">
+            <span class="k">已选地址</span>
+            <span class="v" id="cfAddrLabel" style="font-weight:600;color:#0669FF">-</span>
+          </div>
+          <label>详细地址（楼栋/楼层/房号）*</label>
+          <input type="text" id="cfDetail" placeholder="如：3号楼 1508 房" value="送到前台">
+          <label>收货人姓名 *</label>
+          <input type="text" id="cfContact" placeholder="收货人姓名">
+          <label>收货人手机号 *</label>
+          <input type="text" id="cfPhone" placeholder="11 位手机号" maxlength="11">
+          <div class="cf-hint">补全后方可推送用户确认</div>
+        </div>
+      </div>
+
+      <!-- 忌口与偏好模块（必填，可修改，200 字上限） -->
+      <div class="card" id="prefCard">
+        <div class="card-t">忌口与偏好<span class="card-t-tag">必填 · 推送前请核对</span></div>
+        <div class="pref-row">
+          <label>忌口 *</label>
+          <textarea id="dietInput" maxlength="200" placeholder="如：不吃辣；忌花生、香菜"></textarea>
+          <div class="pref-count"><b id="dietCount">0</b>/200</div>
+        </div>
+        <div class="pref-row" style="margin-bottom:0">
+          <label>偏好 *</label>
+          <textarea id="prefInput" maxlength="200" placeholder="如：少油少盐；餐具要 2 份"></textarea>
+          <div class="pref-count"><b id="prefCount">0</b>/200</div>
+        </div>
+      </div>
+
+      <!-- 用户硬件端模拟面板（第①步） -->
+      <div class="hw-panel hidden" id="hwPanel2">
+        <div class="hw-head">
+          <div class="hw-dot"></div>
+          <div class="hw-title">用户硬件端（模拟）</div>
+          <div class="hw-device" id="hwDevice2">-</div>
+        </div>
+        <div class="hw-body" id="hwCards2"></div>
+      </div>
+    </div>
+
+    <!-- 第②步：选店选菜 -->
+    <div id="step2" class="hidden">
+      <!-- 倒计时条：订单推送有效期（参考打车） -->
+      <div class="count-bar" id="orderCountBar">
+        <svg class="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span class="cb-text" id="orderCountTime">订单有效期至 --:--（-- 分 -- 秒）</span>
+        <button class="cb-refresh" id="orderCountRefreshBtn">刷新</button>
+      </div>
+
+      <!-- 店铺列表（去月售/品类标签/翻页） -->
+      <div class="shop-list" id="shopList"></div>
+
+      <!-- 整单备注（默认回显并拼接忌口偏好） -->
+      <div class="remark-section">
+        <label>整单备注</label>
+        <textarea id="orderRemark" maxlength="200" placeholder="配送备注…"></textarea>
+        <div class="remark-limit"><b id="remarkCount">0</b>/200</div>
+      </div>
+
+      <!-- 用户硬件端模拟面板（第②步） -->
+      <div class="hw-panel hidden" id="hwPanel3">
+        <div class="hw-head">
+          <div class="hw-dot"></div>
+          <div class="hw-title">用户硬件端（模拟）</div>
+          <div class="hw-device" id="hwDevice3">-</div>
+        </div>
+        <div class="hw-body" id="hwCards3"></div>
+      </div>
+    </div>
+
+    <!-- 购物车信息常驻明细块（页面底部，非弹层） -->
+    <div class="cart-detail hidden" id="cartDetail">
+      <div class="cd-t">购物车信息</div>
+      <div class="cd-shop">店铺：<b id="cdShop">-</b></div>
+      <div id="cdItems"></div>
+      <div class="fee-detail cd-fee" id="cdFee"></div>
+      <div class="cd-remark"><span class="rk">整单备注：</span><span id="cdRemark">无</span></div>
+    </div>
+
+    <!-- 底部操作栏（页面最下方，非悬浮） -->
+    <div class="action-bar hidden" id="actionBar">
+      <button class="main-btn" id="mainActionBtn">
+        <span class="spinner"></span>
+        <span id="mainActionText">推送地址、忌口、偏好给用户确认</span>
+      </button>
+    </div>
+
+  </div><!-- /page-body -->
+
+  <!-- 确认弹窗 -->
+  <div class="confirm-mask" id="confirmMask">
+    <div class="confirm-box">
+      <div class="confirm-icon">✅</div>
+      <div class="confirm-title" id="confirmTitle">用户已确认下单</div>
+      <div class="confirm-desc" id="confirmDesc">订单已提交成功</div>
+      <div class="confirm-summary" id="confirmSummary"></div>
+      <button class="confirm-btn" id="confirmCloseBtn">关闭</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div><!-- /app -->
+
+<script src="h5-shared-data.js"></script>
+<script>
+/* ============================================================
+ * 外卖代下单 · 客服端 H5
+ * 流程：① 选收货地址 → ② 选店选菜 → 用户确认
+ * ============================================================ */
+
+// ---------- 全局状态 ----------
+let TOURIST = null;          // 当前用户
+let curStep = 1;             // 当前步骤 1/2
+let selectedAddr = null;     // 已选地址对象
+let selectedRec = null;      // 已选附近地址原始对象
+let addrConfirmed = false;   // 用户是否已确认地址
+let addrCardId = null;       // 当前地址卡片 ID
+let orderCardId = null;      // 当前订单卡片 ID
+let cart = [];               // 购物车 [{shopId, shopName, item, qty}]
+let expandedShop = null;     // 当前展开菜单的店铺 id
+let orderConfirmed = false;  // 用户是否已确认订单
+let orderPushed = false;     // 订单是否已推送
+let addrPushed = false;      // 地址是否已推送
+let cardSeq = 0;             // 硬件卡片序号
+let addrExpireAt = 0;        // 地址/忌口/偏好 推送有效期截止
+let addrExpireTimer = null;  // 倒计时定时器
+let shopPage = 0;            // 店铺列表当前页
+let SHOP_PAGE_SIZE = 4;      // 店铺每页条数
+let menuPages = {};          // 各店铺菜单当前页 {shopId: page}
+let MENU_PAGE_SIZE = 4;      // 菜品每页条数
+let orderExpireAt = 0;       // 订单推送有效期截止
+let orderExpireTimer = null; // 订单倒计时定时器
+
+// ---------- 工具 ----------
+function $(id){ return document.getElementById(id); }
+function show(id){ $(id).classList.remove('hidden'); }
+function hide(id){ $(id).classList.add('hidden'); }
+function esc(s){ return escHtml(s); }
+function money(n){ return fmtMoney(n); }
+
+let toastTimer = null;
+function toast(msg, ms){
+  ms = ms || 2400;
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms);
+}
+
+// ---------- 地址推送有效期倒计时（9 分 50 秒） ----------
+function startAddrExpireTimer(){
+  addrExpireAt = Date.now() + 9*60*1000 + 50*1000;
+  clearInterval(addrExpireTimer);
+  tickAddrExpire();
+  addrExpireTimer = setInterval(tickAddrExpire, 1000);
+}
+function tickAddrExpire(){
+  var el = $('countTime');
+  var remain = Math.max(0, addrExpireAt - Date.now());
+  if(remain <= 0){
+    clearInterval(addrExpireTimer);
+    if(el) el.textContent = '地址/忌口/偏好已过期，请点击「刷新」重新获取';
+    return;
+  }
+  var totalSec = Math.floor(remain / 1000);
+  var m = Math.floor(totalSec / 60), s = totalSec % 60;
+  var expire = new Date(addrExpireAt);
+  var hh = ('0' + expire.getHours()).slice(-2);
+  var mm = ('0' + expire.getMinutes()).slice(-2);
+  if(el) el.textContent = '地址/忌口/偏好有效期至 ' + hh + ':' + mm + '（' + m + ' 分 ' + s + ' 秒）';
+}
+
+// ---------- 第②步 订单推送有效期倒计时（9 分 50 秒） ----------
+function startOrderExpireTimer(){
+  orderExpireAt = Date.now() + 9*60*1000 + 50*1000;
+  clearInterval(orderExpireTimer);
+  tickOrderExpire();
+  orderExpireTimer = setInterval(tickOrderExpire, 1000);
+}
+function tickOrderExpire(){
+  var el = $('orderCountTime');
+  var remain = Math.max(0, orderExpireAt - Date.now());
+  if(remain <= 0){
+    clearInterval(orderExpireTimer);
+    if(el) el.textContent = '订单已过期，请点击「刷新」重新获取';
+    return;
+  }
+  var totalSec = Math.floor(remain / 1000);
+  var m = Math.floor(totalSec / 60), s = totalSec % 60;
+  var expire = new Date(orderExpireAt);
+  var hh = ('0' + expire.getHours()).slice(-2);
+  var mm = ('0' + expire.getMinutes()).slice(-2);
+  if(el) el.textContent = '订单有效期至 ' + hh + ':' + mm + '（' + m + ' 分 ' + s + ' 秒）';
+}
+// 刷新：重置订单倒计时 + 重渲染店铺/菜品
+function refreshOrderStep(){
+  if(orderPushed && !orderConfirmed){ toast('已推送，等待用户确认中…'); return; }
+  startOrderExpireTimer();
+  renderShops();
+  toast('已刷新，订单有效期重置为 9 分 50 秒');
+}
+
+// 刷新：重置倒计时 + 重新拉取附近地址
+function refreshNearbyAddrs(){
+  startAddrExpireTimer();
+  renderRecList($('addrSearchInput').value.trim());
+  toast('已刷新附近地址，有效期重置为 9 分 50 秒');
+}
+
+// ---------- 初始化 ----------
+function init(){
+  // 自动获取第 1 位用户
+  TOURIST = TOURISTS[0];
+  renderTourist();
+  renderAddrList('');
+  renderRecList('');
+  renderShops();
+  bindEvents();
+  gotoStep(1);
+  startAddrExpireTimer();
+}
+
+// ---------- 用户信息 ----------
+function renderTourist(){
+  $('tName').textContent   = TOURIST.name;
+  $('tBalance').innerHTML  = TOURIST.balance + '<small> 积分</small>';
+  $('locName').textContent = TOURIST.loc || nearestPoiName(TOURIST);
+  // 回显历史忌口与偏好（可修改，200 字上限）
+  $('dietInput').value = TOURIST.diet || '';
+  $('prefInput').value = TOURIST.pref || '';
+  updatePrefCount();
+  $('hwDevice2').textContent= TOURIST.deviceNo;
+  $('hwDevice3').textContent= TOURIST.deviceNo;
+}
+
+// 忌口 / 偏好字数统计
+function updatePrefCount(){
+  $('dietCount').textContent = $('dietInput').value.length;
+  $('prefCount').textContent = $('prefInput').value.length;
+}
+
+// 就近 POI 兜底（无 loc 字段时按坐标就近匹配）
+function nearestPoiName(t){
+  var best = null, bd = Infinity;
+  var pools = [];
+  try{ if(typeof TX_PLACES !== 'undefined') pools = pools.concat(Object.values(TX_PLACES).map(p=>({label:p[0],lng:p[2],lat:p[3]}))); }catch(e){}
+  try{ pools = pools.concat(ADDR_RECOMMENDS.map(r=>({label:r.label,lng:r.lng,lat:r.lat}))); }catch(e){}
+  pools.forEach(function(p){
+    var d = Math.pow((p.lng||0)-(t.lng||0),2) + Math.pow((p.lat||0)-(t.lat||0),2);
+    if(d < bd){ bd = d; best = p.label; }
+  });
+  return best || (t.city || '') + '当前位置';
+}
+
+// ---------- 步骤条 ----------
+function updateStepbar(){
+  document.querySelectorAll('.step-item').forEach(function(el){
+    var s = parseInt(el.dataset.step);
+    el.classList.remove('active','done');
+    if(s < curStep)  el.classList.add('done');
+    if(s === curStep) el.classList.add('active');
+    if(s < curStep)  el.querySelector('.dot').textContent = '✓';
+    else             el.querySelector('.dot').textContent = s;
+  });
+}
+
+function gotoStep(n){
+  curStep = n;
+  updateStepbar();
+  hide('step1'); hide('step2');
+  hide('actionBar');
+  if($('cartDetail')) $('cartDetail').classList.add('hidden');
+  $('pageBody').className = 'page-body';
+
+  if(n === 1){
+    show('step1');
+    show('actionBar');
+    resetAddrStep();
+  } else if(n === 2){
+    show('step2');
+    show('actionBar');
+    resetOrderStep();
+  }
+}
+
+// ---------- 第①步：地址 ----------
+function resetAddrStep(){
+  addrConfirmed  = false;
+  addrPushed     = false;
+  addrCardId     = null;
+  selectedAddr   = null;
+  selectedRec    = null;
+  // 清空选择状态
+  document.querySelectorAll('.addr-item').forEach(function(el){ el.classList.remove('selected'); });
+  hide('completeForm');
+  $('addrSearchInput').value = '';
+  renderAddrList('');
+  renderRecList('');
+  // 回显忌口偏好
+  $('dietInput').value = TOURIST.diet || '';
+  $('prefInput').value = TOURIST.pref || '';
+  updatePrefCount();
+  // 清空硬件卡片
+  $('hwCards2').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
+  hide('hwPanel2');
+  // 恢复按钮
+  setMainBtn('推送地址、忌口、偏好给用户确认', false, false);
+  updateMainBtnState();
+}
+
+// 关键词同时匹配 闪购收货地址 + 附近地址
+function renderAddrList(kw){
+  kw = (kw || '').toLowerCase();
+  var list = TOURIST.addrs.map(function(a, i){ return {a:a, i:i}; }).filter(function(x){
+    return !kw || x.a.label.toLowerCase().indexOf(kw) >= 0 || x.a.detail.toLowerCase().indexOf(kw) >= 0;
+  });
+  if(!list.length){
+    $('addrListExist').innerHTML = '<div class="addr-empty">闪购收货地址无匹配结果</div>';
+    return;
+  }
+  var html = '';
+  list.forEach(function(x){
+    var a = x.a;
+    html += '<div class="addr-item" data-idx="'+x.i+'" data-type="exist">'
+      + '<div class="addr-label">'+esc(a.label)+'</div>'
+      + '<div class="addr-detail">'+esc(a.detail)+'</div>'
+      + '<div class="addr-contact">'+esc(a.contact)+'</div>'
+      + (a.note ? '<div class="addr-note">'+esc(a.note)+'</div>' : '')
+      + '</div>';
+  });
+  $('addrListExist').innerHTML = html;
+}
+
+function renderRecList(kw){
+  kw = (kw || '').toLowerCase();
+  var list = ADDR_RECOMMENDS.filter(function(r){
+    return !kw || r.label.toLowerCase().indexOf(kw) >= 0 || r.detail.toLowerCase().indexOf(kw) >= 0;
+  });
+  if(!list.length){
+    $('addrListRec').innerHTML = '<div class="addr-empty">附近地址无匹配结果</div>';
+    return;
+  }
+  var html = '';
+  list.forEach(function(r){
+    html += '<div class="addr-item" data-id="'+r.id+'" data-type="rec">'
+      + '<div class="addr-label">'+esc(r.label)+'</div>'
+      + '<div class="addr-detail">'+esc(r.detail)+'</div>'
+      + '</div>';
+  });
+  $('addrListRec').innerHTML = html;
+}
+
+// 查询：同时过滤两个列表
+function searchAddr(kw){
+  renderAddrList(kw);
+  renderRecList(kw);
+}
+
+// 点击地址卡片
+function onAddrItemClick(el){
+  if(addrPushed && !addrConfirmed){
+    toast('已推送用户，等待确认中…');
+    return;
+  }
+  if(addrConfirmed){
+    toast('用户已确认，如需修改请重新进入');
+    return;
+  }
+
+  document.querySelectorAll('.addr-item').forEach(function(x){ x.classList.remove('selected'); });
+  el.classList.add('selected');
+
+  var type = el.dataset.type;
+  if(type === 'exist'){
+    selectedAddr = TOURIST.addrs[parseInt(el.dataset.idx)];
+    selectedRec  = null;
+    hide('completeForm');
+  } else {
+    var rec = ADDR_RECOMMENDS.find(function(r){ return r.id === el.dataset.id; });
+    selectedRec  = rec;
+    selectedAddr = null;
+    show('completeForm');
+    $('cfAddrLabel').textContent = rec.label;
+    // 预填联系人
+    var parts = (TOURIST.addrs[0].contact || '').split(' / ');
+    $('cfContact').value = parts[0] || TOURIST.name;
+    $('cfPhone').value   = TOURIST.phone || '';
+    $('cfDetail').value  = '送到前台';
+  }
+  // 联动底部按钮态
+  updateMainBtnState();
+}
+
+// 校验附近地址补全
+function validateRecForm(){
+  if(!selectedRec) return {ok:false, msg:'请先选择收货地址'};
+  var d = $('cfDetail').value.trim();
+  var c = $('cfContact').value.trim();
+  var p = $('cfPhone').value.trim();
+  if(!d) return {ok:false, msg:'请填写详细地址（楼栋/楼层/房号）'};
+  if(!c) return {ok:false, msg:'请填写收货人姓名'};
+  if(!p || p.length < 11) return {ok:false, msg:'请填写正确的 11 位手机号'};
+  return {ok:true, detail:d, contact:c, phone:p};
+}
+
+// 底部按钮必填校验：地址 + 忌口 + 偏好
+function isAddrStepReady(){
+  var addrReady = !!(selectedAddr || (selectedRec && validateRecForm().ok));
+  var dietReady = !!$('dietInput').value.trim();
+  var prefReady = !!$('prefInput').value.trim();
+  return addrReady && dietReady && prefReady;
+}
+function updateMainBtnState(){
+  if(addrPushed) return; // 推送中/已确认由流程控制
+  var ready = isAddrStepReady();
+  $('mainActionBtn').disabled = !ready;
+}
+
+// 获取当前选中的完整地址对象
+function getSelectedAddrObj(){
+  if(selectedAddr) return selectedAddr;
+  if(selectedRec){
+    var v = validateRecForm();
+    if(!v.ok) return null;
+    var diet = $('dietInput').value.trim();
+    return {
+      label:   selectedRec.label + ' ' + v.detail,
+      detail:  selectedRec.detail,
+      contact: v.contact + ' / ' + v.phone,
+      note:    diet ? '忌口：' + diet : '',
+      lng:     selectedRec.lng,
+      lat:     selectedRec.lat
+    };
+  }
+  return null;
+}
+
+// 推送地址卡片
+function pushAddrCard(){
+  if(addrPushed && !addrConfirmed){
+    toast('已推送，等待用户确认中…');
+    return;
+  }
+
+  var addr = getSelectedAddrObj();
+  if(!addr){
+    if(selectedRec){
+      var v = validateRecForm();
+      toast(v.msg);
+    } else {
+      toast('请先选择收货地址');
+    }
+    return;
+  }
+
+  // 忌口、偏好必填
+  var diet = $('dietInput').value.trim();
+  var pref = $('prefInput').value.trim();
+  if(!diet){ toast('请填写忌口'); $('dietInput').focus(); return; }
+  if(!pref){ toast('请填写偏好'); $('prefInput').focus(); return; }
+
+  addrPushed = true;
+  addrConfirmed = false;
+  cardSeq++;
+  addrCardId = 'card_addr_' + cardSeq;
+
+  // 按钮 busy
+  setMainBtn('推送中…', true, true);
+
+  setTimeout(function(){
+    setMainBtn('已推送 · 等待用户确认', false, true);
+    $('mainActionBtn').disabled = true;
+
+    // 硬件面板显示卡片
+    show('hwPanel2');
+    $('hwDevice2').textContent = TOURIST.deviceNo;
+    addHwCard('hwCards2', {
+      id:       addrCardId,
+      type:     'addr',
+      typeLabel:'收货信息',
+      status:   'pending',
+      rows: [
+        {k:'地址', v: addr.label},
+        {k:'详情', v: addr.detail},
+        {k:'联系人', v: addr.contact},
+        {k:'忌口', v: diet || '无'},
+        {k:'偏好', v: pref || '无'}
+      ],
+      onConfirm: onAddrConfirm,
+      onReject:  onAddrReject
+    });
+
+    toast('卡片①（收货信息）已推送用户，等待确认（9 分 50 秒内有效）', 3200);
+  }, 900);
+}
+
+// 用户确认地址
+function onAddrConfirm(cardId){
+  if(cardId !== addrCardId) return;
+  addrConfirmed = true;
+  updateHwCardStatus('hwCards2', cardId, 'confirmed');
+  toast('用户已确认，进入选菜');
+  setTimeout(function(){ gotoStep(2); }, 600);
+}
+
+// 用户拒绝地址
+function onAddrReject(cardId){
+  if(cardId !== addrCardId) return;
+  addrPushed = false;
+  addrConfirmed = false;
+  addrCardId = null;
+  updateHwCardStatus('hwCards2', cardId, 'rejected');
+  setMainBtn('推送地址、忌口、偏好给用户确认', false, false);
+  updateMainBtnState();
+  toast('用户已拒绝，可修改后重推');
+}
+
+// ---------- 第②步：选店点菜 ----------
+function resetOrderStep(){
+  orderConfirmed = false;
+  orderPushed    = false;
+  orderCardId    = null;
+  cart           = [];
+  expandedShop   = null;
+  shopPage       = 0;
+  menuPages      = {};
+  // 备注：默认回显「配送完成一定要打电话，否则投诉」+ 拼接第一步忌口与偏好
+  var diet = ($('dietInput') ? $('dietInput').value.trim() : '') || TOURIST.diet || '';
+  var pref = ($('prefInput') ? $('prefInput').value.trim() : '') || TOURIST.pref || '';
+  var remark = '配送完成一定要打电话，否则投诉';
+  if(diet) remark += '；忌口：' + diet;
+  if(pref) remark += '；偏好：' + pref;
+  $('orderRemark').value = remark;
+  $('remarkCount').textContent = $('orderRemark').value.length;
+  // 清空硬件
+  $('hwCards3').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
+  hide('hwPanel3');
+  // 渲染
+  renderShops();
+  renderCartBar();
+  setMainBtn('推送菜品信息给用户确认', false, false);
+  $('mainActionBtn').disabled = true;
+  // 启动订单有效期倒计时
+  startOrderExpireTimer();
+}
+
+// 渲染店铺列表（去月售 / 品类标签 / 店铺翻页）
+function renderShops(){
+  var totalPages = Math.ceil(SHOPS.length / SHOP_PAGE_SIZE);
+  if(shopPage > totalPages - 1) shopPage = Math.max(0, totalPages - 1);
+  var start = shopPage * SHOP_PAGE_SIZE;
+  var pageShops = SHOPS.slice(start, start + SHOP_PAGE_SIZE);
+  var html = '';
+  pageShops.forEach(function(s){
+    var inCart = cart.length > 0 && cart[0].shopId === s.id;
+    var otherShopInCart = cart.length > 0 && cart[0].shopId !== s.id;
+    var menuPage = menuPages[s.id] || 0;
+    var mTotal = s.menu.length;
+    var mPages = Math.max(1, Math.ceil(mTotal / MENU_PAGE_SIZE));
+    if(menuPage > mPages - 1) menuPage = Math.max(0, mPages - 1);
+    var mStart = menuPage * MENU_PAGE_SIZE;
+    var pageMenu = s.menu.slice(mStart, mStart + MENU_PAGE_SIZE);
+    html += '<div class="shop-card'+(expandedShop===s.id?' expanded':'')+'" data-id="'+s.id+'">'
+      + '<div class="shop-head" data-shop="'+s.id+'">'
+      +   '<div class="shop-logo" style="background:linear-gradient(135deg,'+s.logo.a+','+s.logo.b+')">'+s.logo.e+'</div>'
+      +   '<div class="shop-info">'
+      +     '<div class="shop-name">'+esc(s.name)+'<span class="shop-cat">'+esc(s.cat)+'</span></div>'
+      +     '<div class="shop-meta">'
+      +       '<span class="score">★ '+s.score+'</span>'
+      +       '<span class="sep"></span>'
+      +       '<span>'+s.distance+' · '+s.eta+'</span>'
+      +     '</div>'
+      +     '<div class="shop-bottom">'
+      +       '<div class="shop-fees"><span class="fee">'+esc(s.deliveryFee)+'</span> · 起送 ¥'+s.minOrder+'</div>'
+      +       '<div class="shop-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="shop-menu'+(expandedShop===s.id?'':' hidden')+'" id="menu-'+s.id+'">';
+
+    pageMenu.forEach(function(m){
+      var mi = s.menu.indexOf(m);
+      var qty = getCartQty(s.id, mi);
+      html += '<div class="menu-item">'
+        +   '<img class="menu-img" src="'+esc(m.img||'')+'" alt="'+esc(m.name)+'" onerror="this.style.display=\'none\'">'
+        +   '<div class="menu-info">'
+        +     '<div class="menu-name">'+esc(m.name)+'</div>'
+        +     '<div class="menu-desc">'+esc(m.desc)+'</div>'
+        +   '</div>'
+        +   '<div class="menu-right">'
+        +     '<div class="menu-price">'+money(m.price)+'</div>'
+        +     (qty > 0
+              ? '<div class="cart-qty">'
+                + '<button onclick="decQty(\''+s.id+'\','+mi+')">−</button>'
+                + '<span class="qty-num">'+qty+'</span>'
+                + '<button onclick="incQty(\''+s.id+'\','+mi+')">+</button>'
+                + '</div>'
+              : '<button class="menu-add'+(otherShopInCart?' disabled':'')+'" '
+                + (otherShopInCart
+                    ? 'onclick="toast(\'闪购不支持跨店铺下单\')"'
+                    : 'onclick="addToCart(\''+s.id+'\','+mi+')"')
+                + '>+</button>')
+        +   '</div>'
+        + '</div>';
+    });
+
+    // 菜品翻页
+    if(mPages > 1){
+      html += '<div class="pager">'
+        + '<button onclick="menuPageGo(\''+s.id+'\','+(menuPage-1)+')" '+(menuPage<=0?'disabled':'')+'>上一页</button>'
+        + '<span class="pg-info">'+(menuPage+1)+' / '+mPages+'</span>'
+        + '<button onclick="menuPageGo(\''+s.id+'\','+(menuPage+1)+')" '+(menuPage>=mPages-1?'disabled':'')+'>下一页</button>'
+        + '</div>';
+    }
+
+    html += '</div></div>';
+  });
+
+  // 店铺翻页
+  if(totalPages > 1){
+    html += '<div class="pager" style="padding-bottom:4px">'
+      + '<button onclick="shopPageGo('+(shopPage-1)+')" '+(shopPage<=0?'disabled':'')+'>上一页</button>'
+      + '<span class="pg-info">店铺 '+(shopPage+1)+' / '+totalPages+'</span>'
+      + '<button onclick="shopPageGo('+(shopPage+1)+')" '+(shopPage>=totalPages-1?'disabled':'')+'>下一页</button>'
+      + '</div>';
+  }
+  $('shopList').innerHTML = html;
+}
+
+// 店铺翻页
+function shopPageGo(p){
+  var totalPages = Math.ceil(SHOPS.length / SHOP_PAGE_SIZE);
+  if(p < 0 || p > totalPages - 1) return;
+  shopPage = p;
+  renderShops();
+}
+// 菜品翻页
+function menuPageGo(shopId, p){
+  var shop = SHOPS.find(function(s){ return s.id === shopId; });
+  if(!shop) return;
+  var mPages = Math.max(1, Math.ceil(shop.menu.length / MENU_PAGE_SIZE));
+  if(p < 0 || p > mPages - 1) return;
+  menuPages[shopId] = p;
+  renderShops();
+}
+
+// 展开/收起店铺菜单
+function toggleShop(shopId){
+  if(expandedShop === shopId){
+    expandedShop = null;
+  } else {
+    expandedShop = shopId;
+  }
+  renderShops();
+}
+
+// 购物车操作
+function getCartQty(shopId, menuIdx){
+  var found = cart.filter(function(c){ return c.shopId===shopId && c.menuIdx===menuIdx; });
+  return found.length ? found[0].qty : 0;
+}
+
+function addToCart(shopId, menuIdx){
+  if(orderPushed && !orderConfirmed){
+    toast('已推送用户，等待确认中…');
+    return;
+  }
+  if(orderConfirmed){
+    toast('用户已确认，如需修改请重新进入');
+    return;
+  }
+  // 同店限制
+  if(cart.length > 0 && cart[0].shopId !== shopId){
+    toast('闪购不支持跨店铺下单');
+    return;
+  }
+  var shop = SHOPS.find(function(s){ return s.id === shopId; });
+  var item = shop.menu[menuIdx];
+  var found = cart.filter(function(c){ return c.shopId===shopId && c.menuIdx===menuIdx; });
+  if(found.length){
+    found[0].qty++;
+  } else {
+    cart.push({shopId:shopId, shopName:shop.name, menuIdx:menuIdx, item:item, qty:1});
+  }
+  renderShops();
+  renderCartBar();
+}
+
+function incQty(shopId, menuIdx){
+  if(orderPushed && !orderConfirmed){ toast('已推送，等待用户确认…'); return; }
+  var found = cart.filter(function(c){ return c.shopId===shopId && c.menuIdx===menuIdx; });
+  if(found.length) found[0].qty++;
+  renderShops();
+  renderCartBar();
+}
+
+function decQty(shopId, menuIdx){
+  if(orderPushed && !orderConfirmed){ toast('已推送，等待用户确认…'); return; }
+  var found = cart.filter(function(c){ return c.shopId===shopId && c.menuIdx===menuIdx; });
+  if(found.length){
+    found[0].qty--;
+    if(found[0].qty <= 0) cart = cart.filter(function(c){ return c !== found[0]; });
+  }
+  renderShops();
+  renderCartBar();
+}
+
+function removeFromCart(shopId, menuIdx){
+  cart = cart.filter(function(c){ return !(c.shopId===shopId && c.menuIdx===menuIdx); });
+  renderShops();
+  renderCartBar();
+}
+
+// 购物车金额计算
+function calcCart(){
+  var goods    = 0;
+  var totalQty = 0;
+  var shopId   = cart.length ? cart[0].shopId : null;
+  var shop     = shopId ? SHOPS.find(function(s){ return s.id===shopId; }) : null;
+  cart.forEach(function(c){
+    goods    += c.item.price * c.qty;
+    totalQty += c.qty;
+  });
+  var delivery = 0;
+  if(shop){
+    var m = shop.deliveryFee.match(/([\d.]+)/);
+    delivery = m ? parseFloat(m[1]) : 0;
+  }
+  var packing = shop ? (shop.packingFee || 0) : 0;
+  var service = Math.round(goods * 0.1 * 100) / 100;
+  var total   = Math.round((goods + delivery + packing + service) * 100) / 100;
+  return {goods:goods, delivery:delivery, packing:packing, service:service, total:total, totalQty:totalQty, shop:shop};
+}
+
+function renderCartBar(){
+  var c = calcCart();
+  // 控制推送按钮态：有菜品才可点
+  $('mainActionBtn').disabled = !(c.totalQty > 0);
+  // 常驻明细块 + 明细弹层
+  renderCartDetail();
+}
+
+// 底部常驻购物车信息明细块
+function renderCartDetail(){
+  var box = $('cartDetail');
+  if(!box) return;
+  if(!cart.length){ box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  var c = calcCart();
+  $('cdShop').textContent = c.shop ? c.shop.name : '-';
+  var html = '';
+  cart.forEach(function(item){
+    html += '<div class="cd-item">'
+      + '<div class="cd-item-info">'
+      +   '<div class="cd-item-name">'+esc(item.item.name)+'</div>'
+      +   '<div class="cd-item-price">'+money(item.item.price)+' × '+item.qty+' = '+money(item.item.price*item.qty)+'</div>'
+      + '</div>'
+      + '<div class="cart-qty">'
+      +   '<button onclick="decQty(\''+item.shopId+'\','+item.menuIdx+')">−</button>'
+      +   '<span class="qty-num">'+item.qty+'</span>'
+      +   '<button onclick="incQty(\''+item.shopId+'\','+item.menuIdx+')">+</button>'
+      +   '<button class="qty-del" onclick="removeFromCart(\''+item.shopId+'\','+item.menuIdx+')">🗑</button>'
+      + '</div>'
+      + '</div>';
+  });
+  $('cdItems').innerHTML = html;
+  $('cdFee').innerHTML =
+      '<div class="fee-row"><span>菜品金额</span><span>'+money(c.goods)+'</span></div>'
+    + '<div class="fee-row"><span>包装费</span><span>'+money(c.packing)+'</span></div>'
+    + '<div class="fee-row"><span>配送费</span><span>'+money(c.delivery)+'</span></div>'
+    + '<div class="fee-row"><span>平台服务费（10%）</span><span>'+money(c.service)+'</span></div>'
+    + '<div class="fee-row total"><span>合计金额</span><span class="v">'+money(c.total)+'</span></div>';
+  $('cdRemark').textContent = $('orderRemark').value || '无';
+}
+
+// ---------- 推送订单卡片 ----------
+function pushOrderCard(){
+  if(!cart.length){ toast('请先添加菜品'); return; }
+  if(orderPushed && !orderConfirmed){ toast('已推送，等待用户确认…'); return; }
+
+  var c       = calcCart();
+  var addr    = getSelectedAddrObj();
+  var remark  = $('orderRemark').value.trim();
+
+  orderPushed = true;
+  orderConfirmed = false;
+  cardSeq++;
+  orderCardId = 'card_order_' + cardSeq;
+
+  setMainBtn('推送中…', true, true);
+
+  setTimeout(function(){
+    setMainBtn('已推送 · 等待用户确认', false, true);
+    $('mainActionBtn').disabled = true;
+
+    var itemRows = cart.map(function(item){
+      return {k: item.item.name, v: '×'+item.qty+'  '+money(item.item.price * item.qty)};
+    });
+    itemRows.push({k:'备注', v: remark || '无'});
+    itemRows.push({k:'地址', v: addr ? addr.label + ' ' + addr.detail : '-'});
+    itemRows.push({k:'联系人', v: addr ? addr.contact : '-'});
+    itemRows.push({k:'金额', v: '商品 '+money(c.goods)+' + 配送 '+money(c.delivery)+' + 服务 '+money(c.service)});
+
+    show('hwPanel3');
+    $('hwDevice3').textContent = TOURIST.deviceNo;
+    addHwCard('hwCards3', {
+      id:        orderCardId,
+      type:      'order',
+      typeLabel: '订单确认',
+      status:    'pending',
+      rows:      itemRows,
+      moneyLine: '总计 '+money(c.total),
+      onConfirm: onOrderConfirm,
+      onReject:  onOrderReject
+    });
+
+    toast('卡片②（订单确认）已推送用户', 2800);
+  }, 900);
+}
+
+// 用户确认订单
+function onOrderConfirm(cardId){
+  if(cardId !== orderCardId) return;
+  orderConfirmed = true;
+  updateHwCardStatus('hwCards3', cardId, 'confirmed');
+
+  var c    = calcCart();
+  var addr = getSelectedAddrObj();
+
+  // 强制弹窗
+  setTimeout(function(){
+    $('confirmTitle').textContent = '用户已确认下单';
+    $('confirmDesc').textContent  = '订单已提交至闪购，可在「外卖订单」查看进度';
+    $('confirmSummary').innerHTML =
+        '<div class="row"><span class="rk">店铺</span><span class="rv">'+esc(c.shop.name)+'</span></div>'
+      + '<div class="row"><span class="rk">菜品</span><span class="rv">'+cart.map(function(x){return esc(x.item.name)+' ×'+x.qty;}).join('、')+'</span></div>'
+      + '<div class="row"><span class="rk">地址</span><span class="rv">'+esc(addr ? addr.label : '-')+'</span></div>'
+      + '<div class="row"><span class="rk">金额</span><span class="rv money">'+money(c.total)+'（商品 '+money(c.goods)+' + 配送 '+money(c.delivery)+' + 服务 '+money(c.service)+'）</span></div>';
+    $('confirmMask').classList.add('show');
+  }, 400);
+}
+
+// 用户拒绝订单
+function onOrderReject(cardId){
+  if(cardId !== orderCardId) return;
+  orderPushed    = false;
+  orderConfirmed = false;
+  orderCardId    = null;
+  updateHwCardStatus('hwCards3', cardId, 'rejected');
+  setMainBtn('推送菜品信息给用户确认', false, false);
+  $('mainActionBtn').disabled = false;
+  toast('用户已拒绝，可修改后重推');
+}
+
+// 关闭确认弹窗 → 重置回第①步
+$('confirmCloseBtn').addEventListener('click', function(){
+  $('confirmMask').classList.remove('show');
+  // 重置用户（模拟下一位）
+  var idx = TOURISTS.indexOf(TOURIST);
+  TOURIST = TOURISTS[(idx + 1) % TOURISTS.length];
+  renderTourist();
+  $('addrSearchInput').value = '';
+  renderAddrList('');
+  renderRecList('');
+  gotoStep(1);
+  startAddrExpireTimer();
+  toast('已重置，可为下一位用户代下单');
+});
+
+// ---------- 硬件卡片 ----------
+function addHwCard(containerId, opts){
+  var container = $(containerId);
+  // 清空空提示
+  var emptyEl = container.querySelector('.hw-empty');
+  if(emptyEl) emptyEl.remove();
+
+  var card = document.createElement('div');
+  card.className = 'hw-card';
+  card.dataset.cardId = opts.id;
+
+  var rowsHtml = '';
+  opts.rows.forEach(function(r){
+    rowsHtml += '<div class="row"><span class="rk">'+esc(r.k)+'</span><span class="rv">'+esc(r.v)+'</span></div>';
+  });
+
+  var opsHtml = '';
+  if(opts.status === 'pending'){
+    opsHtml = '<div class="hw-card-ops">'
+      + '<button class="hw-btn-ok" onclick="hwConfirm(\''+containerId+'\',\''+opts.id+'\')">✓ 确认</button>'
+      + '<button class="hw-btn-no" onclick="hwReject(\''+containerId+'\',\''+opts.id+'\')">✗ 拒绝</button>'
+      + '</div>';
+  }
+
+  card.innerHTML =
+      '<div class="hw-card-head">'
+    +   '<span class="hw-card-type '+opts.type+'">'+esc(opts.typeLabel)+'</span>'
+    +   '<span class="hw-card-status" data-status>'+statusLabel(opts.status)+'</span>'
+    + '</div>'
+    + '<div class="hw-card-body">'+rowsHtml
+    +   (opts.moneyLine ? '<div class="money-line">'+esc(opts.moneyLine)+'</div>' : '')
+    + '</div>'
+    + opsHtml;
+
+  // 保存回调
+  card._onConfirm = opts.onConfirm;
+  card._onReject  = opts.onReject;
+
+  container.appendChild(card);
+  container.scrollTop = container.scrollHeight;
+}
+
+function statusLabel(s){
+  return s==='confirmed' ? '✓ 已确认' : s==='rejected' ? '✗ 已拒绝' : '⏳ 待确认';
+}
+
+function updateHwCardStatus(containerId, cardId, status){
+  var card = document.querySelector('#'+containerId+' [data-card-id="'+cardId+'"]');
+  if(!card) return;
+  var st = card.querySelector('[data-status]');
+  st.textContent = statusLabel(status);
+  st.className = 'hw-card-status ' + status;
+  // 移除按钮
+  var ops = card.querySelector('.hw-card-ops');
+  if(ops) ops.remove();
+}
+
+// 全局回调（硬件卡片按钮触发）
+function hwConfirm(containerId, cardId){
+  var card = document.querySelector('#'+containerId+' [data-card-id="'+cardId+'"]');
+  if(card && card._onConfirm) card._onConfirm(cardId);
+}
+function hwReject(containerId, cardId){
+  var card = document.querySelector('#'+containerId+' [data-card-id="'+cardId+'"]');
+  if(card && card._onReject) card._onReject(cardId);
+}
+
+// ---------- 主按钮 ----------
+function setMainBtn(text, busy, disabled){
+  $('mainActionText').textContent = text;
+  $('mainActionBtn').classList.toggle('busy', busy);
+  $('mainActionBtn').disabled = disabled;
+}
+
+// 主按钮点击（根据步骤判断行为）
+$('mainActionBtn').addEventListener('click', function(){
+  if(curStep === 1) pushAddrCard();
+  else if(curStep === 2) pushOrderCard();
+});
+
+// ---------- 事件绑定 ----------
+function bindEvents(){
+  // 地址列表点击（事件委托，两列表互斥单选）
+  $('addrListExist').addEventListener('click', function(e){
+    var item = e.target.closest('.addr-item');
+    if(item) onAddrItemClick(item);
+  });
+  $('addrListRec').addEventListener('click', function(e){
+    var item = e.target.closest('.addr-item');
+    if(item) onAddrItemClick(item);
+  });
+
+  // 倒计时刷新：重置 9:50 + 重新拉取附近地址
+  $('countRefreshBtn').addEventListener('click', refreshNearbyAddrs);
+
+  // 第②步 订单倒计时刷新
+  $('orderCountRefreshBtn').addEventListener('click', refreshOrderStep);
+
+  // 关键词搜索（输入即查 + 点查询按钮）
+  $('addrSearchInput').addEventListener('input', function(){
+    searchAddr(this.value.trim());
+  });
+  $('addrSearchBtn').addEventListener('click', function(){
+    searchAddr($('addrSearchInput').value.trim());
+  });
+
+  // 补全表单输入 → 联动按钮态
+  ['cfDetail','cfContact','cfPhone'].forEach(function(id){
+    $(id).addEventListener('input', updateMainBtnState);
+  });
+
+  // 忌口 / 偏好输入 → 联动按钮态 + 字数统计
+  $('dietInput').addEventListener('input', function(){ updateMainBtnState(); updatePrefCount(); });
+  $('prefInput').addEventListener('input', function(){ updateMainBtnState(); updatePrefCount(); });
+
+  // 店铺展开/收起（事件委托）
+  $('shopList').addEventListener('click', function(e){
+    var head = e.target.closest('.shop-head');
+    if(head) toggleShop(head.dataset.shop);
+  });
+
+  // 备注字数统计 + 同步底部常驻明细块
+  $('orderRemark').addEventListener('input', function(){
+    $('remarkCount').textContent = this.value.length;
+    if($('cdRemark') && cart.length) $('cdRemark').textContent = this.value || '无';
+  });
+}
+
+// 暴露给 HTML 内联事件
+window.addToCart  = addToCart;
+window.incQty     = incQty;
+window.decQty     = decQty;
+window.removeFromCart = removeFromCart;
+window.hwConfirm  = hwConfirm;
+window.hwReject   = hwReject;
+window.toast      = toast;
+window.shopPageGo = shopPageGo;
+window.menuPageGo = menuPageGo;
+
+// ---------- 启动 ----------
+init();
+</script>
+</body>
+</html>

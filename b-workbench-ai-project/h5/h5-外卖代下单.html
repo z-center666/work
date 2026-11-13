@@ -75,6 +75,8 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .addr-label{font-size:.85rem;font-weight:700;padding-right:28px}
 .addr-detail{font-size:.75rem;color:#595959;margin-top:3px}
 .addr-contact{font-size:.72rem;color:#8C8C8C;margin-top:3px}
+.addr-dist{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;color:#0669FF;
+  background:#F0F7FF;border:1px solid #D6E9FF;border-radius:6px;padding:2px 6px;margin-top:4px}
 .addr-note{margin-top:6px;font-size:.7rem;color:#D4380D;background:#FFF7F0;border-radius:6px;padding:5px 8px}
 
 /* ========== 倒计时条（参考打车 .estimate-timer） ========== */
@@ -282,26 +284,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .remark-limit{font-size:.68rem;color:#B0B3B8;margin-top:4px;text-align:right}
 .remark-limit b{color:#0669FF}
 
-/* ========== 确认弹窗 ========== */
-.confirm-mask{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);display:flex;
-  align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
-.confirm-mask.show{opacity:1;pointer-events:auto}
-.confirm-box{background:#fff;border-radius:18px;padding:24px 20px;max-width:340px;width:100%;
-  transform:scale(.9);transition:transform .25s;text-align:center}
-.confirm-mask.show .confirm-box{transform:scale(1)}
-.confirm-icon{width:64px;height:64px;border-radius:50%;background:#F6FFED;border:2px solid #52C41A;
-  display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px}
-.confirm-title{font-size:1rem;font-weight:700;margin-bottom:8px}
-.confirm-desc{font-size:.8rem;color:#595959;margin-bottom:16px;line-height:1.6}
-.confirm-summary{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px;
-  font-size:.75rem;color:#595959;text-align:left;margin-bottom:16px}
-.confirm-summary .row{display:flex;gap:6px;padding:3px 0}
-.confirm-summary .row .rk{color:#8C8C8C;flex:none;width:56px}
-.confirm-summary .row .rv{flex:1;word-break:break-all}
-.confirm-summary .money{color:#0669FF;font-weight:700}
-.confirm-btn{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
-  font-size:.9rem;font-weight:700}
-
 /* ========== Toast ========== */
 .toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-12px);z-index:80;
   background:rgba(38,38,38,.92);color:#fff;font-size:.8rem;padding:11px 20px;border-radius:999px;
@@ -317,9 +299,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 <div class="app">
 
   <!-- 顶部 -->
-  <div class="topbar">
-    <div class="tt">外卖代下单</div>
-  </div>
 
   <!-- 步骤条 -->
   <div class="stepbar" id="stepbar">
@@ -480,17 +459,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
     </div>
 
   </div><!-- /page-body -->
-
-  <!-- 确认弹窗 -->
-  <div class="confirm-mask" id="confirmMask">
-    <div class="confirm-box">
-      <div class="confirm-icon">✅</div>
-      <div class="confirm-title" id="confirmTitle">用户已确认下单</div>
-      <div class="confirm-desc" id="confirmDesc">订单已提交成功</div>
-      <div class="confirm-summary" id="confirmSummary"></div>
-      <button class="confirm-btn" id="confirmCloseBtn">关闭</button>
-    </div>
-  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
@@ -722,6 +690,7 @@ function renderAddrList(kw){
       + '<div class="addr-label">'+esc(a.label)+'</div>'
       + '<div class="addr-detail">'+esc(a.detail)+'</div>'
       + '<div class="addr-contact">'+esc(a.contact)+'</div>'
+      + (a.distance ? '<div class="addr-dist"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1"/><path d="M5 0.5V2M5 8V9.5M0.5 5H2M8 5H9.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>距您 '+esc(a.distance)+'</div>' : '')
       + (a.note ? '<div class="addr-note">'+esc(a.note)+'</div>' : '')
       + '</div>';
   });
@@ -1221,20 +1190,19 @@ function onOrderConfirm(cardId){
   orderConfirmed = true;
   updateHwCardStatus('hwCards3', cardId, 'confirmed');
 
-  var c    = calcCart();
-  var addr = getSelectedAddrObj();
-
-  // 强制弹窗
+  // 用户已确认 → 不弹窗，直接重置流程，切换下一位用户
+  toast('用户已确认，订单已提交至闪购');
   setTimeout(function(){
-    $('confirmTitle').textContent = '用户已确认下单';
-    $('confirmDesc').textContent  = '订单已提交至闪购，可在「外卖订单」查看进度';
-    $('confirmSummary').innerHTML =
-        '<div class="row"><span class="rk">店铺</span><span class="rv">'+esc(c.shop.name)+'</span></div>'
-      + '<div class="row"><span class="rk">菜品</span><span class="rv">'+cart.map(function(x){return esc(x.item.name)+' ×'+x.qty;}).join('、')+'</span></div>'
-      + '<div class="row"><span class="rk">地址</span><span class="rv">'+esc(addr ? addr.label : '-')+'</span></div>'
-      + '<div class="row"><span class="rk">金额</span><span class="rv money">'+money(c.total)+'（商品 '+money(c.goods)+' + 配送 '+money(c.delivery)+' + 服务 '+money(c.service)+'）</span></div>';
-    $('confirmMask').classList.add('show');
-  }, 400);
+    var idx = TOURISTS.indexOf(TOURIST);
+    TOURIST = TOURISTS[(idx + 1) % TOURISTS.length];
+    renderTourist();
+    $('addrSearchInput').value = '';
+    renderAddrList('');
+    renderRecList('');
+    gotoStep(1);
+    startAddrExpireTimer();
+    toast('已重置，可为下一位用户代下单');
+  }, 1200);
 }
 
 // 用户拒绝订单
@@ -1248,21 +1216,6 @@ function onOrderReject(cardId){
   $('mainActionBtn').disabled = false;
   toast('用户已拒绝，可修改后重推');
 }
-
-// 关闭确认弹窗 → 重置回第①步
-$('confirmCloseBtn').addEventListener('click', function(){
-  $('confirmMask').classList.remove('show');
-  // 重置用户（模拟下一位）
-  var idx = TOURISTS.indexOf(TOURIST);
-  TOURIST = TOURISTS[(idx + 1) % TOURISTS.length];
-  renderTourist();
-  $('addrSearchInput').value = '';
-  renderAddrList('');
-  renderRecList('');
-  gotoStep(1);
-  startAddrExpireTimer();
-  toast('已重置，可为下一位用户代下单');
-});
 
 // ---------- 硬件卡片 ----------
 function addHwCard(containerId, opts){

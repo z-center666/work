@@ -263,27 +263,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .sheet-close{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
   font-size:.9rem;font-weight:700;margin-top:14px}
 
-/* 强制确认弹窗（bottom sheet 样式） */
-.force-sheet-mask{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:flex;
-  align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.force-sheet-mask.show{opacity:1;pointer-events:auto}
-.force-sheet{width:100%;max-width:480px;background:#fff;border-radius:18px 18px 0 0;
-  padding:8px 16px calc(20px + env(safe-area-inset-bottom));
-  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.35,1)}
-.force-sheet-mask.show .force-sheet{transform:translateY(0)}
-.force-sheet .fs-icon{width:60px;height:60px;border-radius:50%;background:#F6FFED;
-  border:2px solid #52C41A;display:flex;align-items:center;justify-content:center;
-  font-size:1.8rem;margin:10px auto 12px}
-.force-sheet .fs-title{font-size:1rem;font-weight:700;text-align:center;margin-bottom:6px}
-.force-sheet .fs-desc{font-size:.78rem;color:#595959;text-align:center;margin-bottom:14px}
-.force-sheet .fs-summary{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;
-  padding:10px 12px;font-size:.75rem;color:#595959;margin-bottom:6px}
-.force-sheet .fs-summary .row{display:flex;gap:6px;padding:3px 0}
-.force-sheet .fs-summary .row .rk{color:#8C8C8C;flex:none;width:56px}
-.force-sheet .fs-summary .row .rv{flex:1;word-break:break-all}
-.force-sheet .fs-summary .money{color:#0669FF;font-weight:700}
-
-
 /* ========== Toast ========== */
 .toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-12px);z-index:80;
   background:rgba(38,38,38,.92);color:#fff;font-size:.8rem;padding:11px 20px;border-radius:999px;
@@ -300,9 +279,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 <div class="app">
 
   <!-- 顶部 -->
-  <div class="topbar">
-    <div class="tt">打车代下单</div>
-  </div>
 
   <!-- 步骤条 -->
   <div class="stepbar" id="stepbar">
@@ -489,18 +465,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
       <span class="spinner"></span>
       <span id="pushBtnTxt">推送打车订单给用户确认</span>
     </button>
-  </div>
-
-  <!-- 强制确认弹层（bottom sheet） -->
-  <div class="force-sheet-mask" id="forceMask">
-    <div class="force-sheet">
-      <div class="sheet-grip"></div>
-      <div class="fs-icon">✅</div>
-      <div class="fs-title">用户已确认打车订单</div>
-      <div class="fs-desc">订单已进入派单流程，请在「打车订单」页面查看进度</div>
-      <div class="fs-summary" id="forceSummary"></div>
-      <button class="sheet-close" id="forceCloseBtn">关闭</button>
-    </div>
   </div>
 
   <!-- Toast -->
@@ -824,6 +788,18 @@ function renderPuResults(list){
   });
 }
 
+// 根据用户经纬度，默认加载附近 POI 到地图+列表
+function loadDefaultPois(){
+  var nearest = findNearest(TOURIST.lng, TOURIST.lat, 8);
+  if(!nearest.length){
+    hide('puMapBox'); hide('puResultWrap');
+    return;
+  }
+  renderPuMap(nearest);
+  renderPuResults(nearest);
+  $('puResultTitle').textContent = '附近上车点（点击选择）';
+}
+
 // ---------- 第②步：选终点 ----------
 function renderStep2Header(){
   // 控制「已选上车点」模块显隐：未选时整个模块隐藏，选中后才展示
@@ -1134,24 +1110,17 @@ function hwConfirm(cardId){
   st.textContent = '已确认';
   st.classList.add('confirmed');
 
-  // 构建订单摘要
-  const selectedCarList = estimate.cars.filter(function(c){ return selectedCars[c.car]; });
-  const svcSum = selectedCarList.reduce(function(s, c){ return s + c.svc; }, 0);
-  const totalSum = selectedCarList.reduce(function(s, c){ return s + c.total; }, 0);
-
-  const summaryHtml =
-    '<div class="row"><span class="rk">用户</span><span class="rv">' + esc(TOURIST.name) + '（' + esc(TOURIST.lang) + '）</span></div>' +
-    '<div class="row"><span class="rk">上车点</span><span class="rv">' + esc(selectedPu.zh) + '（' + esc(selectedPu.en) + '）</span></div>' +
-    '<div class="row"><span class="rk">目的地</span><span class="rv">' + esc(selectedDst.zh) + '（' + esc(selectedDst.en) + '）</span></div>' +
-    '<div class="row"><span class="rk">行程</span><span class="rv">约 ' + estimate.km + ' km · ' + estimate.minutes + ' 分钟</span></div>' +
-    selectedCarList.map(function(c){
-      return '<div class="row"><span class="rk">' + esc(c.car) + '</span><span class="rv">' + money(c.total) + '</span></div>';
-    }).join('') +
-    '<div class="row"><span class="rk">服务费</span><span class="rv money">合计 ' + money(svcSum) + '</span></div>' +
-    '<div class="row"><span class="rk">最高预估</span><span class="rv money">' + money(totalSum) + '</span></div>';
-
-  $('forceSummary').innerHTML = summaryHtml;
-  $('forceMask').classList.add('show');
+  // 用户已确认 → 不弹窗，直接重置流程，切换下一位用户
+  toast('用户已确认，订单已进入派单流程');
+  setTimeout(function(){
+    resetAll();
+    touristIdx = (touristIdx + 1) % TX_TOURISTS.length;
+    TOURIST = TX_TOURISTS[touristIdx];
+    renderTourist();
+    goStep(1);
+    loadDefaultPois();
+    toast('已切换至下一位用户：' + TOURIST.name);
+  }, 1200);
 }
 
 function hwReject(cardId){
@@ -1165,19 +1134,6 @@ function hwReject(cardId){
   orderCardId = null;
   updatePushBtn();
   toast('用户已拒绝，客服可重新推送（或重新预估价格）');
-}
-
-function bindForceClose(){
-  $('forceCloseBtn').addEventListener('click', function(){
-    $('forceMask').classList.remove('show');
-    // 重置流程，自动选下一位用户，回到第①步重新选上车点
-    resetAll();
-    touristIdx = (touristIdx + 1) % TX_TOURISTS.length;
-    TOURIST = TX_TOURISTS[touristIdx];
-    renderTourist();
-    goStep(1);
-    toast('已切换至下一位用户：' + TOURIST.name);
-  });
 }
 
 function resetStep3(){
@@ -1217,14 +1173,14 @@ function init(){
   bindPuSearch();
   bindDstSearch();
   bindPush();
-  bindForceClose();
 
   // 用户硬件端空状态
   $('hwCards2').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
   $('hwCards3').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
 
-  // 初始进入第①步：选上车点
+  // 初始进入第①步：选上车点，默认加载附近 POI
   goStep(1);
+  loadDefaultPois();
 }
 
 init();

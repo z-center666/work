@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>打车订单 · 入境游客服工作台</title>
+<style>
+/* ========== 基础 ========== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+  background:#EEF0F3;color:#262626;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:#F7F8FA;position:relative;
+  box-shadow:0 0 24px rgba(0,0,0,.06)}
+button{font-family:inherit;border:none;background:none;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:.875rem;border:1px solid #E5E6EB;border-radius:10px;
+  background:#fff;color:#262626;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#0669FF}
+.mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.8rem;letter-spacing:.2px}
+
+/* ========== 顶部 ========== */
+.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #F0F0F0;
+  padding:14px 16px 12px}
+.topbar .tt{font-size:1.05rem;font-weight:700}
+.topbar .sub{font-size:.72rem;color:#8C8C8C;margin-top:2px}
+
+/* ========== 搜索与筛选 ========== */
+.filter-wrap{position:sticky;top:0;z-index:19;background:#F7F8FA;padding:12px 12px 10px}
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECECF0;
+  border-radius:12px;padding:0 12px;height:44px;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.search-box svg{flex:none}
+.search-box input{flex:1;border:none;height:42px;font-size:.875rem;background:transparent}
+.filters{display:flex;gap:8px;margin-top:10px}
+.filters select{flex:1;height:40px;padding:0 8px;font-size:.78rem;background:#fff;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center}
+.date-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.date-row input{flex:1;height:40px;padding:0 10px;font-size:.78rem;background:#fff;min-width:0}
+.date-row span{color:#8C8C8C;font-size:.75rem;flex:none}
+.date-row .reset{flex:none;height:40px;padding:0 12px;font-size:.75rem;color:#0669FF;
+  border:1px solid #D6E9FF;border-radius:10px;background:#F0F7FF;min-width:44px}
+
+/* ========== 订单卡片 ========== */
+.order-list{padding:2px 12px 12px}
+.order-card{background:#fff;border:1px solid #F0F0F0;border-radius:14px;padding:14px;
+  margin-bottom:12px;box-shadow:0 2px 10px rgba(31,45,61,.04)}
+.oc-row1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.oc-row1 .oid{color:#262626;font-weight:600}
+.oc-row2{margin-top:8px;font-size:.8rem;color:#595959}
+.oc-row3{margin-top:4px;font-size:.78rem;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-row4{display:flex;align-items:baseline;justify-content:space-between;margin-top:8px;gap:8px;flex-wrap:wrap}
+.oc-row4 .car{font-size:.72rem;color:#8C8C8C}
+.oc-row4 .amt{font-size:.95rem;font-weight:700;color:#0669FF}
+.oc-row4 .amt small{font-size:.68rem;font-weight:400;color:#8C8C8C;margin-left:4px}
+.oc-row4 .tm{font-size:.7rem;color:#B0B3B8;margin-left:auto}
+.oc-ops{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed #F0F0F0;flex-wrap:wrap}
+.oc-ops button{flex:1;min-width:calc(33% - 6px);min-height:44px;border-radius:10px;font-size:.78rem;font-weight:500;
+  display:flex;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+.btn-ghost{border:1px solid #E5E6EB;color:#595959;background:#fff}
+.btn-primary{border:1px solid #0669FF;color:#fff;background:#0669FF}
+.btn-danger{border:1px solid #FFD6D6;color:#FF4D4F;background:#FFF1F0}
+.btn-change{border:1px solid #D6E9FF;color:#0669FF;background:#F0F7FF}
+.btn-push.busy,.btn-refresh.busy{opacity:.7}
+.btn-push.done{background:#52C41A;border-color:#52C41A;color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* 状态徽标 */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;
+  padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap;flex:none}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.badge-lg{font-size:.85rem;padding:6px 16px}
+
+/* 加载更多 */
+.loadmore-wrap{padding:4px 12px 16px}
+.loadmore{width:100%;min-height:44px;border-radius:12px;border:1px solid #E5E6EB;background:#fff;
+  color:#595959;font-size:.82rem}
+.loadmore b{color:#0669FF;font-weight:600}
+.list-empty{text-align:center;color:#B0B3B8;font-size:.82rem;padding:48px 0}
+
+/* ========== 详情 ========== */
+.detail-head{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #F0F0F0;
+  display:flex;align-items:center;gap:10px;padding:10px 12px;height:52px}
+.detail-head .back{width:44px;height:44px;margin-left:-8px;display:flex;align-items:center;justify-content:center}
+.detail-head .t{font-size:.95rem;font-weight:700}
+.detail-body{padding:12px;padding-bottom:150px}
+.card{background:#fff;border:1px solid #F0F0F0;border-radius:14px;padding:14px;
+  margin-bottom:12px;box-shadow:0 2px 10px rgba(31,45,61,.04)}
+.card-t{font-size:.72rem;color:#8C8C8C;font-weight:600;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px}
+.card-t::before{content:'';width:3px;height:12px;border-radius:2px;background:#0669FF}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;padding:5px 0}
+.kv .k{color:#8C8C8C;flex:none}
+.kv .v{color:#262626;text-align:right;word-break:break-all}
+.status-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.status-card .oid{color:#595959;margin-top:2px}
+.status-card .meta-line{font-size:.72rem;color:#B0B3B8}
+
+/* 路线地图占位 */
+.map-box{position:relative;height:120px;background:linear-gradient(135deg,#EBF5FF 0%,#F0F9FF 100%);
+  border:1px solid #D6E9FF;border-radius:12px;margin:10px 0;overflow:hidden}
+.map-grid{position:absolute;inset:0;
+  background-image:linear-gradient(#D6E9FF 1px,transparent 1px),linear-gradient(90deg,#D6E9FF 1px,transparent 1px);
+  background-size:20px 20px;opacity:.5}
+.map-route{position:absolute;inset:0}
+.map-dot{position:absolute;width:12px;height:12px;border-radius:50%;border:2.5px solid #fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:3}
+.map-dot.pu{background:#52C41A}
+.map-dot.dst{background:#0669FF}
+.map-dot .lbl{position:absolute;left:50%;transform:translateX(-50%);top:-22px;
+  background:rgba(38,38,38,.85);color:#fff;font-size:.6rem;padding:2px 7px;border-radius:6px;
+  white-space:nowrap;pointer-events:none}
+
+/* 司机卡 */
+.driver-card{display:flex;gap:12px;align-items:center}
+.driver-avatar{width:52px;height:52px;border-radius:50%;background:#0669FF;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;flex:none}
+.driver-info{flex:1}
+.driver-name{font-size:.92rem;font-weight:700}
+.driver-sub{font-size:.74rem;color:#8C8C8C;margin-top:2px}
+.driver-stats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.driver-stat{background:#F0F7FF;border:1px solid #D6E9FF;border-radius:8px;padding:3px 8px;
+  font-size:.68rem;color:#0669FF;font-weight:600}
+
+/* 费用 */
+.fee-row{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;color:#595959}
+.fee-row .v{font-variant-numeric:tabular-nums}
+.fee-row.total{font-weight:700;color:#262626;font-size:.92rem;border-top:1px dashed #F0F0F0;
+  margin-top:6px;padding-top:10px}
+.fee-row.total .v{color:#0669FF}
+.fee-note{margin-top:8px;font-size:.74rem;border-radius:8px;padding:7px 10px}
+.fee-note.freeze{background:#F0F7FF;color:#0669FF;border:1px solid #D6E9FF}
+.fee-note.thaw{background:#F6FFED;color:#389E0D;border:1px solid #D9F7BE}
+.fee-note.debt{background:#FFF2E8;color:#D4380D;border:1px solid #FFBB96}
+.fee-note.fee{background:#FFF1F0;color:#FF4D4F;border:1px solid #FFA39E}
+.fee-cmp{background:#FAFAFA;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px;margin-top:10px}
+.fee-cmp-t{font-size:.72rem;color:#8C8C8C;margin-bottom:6px}
+.fee-cmp-row{display:flex;justify-content:space-between;font-size:.78rem;padding:3px 0}
+.fee-cmp-row .delta{font-weight:700}
+.delta.up{color:#FF4D4F}
+.delta.down{color:#52C41A}
+
+/* 流水 */
+.log-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F7F7F8;font-size:.76rem}
+.log-item:last-child{border-bottom:none}
+.log-tm{color:#B0B3B8;flex:none;width:52px;font-variant-numeric:tabular-nums}
+.log-txt{flex:1;color:#434343}
+.log-op{flex:none;font-size:.66rem;color:#8C8C8C;background:#F5F5F5;border-radius:6px;
+  padding:2px 7px;height:fit-content;white-space:nowrap}
+.pt-tag{flex:none;font-size:.66rem;font-weight:700;border-radius:6px;padding:2px 7px;height:fit-content;
+  white-space:nowrap;border:1px solid}
+.pt-tag.freeze{background:#F0F7FF;color:#0669FF;border-color:#D6E9FF}
+.pt-tag.deduct{background:#FFF2E8;color:#D4380D;border-color:#FFBB96}
+.pt-tag.release{background:#F6FFED;color:#389E0D;border-color:#D9F7BE}
+.pt-tag.debt{background:#FFF1F0;color:#FF4D4F;border-color:#FFA39E}
+.pt-tag.confirm{background:#F9F0FF;color:#722ED1;border-color:#D3ADF7}
+.pt-tag.pending{background:#FFFBE6;color:#D48806;border-color:#FFE58F}
+.comp-empty{text-align:center;color:#B0B3B8;font-size:.76rem;padding:16px 0}
+
+/* 事件流水 */
+.ev-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F7F7F8;font-size:.76rem}
+.ev-item:last-child{border-bottom:none}
+.ev-code{flex:none;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.68rem;
+  background:#F0F7FF;color:#0669FF;border:1px solid #D6E9FF;border-radius:6px;padding:2px 7px;height:fit-content}
+.ev-txt{flex:1;color:#434343}
+.ev-tm{color:#B0B3B8;flex:none;font-size:.68rem;white-space:nowrap}
+
+/* 详情底部操作栏 */
+.detail-bar{position:fixed;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));z-index:30;
+  max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #F0F0F0;
+  display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.detail-bar button{flex:1;min-height:44px;border-radius:10px;font-size:.82rem;font-weight:600}
+
+/* ========== 底部导航 ========== */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;max-width:480px;margin:0 auto;
+  background:#fff;border-top:1px solid #F0F0F0;display:flex;
+  padding-bottom:env(safe-area-inset-bottom)}
+.tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 0 5px;text-decoration:none;color:#8C8C8C;font-size:.62rem;min-height:56px;
+  justify-content:center}
+.tabbar a svg{width:22px;height:22px}
+.tabbar a.active{color:#0669FF;font-weight:600}
+
+/* ========== 底部弹层 ========== */
+.sheet-mask{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);opacity:0;
+  pointer-events:none;transition:opacity .25s}
+.sheet-mask.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:480px;margin:0 auto;
+  background:#fff;border-radius:18px 18px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.35,1);
+  max-height:82vh;overflow-y:auto}
+.sheet.show{transform:translateY(0)}
+.sheet-grip{width:36px;height:4px;border-radius:2px;background:#E5E6EB;margin:6px auto 14px}
+.sheet-t{font-size:.95rem;font-weight:700;text-align:center;margin-bottom:12px}
+.sheet .mini-card{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;
+  padding:10px 12px;font-size:.76rem;color:#595959;margin-bottom:10px}
+.sheet .mini-card b{color:#262626}
+.sheet label{display:block;font-size:.74rem;color:#8C8C8C;margin:12px 0 6px}
+.sheet input[type=text],.sheet input[type=number],.sheet textarea{width:100%;padding:11px 12px;border-radius:10px}
+.sheet textarea{min-height:80px;resize:none}
+.sheet .err{font-size:.72rem;color:#FF4D4F;margin-top:5px;display:none}
+.sheet .err.show{display:block}
+.sheet .submit{width:100%;min-height:46px;border-radius:12px;background:#0669FF;color:#fff;
+  font-size:.88rem;font-weight:700;margin-top:16px}
+.sheet .submit.danger{background:#FF4D4F}
+.sheet .cancel{width:100%;min-height:44px;border-radius:12px;color:#8C8C8C;font-size:.82rem;margin-top:8px}
+.sheet .fee-tip{border-radius:10px;padding:10px 12px;font-size:.76rem;margin-bottom:10px;line-height:1.6}
+.sheet .fee-tip.warn{background:#FFF1F0;color:#FF4D4F;border:1px solid #FFA39E}
+.sheet .fee-tip.ok{background:#F6FFED;color:#389E0D;border:1px solid #D9F7BE}
+
+/* 搜索地址 */
+.place-item{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:10px;
+  border:1px solid transparent;background:#fff;cursor:pointer;min-height:44px}
+.place-item:active{background:#F0F7FF}
+.place-item + .place-item{margin-top:4px}
+.place-item .pin{flex:none;width:28px;height:28px;border-radius:50%;background:#F0F7FF;
+  display:flex;align-items:center;justify-content:center}
+.place-item .p-info{flex:1;min-width:0}
+.place-item .p-zh{font-size:.84rem;font-weight:600;color:#262626}
+.place-item .p-en{font-size:.7rem;color:#8C8C8C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.place-item .p-dist{flex:none;font-size:.7rem;color:#0669FF;font-weight:600}
+.place-list{margin-top:8px;max-height:220px;overflow-y:auto}
+.place-list-title{font-size:.72rem;color:#8C8C8C;margin-top:12px}
+
+/* 待确认状态 */
+.pending-box{background:#FFFBE6;border:1px solid #FFE58F;border-radius:10px;
+  padding:12px;font-size:.78rem;color:#8C6D1F;margin-top:10px}
+.pending-box b{color:#D48806}
+.sim-row{display:flex;gap:8px;margin-top:10px}
+.sim-row button{flex:1;min-height:44px;border-radius:10px;font-size:.8rem;font-weight:600}
+.sim-ok{border:1px solid #B7EB8F;color:#52C41A;background:#F6FFED}
+.sim-no{border:1px solid #FFD6D6;color:#FF4D4F;background:#FFF1F0}
+
+/* ========== Toast ========== */
+.toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-12px);z-index:80;
+  background:rgba(38,38,38,.92);color:#fff;font-size:.8rem;padding:11px 20px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:all .25s;max-width:80%;text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.ok{background:rgba(82,196,26,.95)}
+</style>
+<script src="h5-shared-data.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- 列表视图 -->
+  <section id="viewList">
+    <div class="filter-wrap">
+      <div class="topbar" style="position:static;border:none;padding:0 4px 10px;background:transparent">
+        <div class="tt">打车订单</div>
+        <div class="sub">入境游客服工作台 · 共 <span id="totalCnt">0</span> 笔订单</div>
+      </div>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#B0B3B8" stroke-width="1.6"/><path d="M11 11l3.2 3.2" stroke="#B0B3B8" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input id="q" type="search" placeholder="搜索曹操订单号 / 老外姓名 / 护照号 / 设备号" autocomplete="off">
+      </div>
+      <div class="filters">
+        <select id="fStatus">
+          <option value="">全部状态</option>
+        </select>
+      </div>
+      <div class="date-row">
+        <input id="fDateFrom" type="date">
+        <span>至</span>
+        <input id="fDateTo" type="date">
+        <button class="reset" id="fReset">重置</button>
+      </div>
+    </div>
+
+    <div class="order-list" id="orderList"></div>
+    <div class="loadmore-wrap"><button class="loadmore" id="loadMore"></button></div>
+  </section>
+
+  <!-- 详情视图 -->
+  <section id="viewDetail" hidden>
+    <div class="detail-head">
+      <button class="back" id="btnBack" aria-label="返回">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 4L6.5 10l6 6" stroke="#262626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="t">打车订单详情</div>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+  </section>
+
+  <!-- 详情底部操作栏 -->
+  <div class="detail-bar" id="detailBar" hidden></div>
+
+  <!-- 底部导航 -->
+  <nav class="tabbar">
+    <a href="h5-外卖订单.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18l-2.3-1.6L14.4 21l-2.4-1.6L9.6 21l-2.3-1.6L5 21z"/><path d="M9 8h6M9 12h6"/></svg>
+      外卖订单</a>
+    <a href="h5-外卖代下单.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="6" rx="1.6"/><rect x="17" y="13" width="4" height="6" rx="1.6"/><path d="M20 17.5V19a2 2 0 0 1-2 2h-4"/></svg>
+      外卖代下单</a>
+    <a href="h5-打车订单.html" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16l1.4-5.2A2 2 0 0 1 8.3 9.2h7.4a2 2 0 0 1 1.9 1.6L19 16"/><path d="M4 16h16v3h-2.5"/><path d="M4 19h2.5"/><circle cx="8" cy="19" r="1.6"/><circle cx="16" cy="19" r="1.6"/></svg>
+      打车订单</a>
+    <a href="h5-打车代下单.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15l1.5-5.6A2 2 0 0 1 7.4 8h9.2a2 2 0 0 1 1.9 1.4L20 15"/><path d="M3 15h18v4h-3"/><path d="M3 19h3"/><circle cx="8.5" cy="19" r="1.5"/><circle cx="15.5" cy="19" r="1.5"/><path d="M12 4v4M9.8 5.2L12 4l2.2 1.2"/></svg>
+      打车代下单</a>
+    <a href="h5-补偿审核.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.4-3 8-7 9.5-4-1.5-7-5.1-7-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 9.8"/></svg>
+      补偿审核</a>
+  </nav>
+
+  <!-- 底部弹层 -->
+  <div class="sheet-mask" id="sheetMask"></div>
+  <div class="sheet" id="sheet"></div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ================================================================
+ * 打车订单 H5 · 客服视角
+ * ================================================================ */
+
+/* ---------- 常量 ---------- */
+var PAGE_SIZE = 5;
+var CURRENT_CS = '当前客服 13800138018';
+var CANCEL_OK = {1:1, 9:1, 12:1, 3:1};
+var DEST_OK = {9:1, 12:1, 3:1};
+var TX_STATUS = {
+  1:'未派单', 3:'乘客上车·计费开始', 4:'订单系统取消', 5:'订单待支付',
+  7:'订单已支付', 8:'行程结束·计费结束', 9:'开始服务', 10:'订单取消·待付款',
+  12:'司机已到达', 13:'订单取消·已支付', 14:'订单取消已免责取消费',
+  20:'用户取消', 21:'曹操客服取消', 26:'司机取消'
+};
+var STATUS_STYLE = {
+  '未派单':             {bg:'#FAFAFA', fg:'#8C8C8C', bd:'#D9D9D9'},
+  '开始服务':           {bg:'#E6EFFF', fg:'#0669FF', bd:'#91CAFF'},
+  '司机已到达':         {bg:'#E6EFFF', fg:'#0669FF', bd:'#91CAFF'},
+  '乘客上车·计费开始': {bg:'#FFF7E6', fg:'#D46B08', bd:'#FFD591'},
+  '行程结束·计费结束': {bg:'#FFFBE6', fg:'#D48806', bd:'#FFE58F'},
+  '订单待支付':         {bg:'#FFF2E8', fg:'#D4380D', bd:'#FFBB96'},
+  '订单已支付':         {bg:'#F6FFED', fg:'#52C41A', bd:'#B7EB8F'},
+  '订单系统取消':       {bg:'#FFF1F0', fg:'#FF4D4F', bd:'#FFA39E'},
+  '订单取消·待付款':   {bg:'#FFF1F0', fg:'#FF4D4F', bd:'#FFA39E'},
+  '订单取消·已支付':   {bg:'#FFF1F0', fg:'#FF4D4F', bd:'#FFA39E'},
+  '订单取消已免责取消费': {bg:'#FFFBE6', fg:'#D48806', bd:'#FFE58F'},
+  '用户取消':           {bg:'#FAFAFA', fg:'#8C8C8C', bd:'#D9D9D9'},
+  '曹操客服取消':       {bg:'#FAFAFA', fg:'#8C8C8C', bd:'#D9D9D9'},
+  '司机取消':           {bg:'#FAFAFA', fg:'#8C8C8C', bd:'#D9D9D9'}
+};
+var PT_TYPE_TAG = {
+  '冻结':   {cls:'freeze',  sign:-1},
+  '实扣':   {cls:'deduct',  sign:-1},
+  '解冻':   {cls:'release', sign: 1},
+  '待扣':   {cls:'pending', sign:-1},
+  '挂欠账': {cls:'debt',    sign:-1},
+  '确认费用': {cls:'confirm', sign:0}
+};
+var TX_RATES = window.TX_CAR_RATE || {'舒适型':2.3,'新能源':2.1,'优选':2.6,'商务型':3.2,'豪华型':4.5,'礼帽专车':3.8};
+var TX_FLAG = window.TX_CAR_FLAGFALL || {'舒适型':10,'新能源':9,'优选':11,'商务型':14,'豪华型':18,'礼帽专车':16};
+
+/* ---------- 状态 ---------- */
+var state = {
+  q:'', status:'', dateFrom:'', dateTo:'',
+  page:1, detailId:null,
+  sheetOrderId:null, sheetMode:'',
+  destSel:null
+};
+
+/* ---------- 工具 ---------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return escHtml(s); }
+function badge(status, lg){
+  var s = STATUS_STYLE[status] || {bg:'#FAFAFA',fg:'#8C8C8C',bd:'#D9D9D9'};
+  return '<span class="badge' + (lg ? ' badge-lg' : '') + '" style="background:' + s.bg +
+    ';color:' + s.fg + ';border-color:' + s.bd + '"><span class="dot"></span>' + esc(status) + '</span>';
+}
+function orderDate(o){ return (o.tCreated || '').slice(0,10); }
+function toast(msg, ok){
+  var t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (ok ? ' ok' : '');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.className = 'toast'; }, 2400);
+}
+function getOrder(id){ return TAXI_ORDERS[id]; }
+function orderStatusLabel(o){ return TX_STATUS[o.tCaoStatus] || o.status || '未知'; }
+function orderSummary(o){
+  if(o.summary && o.summary.indexOf('undefined') < 0) return o.summary;
+  return (o.tPickup && o.tPickup.zh || '') + ' → ' + (o.tDest && o.tDest.zh || '');
+}
+function canCancel(o){ return CANCEL_OK[o.tCaoStatus] && !o.tCancelPending && !o.tDestPending; }
+function canChangeDest(o){ return DEST_OK[o.tCaoStatus] && !o.tCancelPending && !o.tDestPending; }
+
+/* 距离（km） */
+function distKm(a, b){
+  if(!a || !b || !a.lng || !a.lat || !b.lng || !b.lat) return 0;
+  var R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLng = (b.lng - a.lng) * Math.PI / 180;
+  var s = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(a.lat * Math.PI/180) * Math.cos(b.lat * Math.PI/180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+}
+function fmtKm(km){
+  if(km < 1) return Math.round(km * 1000) + 'm';
+  return km.toFixed(1) + 'km';
+}
+
+/* 新预估（曹操预估 + 服务费） */
+function estimateNew(pu, dst, carType){
+  var km = distKm(pu, dst);
+  var rate = TX_RATES[carType] || 2.3;
+  var flag = TX_FLAG[carType] || 10;
+  var cao = Math.max(flag, flag + km * rate);
+  var svc = +(cao * 0.1).toFixed(1);
+  return { km:km, minutes: Math.max(5, Math.round(km * 2.6)), cao:+cao.toFixed(1), svc:svc,
+    total:+(cao + svc).toFixed(1) };
+}
+
+/* ---------- 筛选下拉初始化 ---------- */
+(function initStatusFilter(){
+  var sel = $('fStatus');
+  Object.keys(TX_STATUS).forEach(function(code){
+    var opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = TX_STATUS[code];
+    sel.appendChild(opt);
+  });
+})();
+
+/* ---------- 列表数据 ---------- */
+function allOrders(){
+  return Object.keys(TAXI_ORDERS).map(function(k){ return TAXI_ORDERS[k]; })
+    .sort(function(a,b){ return (b.tCreated || '').localeCompare(a.tCreated || ''); });
+}
+function filtered(){
+  var q = state.q.trim().toLowerCase();
+  return allOrders().filter(function(o){
+    if(q){
+      var hay = [o.tCaoNo, o.name, o.passport, o.deviceNo].join(' ').toLowerCase();
+      if(hay.indexOf(q) < 0) return false;
+    }
+    if(state.status && String(o.tCaoStatus) !== state.status) return false;
+    var d = orderDate(o);
+    if(state.dateFrom && d && d < state.dateFrom) return false;
+    if(state.dateTo && d && d > state.dateTo) return false;
+    return true;
+  });
+}
+
+/* ---------- 列表渲染 ---------- */
+function renderList(){
+  var data = filtered();
+  $('totalCnt').textContent = data.length;
+  var show = data.slice(0, state.page * PAGE_SIZE);
+  var html = '';
+
+  if(!show.length){
+    html = '<div class="list-empty">暂无符合条件的订单</div>';
+  }else{
+    show.forEach(function(o){
+      var st = orderStatusLabel(o);
+      var showCancel = CANCEL_OK[o.tCaoStatus];
+      var showDest = DEST_OK[o.tCaoStatus];
+      var amtHtml = o.tBill
+        ? '<span class="amt">' + fmtMoney(o.tBill.cao + o.tBill.svc) + '<small>实付 · ' + fmtPoints(o.tBill.cao + o.tBill.svc) + '</small></span>'
+        : '<span class="amt">' + fmtMoney(o.tEst.cao + o.tEst.svc) + '<small>预估 · ' + fmtPoints(o.tEst.cao + o.tEst.svc) + '</small></span>';
+      html += '' +
+      '<div class="order-card" data-id="' + esc(o.id) + '">' +
+        '<div class="oc-row1">' +
+          '<span class="oid mono">' + esc(o.tCaoNo) + '</span>' +
+          badge(st) +
+        '</div>' +
+        '<div class="oc-row2">' + esc(o.name) + ' · ' + esc(o.lang) + ' · ' +
+          esc(maskPassport(o.passport)) + ' · ' + esc(maskPhone(o.phone)) + '</div>' +
+        '<div class="oc-row3">' + esc(orderSummary(o)) + '</div>' +
+        '<div class="oc-row4">' +
+          '<span class="car">' + esc(o.tCarType) + ' · ' + esc(o.tCity) + '</span>' +
+          amtHtml +
+          '<span class="tm">' + esc(o.tCreated) + '</span>' +
+        '</div>' +
+        '<div class="oc-ops">' +
+          '<button class="btn-ghost" data-act="detail">详情</button>' +
+          (showCancel ? '<button class="btn-danger" data-act="cancel">取消</button>' : '') +
+          (showDest ? '<button class="btn-change" data-act="dest">改目的地</button>' : '') +
+          '<button class="btn-push btn-primary" data-act="push">推送订单</button>' +
+        '</div>' +
+      '</div>';
+    });
+  }
+  $('orderList').innerHTML = html;
+
+  var btn = $('loadMore');
+  if(show.length < data.length){
+    btn.hidden = false;
+    btn.innerHTML = '加载更多（还有 <b>' + (data.length - show.length) + '</b> 笔）';
+  }else{
+    btn.hidden = true;
+  }
+}
+
+/* ---------- 卡片事件（事件委托） ---------- */
+$('orderList').addEventListener('click', function(e){
+  var card = e.target.closest('.order-card');
+  if(!card) return;
+  var id = card.getAttribute('data-id');
+  var actBtn = e.target.closest('button[data-act]');
+  if(actBtn){
+    e.stopPropagation();
+    var act = actBtn.getAttribute('data-act');
+    if(act === 'detail') openDetail(id);
+    else if(act === 'cancel') openCancelSheet(id);
+    else if(act === 'dest') openDestSheet(id);
+    else if(act === 'push') doPush(actBtn);
+    return;
+  }
+  openDetail(id);
+});
+
+$('loadMore').addEventListener('click', function(){
+  state.page++;
+  renderList();
+});
+
+/* 筛选事件 */
+$('q').addEventListener('input', function(){ state.q = this.value; state.page = 1; renderList(); });
+$('fStatus').addEventListener('change', function(){ state.status = this.value; state.page = 1; renderList(); });
+$('fDateFrom').addEventListener('change', function(){ state.dateFrom = this.value; state.page = 1; renderList(); });
+$('fDateTo').addEventListener('change', function(){ state.dateTo = this.value; state.page = 1; renderList(); });
+$('fReset').addEventListener('click', function(){
+  state.q = ''; state.status = ''; state.dateFrom = ''; state.dateTo = ''; state.page = 1;
+  $('q').value = ''; $('fStatus').value = '';
+  $('fDateFrom').value = ''; $('fDateTo').value = '';
+  renderList();
+});
+
+/* ---------- 推送订单 ---------- */
+function doPush(btn){
+  if(btn._busy) return;
+  btn._busy = true;
+  var old = btn.innerHTML;
+  btn.classList.add('busy');
+  btn.textContent = '推送中…';
+  setTimeout(function(){
+    btn.classList.remove('busy');
+    btn.classList.add('done');
+    btn.textContent = '✓ 已推送';
+    toast('打车订单已重新推送硬件，并同步至客服系统对话', true);
+    setTimeout(function(){
+      btn.classList.remove('done');
+      btn.innerHTML = old;
+      btn._busy = false;
+    }, 900);
+  }, 1200);
+}
+
+/* ---------- 弹层控制 ---------- */
+function showSheet(){
+  $('sheetMask').classList.add('show');
+  $('sheet').classList.add('show');
+}
+function hideSheet(){
+  $('sheetMask').classList.remove('show');
+  $('sheet').classList.remove('show');
+  state.sheetOrderId = null; state.sheetMode = ''; state.destSel = null;
+}
+$('sheetMask').addEventListener('click', hideSheet);
+
+/* ---------- 取消订单弹层 ---------- */
+function openCancelSheet(id){
+  var o = getOrder(id);
+  if(!o) return;
+  state.sheetOrderId = id; state.sheetMode = 'cancel';
+  var st = orderStatusLabel(o);
+  var hasFee = o.tCancelFee > 0;
+
+  var h = '' +
+    '<div class="sheet-grip"></div>' +
+    '<div class="sheet-t">取消订单</div>' +
+    '<div class="mini-card">' +
+      '曹操订单号 <b class="mono">' + esc(o.tCaoNo) + '</b><br>' +
+      '当前状态 <b>' + esc(st) + '</b><br>' +
+      '行程 ' + esc(orderSummary(o)) + '<br>' +
+      '乘客 ' + esc(o.name) + '（' + esc(maskPassport(o.passport)) + '）' +
+    '</div>';
+
+  if(hasFee){
+    h += '<div class="fee-tip warn">' +
+      '⚠️ 将扣除老外积分 <b>' + fmtPoints(o.tCancelFee) + '</b><br>' +
+      '<span style="font-size:.7rem;opacity:.85">曹操侧已开启计费 / 超过免费取消时长</span></div>';
+  }else{
+    h += '<div class="fee-tip ok">✅ 当前处于免费取消时长内，取消后冻结积分 <b>' +
+      fmtPoints(o.tFrozen) + '</b> 将全额解冻</div>';
+  }
+
+  h += '<label>取消原因（必填）</label>' +
+    '<textarea id="cancelReason" placeholder="请填写取消原因，如：老外行程有变 / 重复下单 / 改用其他交通…"></textarea>' +
+    '<div class="err" id="cancelReasonErr"></div>' +
+    '<button class="submit' + (hasFee ? ' danger' : '') + '" id="cancelSubmit">' +
+      (hasFee ? '发起取消并推送给老外确认（将扣 ' + fmtPoints(o.tCancelFee) + '）' : '确认取消订单') +
+    '</button>' +
+    '<button class="cancel" id="cancelClose">关闭</button>';
+
+  $('sheet').innerHTML = h;
+  showSheet();
+
+  $('cancelClose').onclick = hideSheet;
+  $('cancelSubmit').onclick = function(){ submitCancel(hasFee); };
+  $('cancelReason').focus();
+}
+
+function submitCancel(hasFee){
+  var rsEl = $('cancelReason');
+  var reason = rsEl.value.trim();
+  var err = $('cancelReasonErr');
+  err.className = 'err';
+  if(!reason){
+    err.textContent = '请填写取消原因';
+    err.className = 'err show';
+    return;
+  }
+  var o = getOrder(state.sheetOrderId);
+  if(!o) { hideSheet(); return; }
+
+  if(!hasFee){
+    /* 直接取消 */
+    o.tCaoStatus = 20;
+    o.status = '用户取消';
+    o.tCancelReason = reason;
+    o.tCancelPending = false;
+    o.tCancelMsg = null;
+    txBuildStreams(o);
+    o.tLogs.push({tm: nowStr(), operator:'客服', action:'客服取消订单（免费取消）：' + reason});
+    hideSheet();
+    toast('已取消：冻结积分全额解冻', true);
+  }else{
+    /* 推送老外确认 */
+    o.tCancelPending = true;
+    o.tCancelMsg = {reason: reason, fee: o.tCancelFee, tm: nowStr()};
+    o.tLogs.push({tm: nowStr(), operator:'客服', action:'发起取消并推送老外确认（将扣取消费 ' + fmtPoints(o.tCancelFee) + '）：' + reason});
+    hideSheet();
+    toast('已推送老外确认取消（将扣 ' + fmtPoints(o.tCancelFee) + '），等待老外端确认', true);
+  }
+  renderList();
+  if(state.detailId === o.id) renderDetail(o.id);
+}
+
+/* ---------- 改目的地弹层 ---------- */
+function openDestSheet(id){
+  var o = getOrder(id);
+  if(!o) return;
+  state.sheetOrderId = id; state.sheetMode = 'dest'; state.destSel = null;
+
+  $('sheet').innerHTML = '' +
+    '<div class="sheet-grip"></div>' +
+    '<div class="sheet-t">改目的地</div>' +
+    '<div class="mini-card">' +
+      '当前行程<br>' +
+      '起点 <b>' + esc(o.tPickup.zh) + '</b><br>' +
+      '终点 <b>' + esc(o.tDest.zh) + '</b><br>' +
+      '曹操订单号 <b class="mono">' + esc(o.tCaoNo) + '</b> · 当前状态 <b>' + esc(orderStatusLabel(o)) + '</b>' +
+    '</div>' +
+    '<label>搜索新目的地</label>' +
+    '<input type="text" id="destQ" placeholder="输入目的地关键词，如：西湖 / 机场 / 酒店…" autocomplete="off">' +
+    '<div class="place-list" id="destResults"></div>' +
+    '<div id="destCmp"></div>' +
+    '<div id="destPending"></div>' +
+    '<div id="destSubmitWrap" style="display:none">' +
+      '<button class="submit" id="destSubmit">推送改目的地请求给老外确认</button>' +
+    '</div>' +
+    '<button class="cancel" id="destClose">关闭</button>';
+
+  showSheet();
+  $('destClose').onclick = hideSheet;
+  $('destQ').addEventListener('input', onDestSearch);
+  renderDestResults('');
+  $('destQ').focus();
+}
+
+function renderDestResults(kw){
+  var o = getOrder(state.sheetOrderId);
+  if(!o) return;
+  kw = (kw || '').trim().toLowerCase();
+  var list = [];
+  Object.keys(TX_PLACES).forEach(function(k){
+    var p = TX_PLACES[k];
+    var hit = !kw ||
+      p[0].toLowerCase().indexOf(kw) >= 0 ||
+      p[1].toLowerCase().indexOf(kw) >= 0 ||
+      k.toLowerCase().indexOf(kw) >= 0;
+    if(hit) list.push({key:k, zh:p[0], en:p[1], lng:p[2], lat:p[3],
+      dist: distKm(o.tPickup, {lng:p[2], lat:p[3]})});
+  });
+  list.sort(function(a,b){ return a.dist - b.dist; });
+  list = list.slice(0, 12);
+
+  var h = '<div class="place-list-title">搜索结果（点击选择）</div>';
+  if(!list.length){
+    h += '<div class="comp-empty">未找到匹配地点</div>';
+  }else{
+    list.forEach(function(p){
+      h += '<div class="place-item" data-lng="' + p.lng + '" data-lat="' + p.lat + '" data-zh="' + esc(p.zh) + '" data-en="' + esc(p.en) + '">' +
+        '<div class="pin"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#0669FF" stroke-width="1.4"/><circle cx="7" cy="7" r="2" fill="#0669FF"/></svg></div>' +
+        '<div class="p-info"><div class="p-zh">' + esc(p.zh) + '</div><div class="p-en">' + esc(p.en) + '</div></div>' +
+        '<div class="p-dist">' + fmtKm(p.dist) + '</div>' +
+      '</div>';
+    });
+  }
+  $('destResults').innerHTML = h;
+  Array.prototype.forEach.call($('destResults').querySelectorAll('.place-item'), function(el){
+    el.onclick = function(){ onPickDest(el); };
+  });
+}
+
+function onDestSearch(){
+  renderDestResults(this.value);
+}
+
+function onPickDest(el){
+  var o = getOrder(state.sheetOrderId);
+  if(!o) return;
+  var dest = {zh: el.getAttribute('data-zh'), en: el.getAttribute('data-en'),
+    lng: +el.getAttribute('data-lng'), lat: +el.getAttribute('data-lat')};
+  var est = estimateNew(o.tPickup, dest, o.tCarType);
+  var oldTotal = +(o.tEst.cao + o.tEst.svc).toFixed(1);
+  var delta = +(est.total - oldTotal).toFixed(1);
+  state.destSel = {dest:dest, est:est, delta:delta};
+
+  var deltaHtml;
+  if(delta > 0){
+    deltaHtml = '<span class="delta up">需追加冻结 ' + fmtPoints(delta) + '</span>';
+  }else if(delta < 0){
+    deltaHtml = '<span class="delta down">解冻差额 ' + fmtPoints(-delta) + '</span>';
+  }else{
+    deltaHtml = '<span style="color:#52C41A;font-weight:700">预估价格不变</span>';
+  }
+
+  $('destCmp').innerHTML = '' +
+    '<div class="fee-cmp">' +
+      '<div class="fee-cmp-t">预估价格对比（' + esc(o.tCarType) + '）</div>' +
+      '<div class="fee-cmp-row"><span>新目的地</span><b>' + esc(dest.zh) + '</b></div>' +
+      '<div class="fee-cmp-row"><span>行程距离 / 时长</span><span>' + fmtKm(est.km) + ' / 约' + est.minutes + '分钟</span></div>' +
+      '<div class="fee-cmp-row"><span>曹操预估价</span><span>' + fmtMoney(est.cao) + '</span></div>' +
+      '<div class="fee-cmp-row"><span>平台服务费</span><span>' + fmtMoney(est.svc) + '</span></div>' +
+      '<div class="fee-cmp-row"><span>新预估总价</span><b style="color:#0669FF">' + fmtMoney(est.total) + '（' + fmtPoints(est.total) + '）</b></div>' +
+      '<div class="fee-cmp-row"><span>原预估总价</span><span>' + fmtMoney(oldTotal) + '（' + fmtPoints(oldTotal) + '）</span></div>' +
+      '<div class="fee-cmp-row"><span>差额</span>' + deltaHtml + '</div>' +
+    '</div>';
+
+  $('destPending').innerHTML = '';
+  $('destSubmitWrap').style.display = '';
+  $('destSubmit').onclick = submitDestChange;
+}
+
+function submitDestChange(){
+  var o = getOrder(state.sheetOrderId);
+  if(!o || !state.destSel) return;
+  var sel = state.destSel;
+  o.tDestPending = true;
+  o.tDestProposal = {dest: sel.dest, est: sel.est, delta: sel.delta, tm: nowStr()};
+  o.tDestMsg = {dest: sel.dest, est: sel.est, delta: sel.delta, tm: nowStr()};
+  o.tLogs.push({tm: nowStr(), operator:'客服',
+    action:'推送改目的地请求给老外确认：新目的地「' + sel.dest.zh + '」（预估 ' + fmtMoney(sel.est.total) + '）'});
+
+  $('destSubmitWrap').style.display = 'none';
+  $('destCmp').innerHTML = '';
+  renderDestPending();
+  toast('已推送老外确认改目的地（' + sel.dest.zh + '），等待老外确认', true);
+  renderList();
+  if(state.detailId === o.id) renderDetail(o.id);
+}
+
+function renderDestPending(){
+  var o = getOrder(state.sheetOrderId);
+  if(!o || !o.tDestMsg) return;
+  var p = o.tDestProposal;
+  $('destPending').innerHTML = '' +
+    '<div class="pending-box">' +
+      '⏳ <b>等待老外确认改目的地</b><br>' +
+      '新目的地：' + esc(p.dest.zh) + '（' + esc(p.dest.en) + '）<br>' +
+      '新预估：' + fmtMoney(p.est.total) + '（' + fmtPoints(p.est.total) + '） · 差额 ' +
+      (p.delta > 0 ? '需追加冻结 ' + fmtPoints(p.delta)
+        : p.delta < 0 ? '解冻 ' + fmtPoints(-p.delta) : '0') +
+      '<div class="sim-row">' +
+        '<button class="sim-ok" id="simDestOk">模拟老外确认</button>' +
+        '<button class="sim-no" id="simDestNo">模拟老外拒绝</button>' +
+      '</div>' +
+    '</div>';
+
+  $('simDestOk').onclick = function(){
+    o.tDestPending = false;
+    o.tDest = p.dest;
+    o.summary = o.tPickup.zh + ' → ' + p.dest.zh;
+    o.tEst = {cao: p.est.cao, svc: p.est.svc};
+    o.money = {goods: p.est.cao, delivery: 0, service: p.est.svc, total: p.est.total};
+    if(o.tFrozen < p.est.total){
+      o.tDebt = +(o.tDebt + (p.est.total - o.tFrozen)).toFixed(1);
+      o.tLogs.push({tm: nowStr(), operator:'系统', action:'改目的地后预估超出冻结，超出 ' + fmtPoints(p.est.total - o.tFrozen) + ' 挂欠账'});
+    }
+    o.tFrozen = Math.max(o.tFrozen, p.est.total);
+    o.tPointLogs.push({tm: nowStr(), type:'冻结', amount: p.delta > 0 ? p.delta : 0,
+      note:'改目的地后按新预估冻结（' + p.dest.zh + '）', operator:'系统'});
+    o.tLogs.push({tm: nowStr(), operator:'老外', action:'老外确认改目的地：' + p.dest.zh});
+    o.tDestProposal = null; o.tDestMsg = null;
+    hideSheet();
+    toast('老外已确认改目的地，行程已更新', true);
+    renderList();
+    if(state.detailId === o.id) renderDetail(o.id);
+  };
+  $('simDestNo').onclick = function(){
+    o.tDestPending = false;
+    o.tDestProposal = null; o.tDestMsg = null;
+    o.tLogs.push({tm: nowStr(), operator:'老外', action:'老外拒绝改目的地请求'});
+    hideSheet();
+    toast('老外已拒绝改目的地，行程保持不变');
+    renderList();
+    if(state.detailId === o.id) renderDetail(o.id);
+  };
+}
+
+/* ---------- 详情 ---------- */
+function openDetail(id){
+  state.detailId = id;
+  renderDetail(id);
+  $('viewList').hidden = true;
+  $('viewDetail').hidden = false;
+  $('detailBar').hidden = false;
+  window.scrollTo(0, 0);
+}
+$('btnBack').addEventListener('click', function(){
+  state.detailId = null;
+  $('viewDetail').hidden = true;
+  $('detailBar').hidden = true;
+  $('viewList').hidden = false;
+  renderList();
+});
+
+function kv(k, v){
+  return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>';
+}
+
+/* 路线 SVG */
+function routeSvg(o){
+  var a = o.tPickup, b = o.tDest;
+  var minLng = Math.min(a.lng, b.lng), maxLng = Math.max(a.lng, b.lng);
+  var minLat = Math.min(a.lat, b.lat), maxLat = Math.max(a.lat, b.lat);
+  var padLng = Math.max((maxLng - minLng) * 0.2, 0.005), padLat = Math.max((maxLat - minLat) * 0.2, 0.005);
+  minLng -= padLng; maxLng += padLng; minLat -= padLat; maxLat += padLat;
+  function X(lng){ return ((lng - minLng) / (maxLng - minLng) * 100).toFixed(2); }
+  function Y(lat){ return ((maxLat - lat) / (maxLat - minLat) * 100).toFixed(2); }
+  var x1 = X(a.lng), y1 = Y(a.lat), x2 = X(b.lng), y2 = Y(b.lat);
+  var mx = ((+x1 + +x2) / 2).toFixed(2), my = ((+y1 + +y2) / 2).toFixed(2);
+  /* 曲线路径 */
+  var dx = +x2 - +x1, dy = +y2 - +y1;
+  var len = Math.sqrt(dx*dx + dy*dy) || 1;
+  var nx = -dy / len, ny = dx / len;
+  var cx = (+mx + nx * 10).toFixed(2), cy = (+my + ny * 10).toFixed(2);
+  var dist = fmtKm(distKm(a, b));
+
+  return '<div class="map-box">' +
+    '<div class="map-grid"></div>' +
+    '<svg class="map-route" viewBox="0 0 100 100" preserveAspectRatio="none">' +
+      '<path d="M ' + x1 + ' ' + y1 + ' Q ' + cx + ' ' + cy + ' ' + x2 + ' ' + y2 + '" ' +
+        'fill="none" stroke="#0669FF" stroke-width="1.2" stroke-dasharray="3 2" stroke-linecap="round"/>' +
+      '<circle cx="' + x1 + '" cy="' + y1 + '" r="1.6" fill="#52C41A"/>' +
+      '<circle cx="' + x2 + '" cy="' + y2 + '" r="1.6" fill="#0669FF"/>' +
+    '</svg>' +
+    '<div class="map-dot pu" style="left:calc(' + x1 + '% - 6px);top:calc(' + y1 + '% - 6px)"><span class="lbl">起点</span></div>' +
+    '<div class="map-dot dst" style="left:calc(' + x2 + '% - 6px);top:calc(' + y2 + '% - 6px)"><span class="lbl">终点</span></div>' +
+    '<div style="position:absolute;left:50%;bottom:8px;transform:translateX(-50%);' +
+      'background:rgba(24,144,255,.9);color:#fff;font-size:.64rem;padding:2px 10px;border-radius:999px">' +
+      dist + '</div>' +
+  '</div>';
+}
+
+function renderDetail(id){
+  var o = getOrder(id);
+  if(!o) return;
+  var st = orderStatusLabel(o);
+  var h = '';
+
+  /* 状态卡片 */
+  h += '<div class="card status-card">' +
+    badge(st, true) +
+    '<span class="oid mono">曹操订单号 ' + esc(o.tCaoNo) + '</span>' +
+    '<span class="meta-line">来源：' + esc(o.tSource) + ' · 下单 ' + esc(o.tCreated) +
+      ' · ' + esc(o.tCity) + '（' + esc(o.tCityCode) + '）</span>' +
+  '</div>';
+
+  /* 用户信息 */
+  h += '<div class="card"><div class="card-t">老外用户</div>' +
+    kv('姓名', esc(o.name)) +
+    kv('语言', esc(o.lang)) +
+    kv('护照号', esc(maskPassport(o.passport))) +
+    kv('手机号', esc(maskPhone(o.phone))) +
+    kv('设备号', esc(o.deviceNo)) +
+    kv('当前积分余额', esc(o.balance)) +
+  '</div>';
+
+  /* 行程信息 */
+  h += '<div class="card"><div class="card-t">行程信息</div>' +
+    kv('车型', esc(o.tCarType) + ' · ' + esc(o.merchant)) +
+    routeSvg(o) +
+    '<div style="display:flex;gap:10px">' +
+      '<div style="flex:1;background:#F6FFED;border:1px solid #D9F7BE;border-radius:10px;padding:10px">' +
+        '<div style="font-size:.68rem;color:#389E0D;font-weight:700">起点</div>' +
+        '<div style="font-size:.84rem;font-weight:600;margin-top:2px">' + esc(o.tPickup.zh) + '</div>' +
+        '<div style="font-size:.68rem;color:#8C8C8C">' + esc(o.tPickup.en) + '</div>' +
+      '</div>' +
+      '<div style="flex:1;background:#F0F7FF;border:1px solid #D6E9FF;border-radius:10px;padding:10px">' +
+        '<div style="font-size:.68rem;color:#0669FF;font-weight:700">终点</div>' +
+        '<div style="font-size:.84rem;font-weight:600;margin-top:2px">' + esc(o.tDest.zh) + '</div>' +
+        '<div style="font-size:.68rem;color:#8C8C8C">' + esc(o.tDest.en) + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  /* 司机信息 */
+  if(o.tDriver){
+    var d = o.tDriver;
+    h += '<div class="card"><div class="card-t">司机信息</div>' +
+      '<div class="driver-card">' +
+        '<div class="driver-avatar">' + esc(d.name.charAt(0)) + '</div>' +
+        '<div class="driver-info">' +
+          '<div class="driver-name">' + esc(d.name) + '</div>' +
+          '<div class="driver-sub">' + esc(d.model) + ' · ' + esc(d.color) + '</div>' +
+          '<div class="driver-stats">' +
+            '<span class="driver-stat">⭐ ' + esc(d.score) + '</span>' +
+            '<span class="driver-stat">' + esc(d.trips) + ' 单</span>' +
+            '<span class="driver-stat">ETA ' + esc(String(d.eta)) + ' 分钟</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      kv('车牌号', '<b class="mono">' + esc(d.plate) + '</b>') +
+      kv('虚拟号', esc(maskPhone(d.virtualPhone))) +
+    '</div>';
+  }
+
+  /* 费用明细 */
+  var estTotal = +(o.tEst.cao + o.tEst.svc).toFixed(1);
+  h += '<div class="card"><div class="card-t">费用明细</div>' +
+    '<div class="fee-row"><span>曹操预估价</span><span class="v">' + fmtMoney(o.tEst.cao) + '</span></div>' +
+    '<div class="fee-row"><span>平台服务费</span><span class="v">' + fmtMoney(o.tEst.svc) + '</span></div>' +
+    '<div class="fee-row total"><span>预估总价</span><span class="v">' + fmtMoney(estTotal) + '（' + fmtPoints(estTotal) + '）</span></div>';
+  if(o.tBill){
+    var billTotal = +(o.tBill.cao + o.tBill.svc).toFixed(1);
+    h += '<div class="fee-row"><span>曹操实际账单</span><span class="v">' + fmtMoney(o.tBill.cao) + '</span></div>' +
+      '<div class="fee-row"><span>平台服务费（实）</span><span class="v">' + fmtMoney(o.tBill.svc) + '</span></div>' +
+      '<div class="fee-row total"><span>实付总价</span><span class="v">' + fmtMoney(billTotal) + '（' + fmtPoints(billTotal) + '）</span></div>';
+  }
+  h += '<div class="fee-row"><span>冻结积分</span><span class="v">' + fmtPoints(o.tFrozen) + '</span></div>';
+  if(o.tDeducted) h += '<div class="fee-row"><span>实扣积分</span><span class="v" style="color:#D4380D">' + fmtPoints(o.tDeducted) + '</span></div>';
+  if(o.tReleased) h += '<div class="fee-row"><span>已解冻</span><span class="v" style="color:#389E0D">+' + fmtPoints(o.tReleased) + '</span></div>';
+  if(o.tDebt) h += '<div class="fee-row"><span>挂欠账</span><span class="v" style="color:#FF4D4F">' + fmtPoints(o.tDebt) + '</span></div>';
+  h += '<div class="fee-note freeze">下单时按所选车型最高报价冻结 ' + fmtPoints(o.tFrozen) + '</div>';
+  if(o.tDebt > 0) h += '<div class="fee-note debt">实付超出冻结，差额 ' + fmtPoints(o.tDebt) + ' 挂欠账（下次充值抵扣）</div>';
+  if(o.tCancelFee > 0){
+    h += '<div class="fee-note fee">取消费 ' + fmtPoints(o.tCancelFee) + ' 已计入本单</div>';
+  }
+  h += '</div>';
+
+  /* 积分流水 */
+  h += '<div class="card"><div class="card-t">积分流水</div>';
+  if(o.tPointLogs && o.tPointLogs.length){
+    o.tPointLogs.forEach(function(p){
+      var tag = PT_TYPE_TAG[p.type] || {cls:'freeze', sign:0};
+      var signTxt = tag.sign > 0 ? '+' : tag.sign < 0 ? '-' : '';
+      h += '<div class="log-item">' +
+        '<span class="log-tm" style="width:auto;font-size:.68rem;white-space:nowrap">' + esc(p.tm) + '</span>' +
+        '<span class="pt-tag ' + tag.cls + '">' + esc(p.type) + '</span>' +
+        '<span class="log-txt"><b>' + signTxt + fmtPoints(p.amount) + '</b><br>' + esc(p.note) + '</span>' +
+        '<span class="log-op">' + esc(p.operator) + '</span>' +
+      '</div>';
+    });
+  }else{
+    h += '<div class="comp-empty">暂无积分流水</div>';
+  }
+  h += '</div>';
+
+  /* 曹操事件流水 */
+  h += '<div class="card"><div class="card-t">曹操事件流水</div>';
+  if(o.tEvents && o.tEvents.length){
+    o.tEvents.forEach(function(ev){
+      h += '<div class="ev-item">' +
+        '<span class="ev-code">' + esc(String(ev.code)) + '</span>' +
+        '<span class="ev-txt">' + esc(ev.label) + '</span>' +
+        '<span class="ev-tm">' + esc(ev.tm) + '</span>' +
+      '</div>';
+    });
+  }else{
+    h += '<div class="comp-empty">暂无事件</div>';
+  }
+  h += '</div>';
+
+  /* 操作日志 */
+  h += '<div class="card"><div class="card-t">操作日志</div>';
+  if(o.tLogs && o.tLogs.length){
+    o.tLogs.forEach(function(l){
+      h += '<div class="log-item">' +
+        '<span class="log-tm" style="width:auto;font-size:.68rem;white-space:nowrap">' + esc(l.tm) + '</span>' +
+        '<span class="log-txt">' + esc(l.action) + '</span>' +
+        '<span class="log-op">' + esc(l.operator) + '</span>' +
+      '</div>';
+    });
+  }else{
+    h += '<div class="comp-empty">暂无操作日志</div>';
+  }
+  h += '</div>';
+
+  /* 取消原因 */
+  if(o.tCancelReason){
+    h += '<div class="card"><div class="card-t">取消原因</div>' +
+      '<div style="font-size:.8rem;color:#595959;background:#FAFAFA;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px">' +
+        esc(o.tCancelReason) + '</div></div>';
+  }
+
+  /* 待确认提示 */
+  if(o.tCancelPending && o.tCancelMsg){
+    h += '<div class="card"><div class="card-t">待老外确认</div>' +
+      '<div class="pending-box">⏳ <b>取消订单待老外确认</b><br>原因：' + esc(o.tCancelMsg.reason) +
+      '<br>取消费：<b>' + fmtPoints(o.tCancelMsg.fee) + '</b></div></div>';
+  }
+  if(o.tDestPending && o.tDestMsg){
+    h += '<div class="card"><div class="card-t">待老外确认</div>' +
+      '<div class="pending-box">⏳ <b>改目的地待老外确认</b><br>新目的地：' + esc(o.tDestMsg.dest.zh) +
+      '<br>新预估：' + fmtMoney(o.tDestMsg.est.total) + '（差额 ' + fmtPoints(o.tDestMsg.delta) + '）</div></div>';
+  }
+
+  $('detailBody').innerHTML = h;
+  renderDetailBar(o);
+}
+
+/* 详情底部操作栏 */
+function renderDetailBar(o){
+  var bar = $('detailBar');
+  var showCancel = canCancel(o);
+  var showDest = canChangeDest(o);
+  var html =
+    '<button class="btn-ghost" id="dRefresh">刷新状态</button>';
+  if(showCancel){
+    html += '<button class="btn-danger" id="dCancel">取消</button>';
+  }
+  if(showDest){
+    html += '<button class="btn-change" id="dDest">改目的地</button>';
+  }
+  html += '<button class="btn-push btn-primary" id="dPush">推送订单</button>';
+  bar.innerHTML = html;
+
+  $('dRefresh').addEventListener('click', function(){
+    var btn = this;
+    if(btn._busy) return;
+    btn._busy = true;
+    btn.classList.add('busy');
+    var old = btn.textContent;
+    btn.textContent = '刷新中…';
+    setTimeout(function(){
+      btn.classList.remove('busy');
+      btn.textContent = old;
+      btn._busy = false;
+      toast('订单状态已刷新', true);
+      if(state.detailId) renderDetail(state.detailId);
+    }, 1200);
+  });
+  if(showCancel){
+    $('dCancel').addEventListener('click', function(){ openCancelSheet(o.id); });
+  }
+  if(showDest){
+    $('dDest').addEventListener('click', function(){ openDestSheet(o.id); });
+  }
+  $('dPush').addEventListener('click', function(){ doPush(this); });
+}
+
+/* ---------- 初始化 ---------- */
+renderList();
+</script>
+</body>
+</html>
