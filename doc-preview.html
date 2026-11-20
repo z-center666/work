@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>杭州3天自由行吃与打车实用攻略.docx</title>
+<link href="./fonts/bootstrap-icons.css" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif; background: #e8eaed; color: #1f2329; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ============ 顶部预览工具栏 ============ */
+  .pv-bar {
+    height: 48px; background: #fff; border-bottom: 1px solid #e5e6eb;
+    display: flex; align-items: center; padding: 0 16px; gap: 8px; flex-shrink: 0;
+  }
+  .pv-btn {
+    width: 32px; height: 32px; border: none; background: transparent; border-radius: 4px;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 16px;
+    color: #4e5969; cursor: pointer;
+  }
+  .pv-btn:hover { background: #f2f3f5; }
+  .pv-page {
+    width: 44px; height: 28px; border: 1px solid #dcdfe6; border-radius: 4px;
+    text-align: center; font-size: 13px; color: #1f2329;
+  }
+  .pv-total { font-size: 13px; color: #4e5969; }
+  .pv-sep { width: 1px; height: 20px; background: #e5e6eb; margin: 0 6px; }
+  .pv-spacer { flex: 1; }
+  .pv-zoom {
+    height: 28px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px;
+    color: #1f2329; padding: 0 6px; background: #fff;
+  }
+
+  /* ============ 文档区域 ============ */
+  .pv-main { flex: 1; overflow: auto; position: relative; }
+  .pv-doc {
+    width: 794px; margin: 24px auto 40px; background: #fff;
+    box-shadow: 0 2px 12px rgba(31,35,41,.1); padding: 72px 90px; position: relative;
+  }
+
+  /* 文档排版 */
+  .doc-title { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 40px; }
+  .doc-callout {
+    border: 1px solid #a8c6f0; background: #f4f8fe; border-radius: 2px;
+    padding: 14px 16px; font-size: 14px; line-height: 1.9; margin-bottom: 24px;
+  }
+  .doc-h2 { font-size: 18px; font-weight: 700; margin: 24px 0 12px; }
+  .doc-p { font-size: 14px; line-height: 1.9; margin-bottom: 12px; }
+  .doc-table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+  .doc-table th, .doc-table td { border: 1px solid #dcdfe6; padding: 8px 10px; line-height: 1.7; text-align: left; vertical-align: top; }
+  .doc-table th { background: #f7f8fa; font-weight: 600; }
+  .doc-ul { padding-left: 22px; font-size: 14px; line-height: 1.9; margin-bottom: 12px; }
+  .doc-li { margin-bottom: 4px; }
+  .doc-li b { font-weight: 600; }
+</style>
+</head>
+<body>
+
+  <!-- 顶部预览工具栏 -->
+  <div class="pv-bar">
+    <button class="pv-btn" title="目录"><i class="bi bi-layout-sidebar"></i></button>
+    <button class="pv-btn" title="搜索"><i class="bi bi-search"></i></button>
+    <span class="pv-sep"></span>
+    <button class="pv-btn" title="上一页"><i class="bi bi-chevron-up"></i></button>
+    <button class="pv-btn" title="下一页"><i class="bi bi-chevron-down"></i></button>
+    <input class="pv-page" value="1" readonly>
+    <span class="pv-total">/ 7</span>
+    <span class="pv-sep"></span>
+    <button class="pv-btn" title="缩小"><i class="bi bi-dash-lg"></i></button>
+    <button class="pv-btn" title="放大"><i class="bi bi-plus-lg"></i></button>
+    <select class="pv-zoom"><option>自动缩放</option><option>50%</option><option>75%</option><option>100%</option><option>150%</option></select>
+    <span class="pv-spacer"></span>
+    <button class="pv-btn" title="全屏"><i class="bi bi-fullscreen"></i></button>
+  </div>
+
+  <!-- 文档区域 -->
+  <div class="pv-main" id="pvMain">
+    <div class="pv-doc">
+      <div class="doc-title">杭州 3 天自由行·吃与打车实用攻略</div>
+
+      <div class="doc-callout">
+        <b>一句话怎么玩：</b>3 天足够把西湖、灵隐、老城吃住行玩透。住宿定在湖滨/龙翔桥<b>地铁站附近</b>，出行用<b>“地铁为主 + 网约车兜底”</b>的组合；10 月昼夜温差大、湖边风大、偶有阵雨，记得带薄外套和雨伞；灵隐飞来峰景区<b>已免票，但必须提前在“杭州灵隐飞来峰”小程序实名预约分时入园</b>。
+      </div>
+
+      <div class="doc-h2">一句话怎么玩<br>推荐天数与适合谁</div>
+      <div class="doc-p">3 天是第一次来杭州的最优长度：1 天西湖东线、1 天灵隐+茶园、1 天老城小吃，节奏舒服，不赶场。适合休闲情侣、朋友结伴、带大一点孩子的家庭；如果是带老人或小宝宝，把 Day1、Day2 各砍掉一个点位，放慢脚步即可。</div>
+
+      <div class="doc-h2">最大风险与应对</div>
+      <div class="doc-p">最大的坑不是路线，而是<b>周末与节假日的打车难和灵隐约不上</b>。西湖沿线、灵隐、湖滨高峰时段网约车要等很久且经常堵车；灵隐节假日预约名额很快约满。应对办法：核心景区之间优先地铁或骑行，打车放在非高峰，灵隐提前约好再出门。</div>
+
+      <div class="doc-h2">10 月天气与穿着策略</div>
+      <table class="doc-table">
+        <tr><th style="width:22%;">天气情况</th><th style="width:36%;">对行程的影响</th><th>应对</th></tr>
+        <tr><td>平均 15~23℃，晴多雨少</td><td>白天行走舒适，早晚湖边风大偏凉</td><td>短袖/薄卫衣 + 防风薄外套</td></tr>
+        <tr><td>偶有阵雨（多为短时）</td><td>排队打车的需求猛增，路边难打车</td><td>随身带折叠伞，优先地铁/商场内等车</td></tr>
+        <tr><td>国庆假期人流极大</td><td>景区周边道路管制，网约车进不去</td><td>错峰出行，避开 10.1~10.5 高峰</td></tr>
+      </table>
+
+      <div class="doc-h2">三日线怎么排</div>
+      <ul class="doc-ul">
+        <li class="doc-li"><b>Day1 西湖东线经典游：</b>断桥残雪 → 白堤 → 平湖秋月 → 孤山 → 湖滨银泰 in77 午餐 → 柳浪闻莺 → 雷峰塔看日落 → 湖滨晚餐。</li>
+        <li class="doc-li"><b>Day2 灵隐 + 茶园深度游：</b>早 7:30 前到灵隐飞来峰（免票需预约）→ 灵隐寺 → 法喜寺 → 茶村翁家山/龙井村 → 杭州植物园或茅家埠 → 晚餐浙大附近。</li>
+        <li class="doc-li"><b>Day3 老城小吃 + 返程：</b>河坊街/清河坊早餐 → 胡庆余堂 → 城隍阁远眺 → 南宋御街 → 午餐后视返程时间加西湖文化广场/京杭大运河。</li>
+      </ul>
+
+      <div class="doc-h2">吃什么：本地人认可的清单</div>
+      <table class="doc-table">
+        <tr><th style="width:26%;">品类</th><th>推荐</th></tr>
+        <tr><td>杭帮菜正餐</td><td>西湖醋鱼、龙井虾仁、东坡肉、油炸虾、精品小笼包、片儿川、猫耳朵</td></tr>
+        <tr><td>小吃点心</td><td>葱包桧、定胜糕、吴山酥油饼、鲜肉小笼</td></tr>
+        <tr><td>面馆</td><td>菊英面店（片儿川）、方老大面（拌川）</td></tr>
+        <tr><td>茶饮</td><td>龙井茶（狮峰/梅家坞）、九曲红梅</td></tr>
+      </table>
+
+      <div class="doc-h2">打车实用建议</div>
+      <div class="doc-p">早高峰（7:30~9:00）与晚高峰（17:00~19:00）景区周边基本叫不到车，建议地铁 1 号线/7 号线到湖滨、龙翔桥站；环西湖观光电瓶车分段计价，适合沿湖移动；夜间 22:00 后打车恢复顺畅，机场/火车站预留 60 分钟以上车程余量。</div>
+    </div>
+  </div>
+
+</body>
+</html>

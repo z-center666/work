@@ -2851,17 +2851,17 @@ body {
           <div class="dz-customer__body">
             <input class="dz-field__input" placeholder="输入关键词搜索" style="margin-bottom: 10px;">
             <div class="dz-kb-card">
-              <div class="dz-kb-card__title" data-kb="points">什么是积分？如何获取？ <i class="bi bi-eye"></i></div>
+              <div class="dz-kb-card__title" data-kb="points"><i class="bi bi-eye"></i></div>
               <div class="dz-kb-card__text">您可以通过预订酒店、参与活动、每日签到等方式获取积分，积分可用于兑换房型升级、早餐券等权益。</div>
               <div class="dz-kb-card__btns"><button class="dz-kb-card__btn dz-kb-card__btn--primary">发送</button><button class="dz-kb-card__btn">引用</button></div>
             </div>
             <div class="dz-kb-card">
-              <div class="dz-kb-card__title" data-kb="island">如何选择海岛目的地？ <i class="bi bi-eye"></i></div>
+              <div class="dz-kb-card__title" data-kb="island"><i class="bi bi-eye"></i></div>
               <div class="dz-kb-card__text">我们精选了数十个热门海岛目的地，涵盖三亚、普吉、巴厘岛等，并提供最佳出行季节与预算参考。</div>
               <div class="dz-kb-card__btns"><button class="dz-kb-card__btn dz-kb-card__btn--primary">发送</button><button class="dz-kb-card__btn">引用</button></div>
             </div>
             <div class="dz-kb-card">
-              <div class="dz-kb-card__title" data-kb="orderClosed">为什么订单状态显示已关闭？ <i class="bi bi-eye"></i></div>
+              <div class="dz-kb-card__title" data-kb="orderClosed"><i class="bi bi-eye"></i></div>
               <div class="dz-kb-card__text">已关闭表示订单超时未支付，可在订单列表重新提交预订；如有疑问请联系客服协助处理。</div>
               <div class="dz-kb-card__btns"><button class="dz-kb-card__btn dz-kb-card__btn--primary">发送</button><button class="dz-kb-card__btn">引用</button></div>
             </div>
@@ -2920,7 +2920,6 @@ body {
         <div class="dz-kb-modal" id="kbModal">
           <div class="dz-kb-modal__dialog">
             <div class="dz-kb-modal__head">
-              <span class="dz-kb-modal__title" id="kbModalTitle">什么是积分？如何获取？</span>
               <span class="dz-kb-modal__close" id="kbModalClose"><i class="bi bi-x-lg"></i></span>
             </div>
             <div class="dz-kb-modal__body" id="kbModalBody"><p>积分是本平台为会员用户提供的专属权益值，可通过以下方式获取：</p><p>1. 预订酒店：每消费 1 元累计 1 积分，订单完成入住后到账；</p><p>2. 参与活动：节假日限时活动、邀请好友注册等可获得额外积分奖励；</p><p>3. 每日签到：连续签到 7 天可额外获得 50 积分。</p><p>积分可用于兑换房型升级、早餐券、延迟退房等权益，有效期一般为获取当年及次年年底。</p></div>
@@ -2931,7 +2930,6 @@ body {
         <div class="dz-kb-modal" id="sendModal">
           <div class="dz-kb-modal__dialog dz-send-dialog">
             <span class="dz-kb-modal__close" id="sendModalClose"><i class="bi bi-x-lg"></i></span>
-            <div class="dz-send-dialog__title" id="sendModalTitle">什么是积分？如何获取？</div>
             <div class="dz-send-dialog__body" id="sendModalBody"></div>
             <div class="dz-send-dialog__foot">
               <button class="dz-send-dialog__btn" id="sendModalCancel">取消</button>
@@ -3845,10 +3843,9 @@ var kbDetails = {
 // AI知识库详情弹窗：点击卡片眼睛图标展示中文详情，关闭按钮/遮罩点击/Esc 关闭
 (function () {
   var modal = document.getElementById('kbModal');
-  var titleEl = document.getElementById('kbModalTitle');
   var bodyEl = document.getElementById('kbModalBody');
   var closeBtn = document.getElementById('kbModalClose');
-  if (!modal || !titleEl || !bodyEl) return;
+  if (!modal || !bodyEl) return;
 
   // 点击卡片标题（含眼睛图标）打开弹窗
   document.querySelectorAll('#aiKb .dz-kb-card__title').forEach(function (t) {
@@ -3856,7 +3853,6 @@ var kbDetails = {
       var key = t.getAttribute('data-kb');
       var d = kbDetails[key];
       if (!d) return;
-      titleEl.textContent = d.title;
       bodyEl.innerHTML = d.body;
       modal.classList.add('show');
     });
@@ -3902,9 +3898,8 @@ var kbDetails = {
 // 知识卡片「发送」按钮：弹出含详情正文的中文确认弹窗，确定后以坐席身份发出新消息
 (function () {
   var sendModal = document.getElementById('sendModal');
-  var sendTitle = document.getElementById('sendModalTitle');
   var sendBody = document.getElementById('sendModalBody');
-  if (!sendModal || !sendTitle || !sendBody) return;
+  if (!sendModal || !sendBody) return;
   var pending = null;
 
   function closeSend() { sendModal.classList.remove('show'); }
@@ -3935,7 +3930,6 @@ var kbDetails = {
       var d = kbDetails[key];
       if (!d) return;
       pending = d;
-      sendTitle.textContent = d.title;
       sendBody.innerHTML = d.body;
       sendModal.classList.add('show');
     });
@@ -4587,7 +4581,7 @@ var kbDetails = {
 }
 .dz-kb-card__title {
   color: var(--dz-font-color); font-weight: 500; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: flex-end; margin-bottom: 4px;
 }
 .dz-kb-card__title .bi { color: var(--dz-font-color-3); font-size: 14px; font-weight: 400; }
 .dz-kb-card__title:hover .bi { color: var(--dzglobal-primary-color); }
@@ -4648,9 +4642,8 @@ var kbDetails = {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
 }
 .dz-kb-modal__head {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: flex-end; margin-bottom: 10px;
 }
-.dz-kb-modal__title { font-size: 15px; font-weight: 600; color: var(--dz-font-color); }
 .dz-kb-modal__close {
   width: 24px; height: 24px; line-height: 24px; text-align: center; cursor: pointer;
   color: var(--dz-font-color-3); font-size: 16px; border-radius: 4px; flex-shrink: 0;
@@ -4660,12 +4653,8 @@ var kbDetails = {
 .dz-kb-modal__body p { margin: 0 0 8px; }
 .dz-kb-modal__body p:last-child { margin-bottom: 0; }
 
-/* ---- 发送确认弹窗：标题 + 取消/确定 ---- */
+/* ---- 发送确认弹窗：正文 + 取消/确定 ---- */
 .dz-send-dialog { max-width: 420px; }
-.dz-send-dialog__title {
-  font-size: 14px; color: var(--dz-font-color); line-height: 1.6;
-  padding: 10px 4px 8px; font-weight: 600;
-}
 .dz-send-dialog__body {
   font-size: 13px; color: var(--dz-font-color); line-height: 1.8;
   max-height: 300px; overflow-y: auto; padding: 0 4px 18px;
