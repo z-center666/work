@@ -2255,15 +2255,8 @@ body {
                 <div class="dz-msg__bubble"><b>收货信息-待确认</b><br><b>地址</b>：杭州君悦酒店 1212 房<br><b>详情</b>：杭州市西湖区湖滨路 28 号<br><b>联系人</b>：John / 13812346620<br><b>忌口</b>：不吃辣；忌花生、香菜<br><b>偏好</b>：少油少盐；餐具要 2 份，送到前台请致电<br>消息有效期：此条确认信息将在10分钟后失效，请提醒客户在有效期内完成确认</div>
               </div>
             </div>
-            <!-- 客户消息（左）：确认地址与偏好 -->
-            <div class="dz-msg dz-msg--other dz-chat__row">
-              <span class="dz-msg__avatar"><i class="bi bi-person-fill"></i></span>
-              <div class="dz-msg__main">
-                <div class="dz-msg__meta"><span class="dz-msg__name">匿名用户</span><span class="dz-msg__time">今天 10:12:05</span></div>
-                <div class="dz-msg__bubble">Delivery address and food preferences confirmed</div>
-                <div class="dz-msg__bubble" style="margin-top:6px;">已确认收货地址和饮食偏好</div>
-              </div>
-            </div>
+            <!-- 系统提示：确认地址与偏好 -->
+            <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:12:05</span><span class="dz-satisfy-tip__text">已确认收货地址和饮食偏好</span></div>
             <!-- 坐席消息（右）：外卖订单确认卡片 -->
             <div class="dz-msg dz-msg--mine dz-chat__row">
               <span class="dz-msg__avatar dz-msg__avatar--agent"><i class="bi bi-person-fill"></i></span>
@@ -2292,7 +2285,7 @@ body {
               </div>
             </div>
             <!-- 系统提示：卡片超时失效 -->
-            <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:13:30</span><span class="dz-satisfy-tip__text">9m50s未点击卡片，卡片超时失效</span></div>
+            <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:13:30</span><span class="dz-satisfy-tip__text">客户在10分钟内未点击“订单确认”卡片，卡片超时失效</span></div>
             <!-- 系统提示：下单支付成功 -->
             <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:13:05</span><span class="dz-satisfy-tip__text">外卖订单已下单成功，订单编号SG20260907112543</span></div>
             <!-- 客户消息（左）：询问餐品配送进度 -->
@@ -2381,6 +2374,31 @@ body {
                 <div class="dz-msg__bubble" style="margin-top:6px;">是的</div>
               </div>
             </div>
+            <!-- 坐席消息（右）：打车订单卡片（已作废） -->
+            <div class="dz-msg dz-msg--mine dz-chat__row">
+              <span class="dz-msg__avatar dz-msg__avatar--agent"><i class="bi bi-person-fill"></i></span>
+              <div class="dz-msg__main">
+                <div class="dz-msg__meta"><span class="dz-msg__time">今天 10:14:05</span><span class="dz-msg__name">张三</span></div>
+                <div class="dz-msg__bubble dz-msg__bubble--order" style="opacity:0.55;background:#f2f3f5;">
+                  <div class="dz-order__row" style="font-weight:600;">打车订单-待确认（已作废）</div>
+                  <div class="dz-order__row"><b>乘客：</b>James Miller（英语）</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Passenger: James Miller (English)</div>
+                  <div class="dz-order__row"><b>上车点：</b>西湖游船码头</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Pickup: West Lake Cruise Boat Dock</div>
+                  <div class="dz-order__row"><b>目的地：</b>萧山国际机场 T4 航站楼</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Destination: Xiaoshan International Airport Terminal T4</div>
+                  <div class="dz-order__row"><b>行程：</b>约 32 km · 70 分钟</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Trip: approx. 32 km · 70 min</div>
+                  <div class="dz-order__row"><b>车型：</b>舒适型</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Car type: Comfort</div>
+                  <div class="dz-order__row"><b>预估费用：</b>¥92.00（曹操 ¥83.60 + 服务费 ¥8.40）</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Estimated fare: ¥92.00 (Cao Cao ¥83.60 + service fee ¥8.40)</div>
+                  <div class="dz-order__row">消息有效期：此条确认信息将在10分钟后失效，请提醒客户在有效期内完成确认</div>
+                </div>
+              </div>
+            </div>
+            <!-- 系统提示：卡片作废 -->
+            <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:14:12</span><span class="dz-satisfy-tip__text">客户在10分钟内未点击“订单确认”卡片，卡片超时失效</span></div>
             <!-- 坐席消息（右）：打车订单卡片 -->
             <div class="dz-msg dz-msg--mine dz-chat__row">
               <span class="dz-msg__avatar dz-msg__avatar--agent"><i class="bi bi-person-fill"></i></span>
@@ -2389,11 +2407,17 @@ body {
                 <div class="dz-msg__bubble dz-msg__bubble--order">
                   <div class="dz-order__row" style="font-weight:600;">打车订单-待确认</div>
                   <div class="dz-order__row"><b>乘客：</b>James Miller（英语）</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Passenger: James Miller (English)</div>
                   <div class="dz-order__row"><b>上车点：</b>西湖游船码头</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Pickup: West Lake Cruise Boat Dock</div>
                   <div class="dz-order__row"><b>目的地：</b>萧山国际机场 T4 航站楼</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Destination: Xiaoshan International Airport Terminal T4</div>
                   <div class="dz-order__row"><b>行程：</b>约 32 km · 70 分钟</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Trip: approx. 32 km · 70 min</div>
                   <div class="dz-order__row"><b>车型：</b>舒适型</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Car type: Comfort</div>
                   <div class="dz-order__row"><b>预估费用：</b>¥92.00（曹操 ¥83.60 + 服务费 ¥8.40）</div>
+                  <div class="dz-order__row" style="color:#99999a;font-size:12px;">Estimated fare: ¥92.00 (Cao Cao ¥83.60 + service fee ¥8.40)</div>
                   <div class="dz-order__row">消息有效期：此条确认信息将在10分钟后失效，请提醒客户在有效期内完成确认</div>
                 </div>
               </div>
@@ -2474,21 +2498,15 @@ body {
                 <div class="dz-msg__meta"><span class="dz-msg__time">今天 10:16:08</span><span class="dz-msg__name">张三</span></div>
                 <div class="dz-msg__bubble dz-msg__bubble--order">
                   <div class="dz-order__row" style="font-weight:600;">取消订单-待确认</div>
-                  <div class="dz-order__row"><b>乘客：</b>James Miller（英语）</div>
-                  <div class="dz-order__row"><b>订单编号：</b>1140671095002206</div>
-                  <div class="dz-order__row"><b>订单状态：</b>司机已到达</div>
-                  <div class="dz-order__row"><b>运力厂商：</b>曹操出行</div>
-                  <div class="dz-order__row"><b>上车点：</b>西湖游船码头</div>
-                  <div class="dz-order__row"><b>目的地：</b>杭州君悦酒店</div>
-                  <div class="dz-order__row"><b>车型：</b>比亚迪</div>
-                  <div class="dz-order__row"><b>车牌号：</b> 浙A·9B4C6</div>
-                  <div class="dz-order__row"><b>扣除：</b>20积分</div>
+                  <div class="dz-order__row"><b>曹操订单号：</b>1140671095002203</div>
+                  <div class="dz-order__row"><b>当前状态：</b>司机已到达</div>
+                  <div class="dz-order__row"><b>行程：</b>杭州柏悦酒店 → 灵隐寺</div>
+                  <div class="dz-order__row"><b>乘客：</b>Hans Weber（D****1003）</div>
+                  <div class="dz-order__row">本单已产生取消费8.8积分，将由平台承担；老外预扣的96.8积分将原路退回，取消费不向老外收取</div>
                   <div class="dz-order__row">消息有效期：此条确认信息将在10分钟后失效，请提醒客户在有效期内完成确认</div>
                 </div>
               </div>
             </div>
-            <!-- 系统提示：用户确定取消订单 -->
-            <div class="dz-satisfy-tip dz-chat__row"><span class="dz-satisfy-tip__time">今天 10:16:15</span><span class="dz-satisfy-tip__text">用户确定取消订单，订单编号SG20260907112543</span></div>
           </div>
 
           <!-- 工具栏 + 输入区：浅灰圆角卡片 -->
