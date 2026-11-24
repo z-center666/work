@@ -7610,6 +7610,17 @@
        放在脚本末尾执行：此时外卖与打车两个模块的常量、函数均已初始化完成，
        避免在 const 暂时性死区（TDZ）中调用而中断脚本。 */
     applyRole();
+    /* 支持 URL 参数直达：?view=review 直开补偿积分审核页（供坐席工作台 iframe 嵌入） */
+    (function(){
+      var p = new URLSearchParams(location.search);
+      if (p.get('view') === 'review') {
+        CURRENT_STAFF = 'supervisor';
+        var s = document.getElementById('staff-select');
+        if (s) s.value = 'supervisor';
+        applyRole();
+        openCompReview();
+      }
+    })();
 
     /* 改目的地「老外待确认」9 分 50 秒时限：每秒巡检，到点自动失效并刷新列表/详情 */
     setInterval(function(){
