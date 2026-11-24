@@ -23,12 +23,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .hidden{display:none!important}
 [hidden]{display:none!important}
 
-/* ========== 顶部 ========== */
-.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #F0F0F0;
-  padding:14px 16px 12px}
-.topbar .tt{font-size:1.05rem;font-weight:700}
-.topbar .sub{font-size:.72rem;color:#8C8C8C;margin-top:2px}
-
 /* ========== 步骤条 ========== */
 .stepbar{display:flex;align-items:center;padding:14px 16px 4px;gap:0}
 .step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
@@ -68,6 +62,13 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .balance-bar .ba-user{font-size:.95rem;font-weight:700;flex:1;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;padding-right:14px}
 
+/* 用户当前定位（参考外卖代下单） */
+.loc-row{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#595959;
+  background:#F0F7FF;border-radius:8px;padding:8px 10px}
+.loc-pin{flex:none;color:#0669FF}
+.loc-label{color:#8C8C8C;flex:none}
+.loc-name{color:#262626;font-weight:600}
+
 /* ========== 第②步：搜索上车点 ========== */
 .pu-search{padding:12px 12px 0}
 .pu-search-row{display:flex;flex-direction:column;gap:8px}
@@ -88,9 +89,9 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
   box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:3}
 .map-dot.pu{background:#52C41A}
 .map-dot.dst{background:#0669FF}
-.map-dot.user{background:#722ED7}
+.map-dot.user{background:#0669FF}
 .map-dot.user .map-user-ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:26px;height:26px;border-radius:50%;border:2px solid rgba(114,46,215,.45);
+  width:26px;height:26px;border-radius:50%;border:2px solid rgba(6,105,255,.45);
   background:rgba(114,46,215,.12);animation:mapPulse 2s ease-out infinite}
 @keyframes mapPulse{0%{transform:translate(-50%,-50%) scale(.6);opacity:.9}
   100%{transform:translate(-50%,-50%) scale(1.4);opacity:0}}
@@ -131,15 +132,86 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .poi-zh{font-size:.88rem;font-weight:700;padding-right:28px}
 .poi-zh .poi-zh-en{font-size:.7rem;color:#8C8C8C;font-weight:400;margin-left:6px}
 .poi-en{font-size:.7rem;color:#8C8C8C;margin-top:2px}
-.poi-dist{font-size:.72rem;color:#0669FF;margin-top:6px;font-weight:600}
+/* 距离：右侧、灰色、无 icon、防对勾重叠 */
+.poi-dist{display:inline-flex;align-items:center;font-size:.68rem;color:#8C8C8C;
+  margin-top:2px;padding-right:28px}
 .poi-empty{text-align:center;color:#B0B3B8;font-size:.78rem;padding:28px 0}
 .poi-short{position:absolute;top:12px;right:12px;font-size:.62rem;font-weight:700;
   padding:2px 7px;border-radius:6px;background:#FFF2E8;color:#D4380D;border:1px solid #FFD6B3}
+
+/* 【新增】步行到这里按钮 */
+.walk-btn{display:none;margin-top:8px;padding:6px 14px;border-radius:8px;
+  background:#52C41A;color:#fff;font-size:.75rem;font-weight:600;
+  border:none;cursor:pointer;transition:opacity .2s}
+.walk-btn:active{opacity:.8}
+.poi-item.selected .walk-btn{display:inline-block}
+
+/* 【新增】步行导航弹窗 */
+.walk-nav-mask{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.walk-nav-mask.show{opacity:1;pointer-events:auto}
+.walk-nav{position:fixed;left:50%;top:50%;z-index:71;width:90%;max-width:420px;
+  max-height:80vh;background:#fff;border-radius:16px;padding:0;
+  transform:translate(-50%,-50%) scale(.92);opacity:0;pointer-events:none;
+  transition:transform .25s,opacity .25s;overflow:hidden;
+  display:flex;flex-direction:column}
+.walk-nav.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.walk-nav-header{padding:16px 16px 12px;border-bottom:1px solid #F0F0F0;
+  display:flex;align-items:center;justify-content:space-between}
+.walk-nav-title{font-size:1rem;font-weight:700;color:#1A1A1A}
+.walk-nav-close{width:32px;height:32px;border-radius:50%;background:#F5F5F5;
+  border:none;font-size:18px;color:#666;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;line-height:1}
+.walk-nav-close:active{background:#E8E8E8}
+.walk-nav-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px 16px}
+.walk-nav-map{width:100%;height:180px;border-radius:12px;overflow:hidden;
+  position:relative;background:#F0F5FF;margin-bottom:14px;flex:none}
+.walk-nav-map .map-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(6,105,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(6,105,255,.06) 1px,transparent 1px);
+  background-size:20px 20px}
+.walk-nav-map svg{width:100%;height:100%}
+.walk-nav-map .map-legend{position:absolute;bottom:8px;left:8px;right:8px;
+  display:flex;gap:10px;font-size:.65rem;color:#595959;
+  background:rgba(255,255,255,.9);padding:4px 8px;border-radius:6px}
+.walk-nav-map .map-legend span{display:inline-flex;align-items:center;gap:3px}
+.walk-nav-map .map-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.walk-nav-steps-title{font-size:.85rem;font-weight:700;color:#1A1A1A;margin-bottom:10px;flex:none}
+.walk-nav-steps-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+.walk-nav-steps{list-style:none;padding:0;margin:0}
+.walk-nav-steps li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #F5F5F5}
+.walk-nav-steps li:last-child{border-bottom:none}
+.walk-step-num{width:24px;height:24px;border-radius:50%;background:#0669FF;color:#fff;
+  font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;
+  flex:none;margin-top:1px}
+.walk-step-text{font-size:.82rem;color:#1A1A1A;line-height:1.4}
+.walk-step-en{font-size:.72rem;color:#595959;margin-top:2px;line-height:1.3}
+.walk-step-sub{font-size:.7rem;color:#8C8C8C;margin-top:2px}
+.walk-nav-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #F0F0F0}
+.walk-nav-footer button{width:100%;min-height:44px;border-radius:10px;background:#0669FF;
+  color:#fff;font-size:.88rem;font-weight:700;border:none;cursor:pointer}
+.walk-nav-footer button:active{opacity:.85}
 
 /* 地图 POI 点位可点击（层级要压过标签） */
 .map-dot.poi-click{cursor:pointer;z-index:5}
 .map-dot.poi-click:hover{transform:scale(1.25)}
 .map-dot.poi-click.selected{box-shadow:0 0 0 4px rgba(6,105,255,.35);transform:scale(1.35)}
+/* 第①步附近上车点：绿色选中态 */
+.map-dot.pu.poi-click.selected{box-shadow:0 0 0 4px rgba(82,196,26,.35)}
+
+/* 第①步 POI 蓝点（高德搜索结果） */
+.map-dot.poi-blue{background:#0669FF}
+.map-dot.poi-blue.poi-click.selected{box-shadow:0 0 0 4px rgba(6,105,255,.35)}
+
+/* 第①步：已选 POI 上下文提示条 + 修改按钮 */
+.poi-context-bar{margin:12px 12px 0;background:#F0F7FF;border:1.5px solid #D6E9FF;
+  border-radius:10px;padding:8px 12px;font-size:.72rem;color:#0669FF;font-weight:600;
+  display:flex;align-items:center;gap:8px}
+.poi-context-bar .ctx-text{flex:1;min-width:0}
+.poi-context-bar .ctx-edit{flex:none;font-size:.68rem;color:#0669FF;font-weight:600;
+  padding:4px 10px;border:1px solid #D6E9FF;border-radius:8px;background:#fff;
+  min-height:32px;display:flex;align-items:center;cursor:pointer}
+.poi-context-bar .ctx-edit:active{background:#D6E9FF}
 
 /* 选中的上车点/终点 展示条（第②步 上车点 / 第③步 行程回显） */
 .pu-selected{background:#F0F7FF;border:1.5px solid #D6E9FF;border-radius:12px;padding:12px 14px;
@@ -152,19 +224,35 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .pu-selected .chg{flex:none;font-size:.72rem;color:#0669FF;font-weight:600;padding:6px 10px;
   border:1px solid #D6E9FF;border-radius:8px;background:#fff;min-height:44px;display:flex;align-items:center}
 
-/* 第③步 顶部行程回显 */
-.summary-bar{display:flex;gap:10px;padding:12px 12px 0}
-.summary-bar .leg{flex:1;background:#F0F7FF;border:1.5px solid #D6E9FF;border-radius:12px;
-  padding:10px 12px;display:flex;align-items:center;gap:8px;min-width:0}
-.summary-bar .leg .dot{width:10px;height:10px;border-radius:50%;flex:none}
-.summary-bar .leg.pu .dot{background:#52C41A}
-.summary-bar .leg.dst .dot{background:#FA8C16}
-.summary-bar .leg .inf{flex:1;min-width:0}
-.summary-bar .leg .lb{font-size:.62rem;color:#8C8C8C;font-weight:600}
-.summary-bar .leg .val{font-size:.78rem;font-weight:700;color:#262626;margin-top:1px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.summary-bar .leg .chg{flex:none;font-size:.68rem;color:#0669FF;font-weight:600;padding:5px 9px;
-  border:1px solid #D6E9FF;border-radius:8px;background:#fff;min-height:36px;display:flex;align-items:center}
+/* 第③步：行程路线地图（上车点 → 终点） */
+.route-map{position:relative;margin:12px 12px 0;border-radius:14px;overflow:hidden;
+  background:#F0F5FF;border:1.5px solid #D6E9FF;height:200px}
+.route-map .map-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(6,105,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(6,105,255,.06) 1px,transparent 1px);
+  background-size:20px 20px}
+.route-map svg{width:100%;height:100%;display:block}
+.route-map .map-meta{position:absolute;bottom:8px;left:8px;right:8px;
+  display:flex;gap:8px;font-size:.65rem;color:#595959;
+  background:rgba(255,255,255,.92);padding:4px 8px;border-radius:6px;
+  justify-content:center;font-weight:600}
+.route-bubble{position:absolute;background:#fff;border:1.5px solid #D6E9FF;
+  border-radius:10px;padding:6px 8px;max-width:170px;min-width:120px;
+  box-shadow:0 2px 8px rgba(31,45,61,.08);pointer-events:auto}
+.route-bubble .rb-row1{display:flex;align-items:flex-start;gap:4px}
+.route-bubble .rb-names{flex:1;min-width:0}
+.route-bubble .rb-zh{font-size:.72rem;font-weight:700;color:#262626;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.route-bubble .rb-en{font-size:.62rem;color:#8C8C8C;margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.route-bubble .rb-time{font-size:.68rem;font-weight:700;margin-top:3px;line-height:1.2}
+.route-bubble.pu .rb-time{color:#52C41A}
+.route-bubble.dst .rb-time{color:#FA8C16}
+.route-edit-btn{flex:none;width:22px;height:22px;border-radius:6px;
+  border:1px solid #D6E9FF;background:#F0F7FF;color:#0669FF;
+  font-size:.65rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;pointer-events:auto;padding:0;line-height:1}
+.route-edit-btn:active{background:#D6E9FF}
 
 /* ========== 第③步：目的地搜索 + 预估价格 ========== */
 .dst-search{padding:12px 12px 0}
@@ -236,9 +324,8 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .hw-empty{color:#8b9dc3;font-size:.75rem;text-align:center;padding:24px 0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ========== 底部固定按钮 ========== */
-.action-bar{position:fixed;left:0;right:0;bottom:56px;z-index:35;max-width:480px;margin:0 auto;
-  background:#fff;border-top:1px solid #F0F0F0;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+/* ========== 底部按钮（不吸底，随页面滚动） ========== */
+.action-bar{position:static;max-width:480px;margin:12px auto 0;padding:0 12px}
 .action-bar .main-btn{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
   font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;
   transition:all .2s;box-shadow:0 4px 12px rgba(24,144,255,.25)}
@@ -263,27 +350,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .sheet-close{width:100%;min-height:48px;border-radius:12px;background:#0669FF;color:#fff;
   font-size:.9rem;font-weight:700;margin-top:14px}
 
-/* 强制确认弹窗（bottom sheet 样式） */
-.force-sheet-mask{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:flex;
-  align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.force-sheet-mask.show{opacity:1;pointer-events:auto}
-.force-sheet{width:100%;max-width:480px;background:#fff;border-radius:18px 18px 0 0;
-  padding:8px 16px calc(20px + env(safe-area-inset-bottom));
-  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.35,1)}
-.force-sheet-mask.show .force-sheet{transform:translateY(0)}
-.force-sheet .fs-icon{width:60px;height:60px;border-radius:50%;background:#F6FFED;
-  border:2px solid #52C41A;display:flex;align-items:center;justify-content:center;
-  font-size:1.8rem;margin:10px auto 12px}
-.force-sheet .fs-title{font-size:1rem;font-weight:700;text-align:center;margin-bottom:6px}
-.force-sheet .fs-desc{font-size:.78rem;color:#595959;text-align:center;margin-bottom:14px}
-.force-sheet .fs-summary{background:#F9FAFB;border:1px solid #F0F0F0;border-radius:10px;
-  padding:10px 12px;font-size:.75rem;color:#595959;margin-bottom:6px}
-.force-sheet .fs-summary .row{display:flex;gap:6px;padding:3px 0}
-.force-sheet .fs-summary .row .rk{color:#8C8C8C;flex:none;width:56px}
-.force-sheet .fs-summary .row .rv{flex:1;word-break:break-all}
-.force-sheet .fs-summary .money{color:#0669FF;font-weight:700}
-
-
 /* ========== Toast ========== */
 .toast{position:fixed;top:18%;left:50%;transform:translate(-50%,-12px);z-index:80;
   background:rgba(38,38,38,.92);color:#fff;font-size:.8rem;padding:11px 20px;border-radius:999px;
@@ -292,17 +358,14 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* ========== 页面主体 ========== */
-.page-body{padding-bottom:130px}
-.page-body.has-action{padding-bottom:190px}
+.page-body{padding-bottom:20px}
+.page-body.has-action{padding-bottom:20px}
 </style>
 </head>
 <body>
 <div class="app">
 
   <!-- 顶部 -->
-  <div class="topbar">
-    <div class="tt">打车代下单</div>
-  </div>
 
   <!-- 步骤条 -->
   <div class="stepbar" id="stepbar">
@@ -328,30 +391,38 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 
     <!-- 第①步：选上车点 -->
     <div id="step1">
-      <div class="balance-bar">
-        <div class="ba-user" id="tName">-</div>
-        <div style="text-align:right">
-          <div class="bv" id="tBalance">-</div>
+      <!-- 用户当前定位（参考外卖代下单） -->
+      <div class="card">
+        <div class="loc-row" style="margin:0">
+          <svg class="loc-pin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0669FF" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span class="loc-label">用户当前定位：</span>
+          <span class="loc-name" id="txLocName">-</span>
         </div>
       </div>
 
       <div class="pu-search">
-        <div class="pu-search-row">
-          <input type="text" id="puKeyword" placeholder="输入关键词搜索上车点，如「四季酒店」「西湖」">
+        <div class="pu-search-row" style="flex-direction:row;gap:8px;align-items:center">
+          <input type="text" id="puKeyword" placeholder="输入关键词搜索上车点，如「四季酒店」「西湖」" style="flex:1">
+          <button class="pu-search-btn" id="puSearchBtn" style="width:auto;min-width:80px;margin-top:0;min-height:44px;padding:0 16px">查询</button>
         </div>
-        <button class="pu-search-btn" id="puSearchBtn">查询</button>
       </div>
 
-      <!-- 地图占位 -->
+      <!-- 地图占位（第①步：POI 搜索 / 上车点选择 共用） -->
       <div class="map-box hidden" id="puMapBox">
         <div class="map-grid"></div>
         <svg class="map-route" viewBox="0 0 100 60" preserveAspectRatio="none">
           <path d="M 20 40 Q 40 20 60 30 T 80 20" stroke="#0669FF" stroke-width="2" fill="none" stroke-dasharray="4 3" opacity="0.6"/>
         </svg>
         <div class="map-legend">
-          <span><i style="background:#722ED7"></i>用户定位</span>
-          <span><i style="background:#0669FF"></i>POI 点位</span>
+          <span><i style="background:#0669FF"></i>用户定位</span>
+          <span><i id="puMapLegendDot" style="background:#52C41A"></i>附近上车点</span>
         </div>
+      </div>
+
+      <!-- 第①步第二步：已选 POI 上下文提示条 + 修改按钮 -->
+      <div class="poi-context-bar hidden" id="puContextBar">
+        <span class="ctx-text">已选 POI：<span id="puContextName">-</span></span>
+        <button class="ctx-edit" id="puCtxEditBtn">修改</button>
       </div>
 
       <!-- POI 搜索结果（组件内滑动） -->
@@ -373,13 +444,6 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 
     <!-- 第②步：选终点 -->
     <div id="step2" class="hidden">
-      <div class="balance-bar">
-        <div class="ba-user" id="tName2">-</div>
-        <div style="text-align:right">
-          <div class="bv" id="tBalance2">-</div>
-        </div>
-      </div>
-
       <!-- 已选上车点（未选时整个模块隐藏） -->
       <div class="pu-selected" id="puSelectedBar" hidden>
         <div class="ic">🅿</div>
@@ -391,10 +455,10 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
       </div>
 
       <div class="pu-search">
-        <div class="pu-search-row">
-          <input type="text" id="dstKeyword" placeholder="输入关键词搜索终点，如「西湖景区」「萧山国际机场」">
+        <div class="pu-search-row" style="flex-direction:row;gap:8px;align-items:center">
+          <input type="text" id="dstKeyword" placeholder="输入关键词搜索终点，如「西湖景区」「萧山国际机场」" style="flex:1">
+          <button class="pu-search-btn" id="dstSearchBtn" style="width:auto;min-width:80px;margin-top:0;min-height:44px;padding:0 16px">查询</button>
         </div>
-        <button class="pu-search-btn" id="dstSearchBtn">查询</button>
       </div>
 
       <!-- 地图占位 -->
@@ -415,30 +479,37 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 
     <!-- 第③步：估价 + 推送 -->
     <div id="step3" class="hidden">
-      <div class="balance-bar">
-        <div class="ba-user" id="tName3">-</div>
-        <div style="text-align:right">
-          <div class="bv" id="tBalance3">-</div>
-        </div>
-      </div>
-
-      <!-- 行程回显：上车点 + 终点（含更换） -->
-      <div class="summary-bar">
-        <div class="leg pu">
-          <span class="dot"></span>
-          <div class="inf">
-            <div class="lb">上车点</div>
-            <div class="val" id="sumPu">-</div>
+      <!-- 行程路线地图模块：SVG 模拟地图（上车点 → 终点 绿色路线） -->
+      <div class="route-map" id="routeMap">
+        <div class="map-grid"></div>
+        <svg id="routeMapSvg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid meet"></svg>
+        <!-- 上车点气泡：中文名 + 英文名 + 步行时间 + 修改按钮 -->
+        <div class="route-bubble pu" id="routeBubblePu" style="display:none">
+          <div class="rb-row1">
+            <div class="rb-names">
+              <div class="rb-zh" id="rbPuZh">-</div>
+              <div class="rb-en" id="rbPuEn">-</div>
+            </div>
+            <button class="route-edit-btn" id="routeEditPu" title="修改上车点">✏️</button>
           </div>
-          <button class="chg" id="changePuBtn3">更换</button>
+          <div class="rb-time" id="rbPuTime">-</div>
         </div>
-        <div class="leg dst">
-          <span class="dot"></span>
-          <div class="inf">
-            <div class="lb">终点</div>
-            <div class="val" id="sumDst">-</div>
+        <!-- 终点气泡：中文名 + 英文名 + 预计到达时间 + 修改按钮 -->
+        <div class="route-bubble dst" id="routeBubbleDst" style="display:none">
+          <div class="rb-row1">
+            <div class="rb-names">
+              <div class="rb-zh" id="rbDstZh">-</div>
+              <div class="rb-en" id="rbDstEn">-</div>
+            </div>
+            <button class="route-edit-btn" id="routeEditDst" title="修改终点">✏️</button>
           </div>
-          <button class="chg" id="changeDstBtn3">更换</button>
+          <div class="rb-time" id="rbDstTime">-</div>
+        </div>
+        <!-- 底部：预估里程 + 预估时长 -->
+        <div class="map-meta" id="routeMapMeta">
+          <span>预估里程 <b id="sumKm">- km</b></span>
+          <span>·</span>
+          <span>预估时长 <b id="sumMin">- 分 - 秒</b></span>
         </div>
       </div>
 
@@ -448,11 +519,17 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
           <svg class="clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span id="estimateTimer" style="flex:1">预估价格有效期至 --:--（-- 分 -- 秒）</span>
+          <span id="estimateTimer" style="flex:1">预估价信息，请用户在 --:-- 前确认(剩 -- 分 -- 秒)</span>
           <button class="refresh-btn" id="refreshEstimateBtn">刷新</button>
         </div>
-        <div class="trip-summary" id="tripSummary"></div>
-        <div class="card-t" style="margin-bottom:8px">勾选车档（可多选）</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="card-t" style="margin-bottom:0">勾选车档（可多选）</div>
+          <div id="carBalance" style="font-size:.72rem;color:#8C8C8C;font-weight:600"></div>
+        </div>
+        <div style="background:#FFF7F0;border:1px solid #FFD6B3;border-radius:8px;padding:8px 10px;
+          font-size:.72rem;color:#D4380D;margin-bottom:10px;font-weight:500">
+          ⚠️ 请先跟用户确认下本次乘车人数
+        </div>
         <div id="carOptions"></div>
       </div>
 
@@ -487,24 +564,39 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
   <div class="action-bar hidden" id="pushBar">
     <button class="main-btn" id="pushBtn" disabled>
       <span class="spinner"></span>
-      <span id="pushBtnTxt">推送打车订单给用户确认</span>
+      <span id="pushBtnTxt">推送预估价/车型信息给用户确认</span>
     </button>
-  </div>
-
-  <!-- 强制确认弹层（bottom sheet） -->
-  <div class="force-sheet-mask" id="forceMask">
-    <div class="force-sheet">
-      <div class="sheet-grip"></div>
-      <div class="fs-icon">✅</div>
-      <div class="fs-title">用户已确认打车订单</div>
-      <div class="fs-desc">订单已进入派单流程，请在「打车订单」页面查看进度</div>
-      <div class="fs-summary" id="forceSummary"></div>
-      <button class="sheet-close" id="forceCloseBtn">关闭</button>
-    </div>
   </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+
+  <!-- 【新增】步行导航弹窗 -->
+  <div class="walk-nav-mask" id="walkNavMask"></div>
+  <div class="walk-nav" id="walkNav">
+    <div class="walk-nav-header">
+      <div class="walk-nav-title">步行导航</div>
+      <button class="walk-nav-close" id="walkNavClose">✕</button>
+    </div>
+    <div class="walk-nav-body">
+      <div class="walk-nav-map" id="walkNavMap">
+        <div class="map-grid"></div>
+        <svg id="walkNavSvg" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="map-legend">
+          <span><i style="background:#0669FF"></i>用户定位</span>
+          <span><i style="background:#52C41A"></i>上车点</span>
+          <span><i style="background:#FAAD14"></i>步行路线</span>
+        </div>
+      </div>
+      <div class="walk-nav-steps-title">步行路线</div>
+      <div class="walk-nav-steps-wrap">
+        <ul class="walk-nav-steps" id="walkNavSteps"></ul>
+      </div>
+    </div>
+    <div class="walk-nav-footer">
+      <button id="walkNavOk">关闭</button>
+    </div>
+  </div>
 
 </div><!-- /app -->
 
@@ -618,6 +710,36 @@ const POI_ADDR_ZH = {
   '陆家嘴':            '上海市浦东新区陆家嘴环路'
 };
 
+/* 详细地址英文（key 与 POI_ADDR_ZH 一致） */
+const POI_ADDR_EN = {
+  '西湖景区':          'West Lake Scenic Area, Xihu District, Hangzhou',
+  '西湖断桥':          'Broken Bridge, Beishan Street, Xihu District, Hangzhou',
+  '西湖音乐喷泉':      'West Lake Music Fountain, Hubin 3rd Park, Xihu District, Hangzhou',
+  '西湖游船码头':      'West Lake Cruise Pier, Hubin Road, Xihu District, Hangzhou',
+  '西湖三潭印月':      'Three Pools Mirroring the Moon, Xihu District, Hangzhou',
+  '西湖雷峰塔':        'Leifeng Pagoda, No.15 Nanshan Road, Xihu District, Hangzhou',
+  '西湖苏堤春晓':      'Su Causeway, Xihu District, Hangzhou',
+  '灵隐寺':            'Lingyin Temple, No.1 Fayun Lane, Lingyin Road, Xihu District, Hangzhou',
+  '杭州东站':          'Hangzhou East Railway Station, No.2 Quanfuqiao Road, Jianggan District, Hangzhou',
+  '萧山国际机场':      'Hangzhou Xiaoshan International Airport T4, Airport Road, Xiaoshan District, Hangzhou',
+  '杭州君悦酒店':      'Grand Hyatt Hangzhou, No.28 Hubin Road, Xihu District, Hangzhou',
+  '杭州柏悦酒店':      'Park Hyatt Hangzhou, No.27 Changsheng Road, Xihu District, Hangzhou',
+  '西子湖四季酒店':    'Four Seasons Hotel Hangzhou at West Lake, No.5 Lingyin Road, Xihu District, Hangzhou',
+  '河坊街':            'Hefang Street Historic District, Shangcheng District, Hangzhou',
+  '武林广场':          'Wulin Square, Xiacheng District, Hangzhou',
+  '西溪湿地':          'Xixi National Wetland Park, No.518 Tianmushan Road, Xihu District, Hangzhou',
+  '城站火车站':        'Hangzhou Railway Station, No.1 Huancheng East Road, Shangcheng District, Hangzhou',
+  '湖滨银泰':          'Hubin Intime In77, No.98 Yan\'an Road, Xihu District, Hangzhou',
+  '西湖文化广场':      'West Lake Cultural Square, Zhongshan North Road, Xiacheng District, Hangzhou',
+  '外滩':              'The Bund, Zhongshan East 1st Road, Huangpu District, Shanghai',
+  '虹桥火车站':        'Shanghai Hongqiao Railway Station, Shenhong Road, Minhang District, Shanghai',
+  '浦东国际机场':      'Shanghai Pudong International Airport T2, Yingbin Road, Pudong District, Shanghai',
+  '南京路步行街':      'Nanjing Road Pedestrian Street, Nanjing East Road, Huangpu District, Shanghai',
+  '上海环球金融中心':  'Shanghai World Financial Center, No.100 Century Avenue, Pudong District, Shanghai',
+  '静安寺':            'Jing\'an Temple, No.1686 Nanjing West Road, Jing\'an District, Shanghai',
+  '陆家嘴':            'Lujiazui, Lujiazui Ring Road, Pudong District, Shanghai'
+};
+
 // ---------- 步骤条 ----------
 function renderStepbar(){
   document.querySelectorAll('.step-item').forEach(function(item){
@@ -645,6 +767,8 @@ function goStep(n){
   } else if(n === 3){
     hide('nextBar'); hide('estBar'); show('pushBar');
     $('pageBody').classList.add('has-action');
+    // 若已选上车点 + 终点，自动刷新预估价格（含时间 B、里程、时长）
+    if(selectedPu && selectedDst) calcEstimate();
   }
   window.scrollTo(0, 0);
 }
@@ -654,14 +778,21 @@ function renderTourist(){
   const t = TOURIST;
   const bal = Number(t.balance).toFixed(1);
   const favCar = t.favCar || '-';
-  $('tName').textContent = t.name;
-  $('tName2').textContent = t.name;
-  $('tName3').textContent = t.name;
-  $('tBalance').innerHTML = bal + '<small> 积分</small><div class="ba-sub">偏好用车 ' + esc(favCar) + '</div>';
-  $('tBalance2').innerHTML = bal + '<small> 积分</small><div class="ba-sub">偏好用车 ' + esc(favCar) + '</div>';
-  $('tBalance3').innerHTML = bal + '<small> 积分</small><div class="ba-sub">偏好用车 ' + esc(favCar) + '</div>';
-  $('hwDevice2').textContent = t.deviceNo;
-  $('hwDevice3').textContent = t.deviceNo;
+  /* 已删除的 balance-bar 元素做空值保护，避免报错中断后续赋值 */
+  var el;
+  el = $('tName');    if(el) el.textContent = t.name;
+  el = $('tName2');   if(el) el.textContent = t.name;
+  el = $('tName3');   if(el) el.textContent = t.name;
+  var balHtml = bal + '<small> 积分</small><div class="ba-sub">偏好用车 ' + esc(favCar) + '</div>';
+  el = $('tBalance');  if(el) el.innerHTML = balHtml;
+  el = $('tBalance2'); if(el) el.innerHTML = balHtml;
+  el = $('tBalance3'); if(el) el.innerHTML = balHtml;
+  el = $('hwDevice2'); if(el) el.textContent = t.deviceNo;
+  el = $('hwDevice3'); if(el) el.textContent = t.deviceNo;
+  /* 用户当前定位（第①步顶部） */
+  el = $('txLocName'); if(el) el.textContent = t.loc || t.city || '-';
+  /* 第③步 勾选车档模块右上角：用户剩余积分 */
+  el = $('carBalance'); if(el) el.textContent = '用户积分 ' + bal + '分';
 }
 
 // ---------- 地图工具：把经纬度集合放进地图并返回坐标转换器 ----------
@@ -714,19 +845,45 @@ function bindPoiSync(mapBoxId, listId, getSelected, setSelected, syncButton){
       if(syncButton) syncButton(true);
     }
   }
-  // 列表点击 → 联动地图
+  // 列表点击 → 根据当前模式分流
   list.addEventListener('click', function(e){
+    // 「步行到这里」按钮：仅第二步（上车点列表）触发，不触发选中
+    var walkBtn = e.target.closest('.walk-btn');
+    if(walkBtn){
+      e.stopPropagation();
+      var item = walkBtn.closest('.poi-item');
+      var walkPoi = item && item.__poi;
+      if(walkPoi) openWalkNav(walkPoi);
+      return;
+    }
     var item = e.target.closest('.poi-item');
     if(!item) return;
     var idx = Array.from(list.querySelectorAll('.poi-item')).indexOf(item);
-    if(idx >= 0) selectByIndex(idx);
+    if(idx < 0) return;
+    if(step1Mode === 'poi'){
+      // 第一步：点 POI → 查该 POI 附近的上车点
+      var poi = item.__poi;
+      if(poi) queryPickupPoints(poi);
+    } else {
+      // 默认 / 第二步：直接选上车点
+      selectByIndex(idx);
+    }
   });
-  // 地图点击 → 联动列表
+  // 地图点击 → 根据当前模式分流
   mapBox.addEventListener('click', function(e){
     var dot = e.target.closest('.map-dot.poi-click');
     if(!dot) return;
     var idx = Array.from(mapBox.querySelectorAll('.map-dot.poi-click')).indexOf(dot);
-    if(idx >= 0) selectByIndex(idx);
+    if(idx < 0) return;
+    if(step1Mode === 'poi'){
+      // 第一步：点 POI 蓝点 → 查该 POI 附近的上车点
+      var item = list.querySelectorAll('.poi-item')[idx];
+      var poi = item && item.__poi;
+      if(poi) queryPickupPoints(poi);
+    } else {
+      // 默认 / 第二步：直接选上车点
+      selectByIndex(idx);
+    }
   });
   // 暴露回填接口：根据已选 poi.key 恢复高亮
   return {
@@ -758,6 +915,12 @@ function bindPuSearch(){
     function(p){ selectedPu = p; },
     function(hasSel){ $('nextStepBtn').disabled = !hasSel; }
   );
+  // 第①步：「修改」按钮（第二步 → 第一步）
+  bindPuCtxEditBtn();
+  // 【新增】步行导航弹窗关闭事件
+  $('walkNavClose').addEventListener('click', closeWalkNav);
+  $('walkNavOk').addEventListener('click', closeWalkNav);
+  $('walkNavMask').addEventListener('click', closeWalkNav);
 }
 
 // 清空已选上车点（含 POI 选中态 + 下一步按钮禁用）
@@ -767,6 +930,84 @@ function clearSelectedPu(){
   var puList = $('puResultList');
   if(puList) puList.querySelectorAll('.poi-item').forEach(function(el){ el.classList.remove('selected'); });
 }
+
+// 【新增】打开步行导航弹窗
+function openWalkNav(poi){
+  renderWalkNavMap(poi);
+  renderWalkNavSteps(poi);
+  $('walkNavMask').classList.add('show');
+  $('walkNav').classList.add('show');
+}
+
+// 【新增】关闭步行导航弹窗
+function closeWalkNav(){
+  $('walkNavMask').classList.remove('show');
+  $('walkNav').classList.remove('show');
+}
+
+// 【新增】渲染步行导航弹窗地图
+function renderWalkNavMap(poi){
+  var svg = $('walkNavSvg');
+  var userX = 60, userY = 140;
+  var poiX = 300, poiY = 40;
+  var mid1X = 60, mid1Y = 40;
+  var mid2X = 180, mid2Y = 40;
+
+  // 计算预计到达时间
+  var dist = calcDist(TOURIST.lng, TOURIST.lat, poi.lng, poi.lat);
+  var distM = Math.round(dist * 1000);
+  var walkTimeMin = Math.max(1, Math.round(distM / 80));
+  var now = new Date();
+  var arriveTime = new Date(now.getTime() + walkTimeMin * 60000);
+  var hh = String(arriveTime.getHours()).padStart(2, '0');
+  var mm = String(arriveTime.getMinutes()).padStart(2, '0');
+  var arriveText = '预计 ' + hh + ':' + mm + ' 到达';
+
+  svg.innerHTML =
+    '<line x1="' + userX + '" y1="' + userY + '" x2="' + mid1X + '" y2="' + mid1Y + '" stroke="#FAAD14" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/>'
+    + '<line x1="' + mid1X + '" y1="' + mid1Y + '" x2="' + mid2X + '" y2="' + mid2Y + '" stroke="#FAAD14" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/>'
+    + '<line x1="' + mid2X + '" y1="' + mid2Y + '" x2="' + poiX + '" y2="' + poiY + '" stroke="#FAAD14" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/>'
+    + '<circle cx="' + userX + '" cy="' + userY + '" r="8" fill="#0669FF" stroke="#fff" stroke-width="2"/>'
+    + '<text x="' + userX + '" y="' + (userY + 22) + '" text-anchor="middle" font-size="10" fill="#0669FF" font-weight="600">用户定位</text>'
+    + '<circle cx="' + poiX + '" cy="' + poiY + '" r="8" fill="#52C41A" stroke="#fff" stroke-width="2"/>'
+    + '<text x="' + poiX + '" y="' + (poiY - 14) + '" text-anchor="middle" font-size="10" fill="#52C41A" font-weight="600">' + esc(poi.zh) + '</text>'
+    + '<text x="' + poiX + '" y="' + (poiY - 28) + '" text-anchor="middle" font-size="9" fill="#FA8C16" font-weight="600">' + esc(arriveText) + '</text>';
+}
+
+// 【新增】渲染步行导航步骤列表
+function renderWalkNavSteps(poi){
+  var dist = calcDist(TOURIST.lng, TOURIST.lat, poi.lng, poi.lat);
+  var distM = Math.round(dist * 1000);
+  var walkTime = Math.max(1, Math.round(distM / 80));
+
+  var steps = [
+    { num: 1, text: '从当前位置出发', en: 'Start from your current location', sub: '向正北方向出发' },
+    { num: 2, text: '沿 current 路直行约 ' + Math.round(distM * 0.4) + ' 米', en: 'Go straight along Current Road for about ' + Math.round(distM * 0.4) + ' meters', sub: '沿 current 路直行' },
+    { num: 3, text: '向右前方转入 main 大街', en: 'Turn right onto Main Avenue', sub: '进入 main 大街' },
+    { num: 4, text: '沿 main 大街直行约 ' + Math.round(distM * 0.35) + ' 米', en: 'Go straight along Main Avenue for about ' + Math.round(distM * 0.35) + ' meters', sub: '沿 main 大街直行' },
+    { num: 5, text: '向左转入 station 路', en: 'Turn left onto Station Road', sub: '进入 station 路' },
+    { num: 6, text: '沿 station 路直行约 ' + Math.round(distM * 0.25) + ' 米', en: 'Go straight along Station Road for about ' + Math.round(distM * 0.25) + ' meters', sub: '沿 station 路直行' },
+    { num: 7, text: '到达 ' + poi.zh, en: 'Arrive at ' + esc(poi.en), sub: '全程约 ' + distM + ' 米，预计步行 ' + walkTime + ' 分钟' }
+  ];
+
+  var ul = $('walkNavSteps');
+  ul.innerHTML = '';
+  steps.forEach(function(s){
+    var li = document.createElement('li');
+    li.innerHTML =
+      '<div class="walk-step-num">' + s.num + '</div>'
+      + '<div>'
+      +   '<div class="walk-step-text">' + esc(s.text) + '</div>'
+      +   '<div class="walk-step-en">' + esc(s.en) + '</div>'
+      +   (s.sub ? '<div class="walk-step-sub">' + esc(s.sub) + '</div>' : '')
+      + '</div>';
+    ul.appendChild(li);
+  });
+}
+
+// 第①步：模式状态 'pu'（默认附近上车点）| 'poi'（关键词搜索 POI）| 'pu-from-poi'（选 POI 后查上车点）
+let step1Mode = 'pu';
+let selectedPoiFromSearch = null; // 第一步搜索后选中的 POI（进入第二步的上下文）
 
 function doPuSearch(){
   var kwVal = $('puKeyword').value.trim();
@@ -778,8 +1019,13 @@ function doPuSearch(){
   }
   var results = searchPlaces(kwVal);
   if(!results.length){
-    toast('未找到匹配的地点');
-    hide('puMapBox'); hide('puResultWrap');
+    // 空态：列表区域展示提示文案
+    step1Mode = 'poi';
+    selectedPoiFromSearch = null;
+    show('puResultWrap');
+    $('puResultTitle').textContent = '搜索结果';
+    $('puResultList').innerHTML = '<div style="padding:24px 12px;text-align:center;color:#8C8C8C;font-size:.78rem">未找到相关 POI，请换个关键词</div>';
+    hide('puMapBox'); hide('puContextBar');
     clearSelectedPu();
     return;
   }
@@ -787,29 +1033,34 @@ function doPuSearch(){
     r.dist = calcDist(TOURIST.lng, TOURIST.lat, r.lng, r.lat);
   });
   results.sort(function(a, b){ return a.dist - b.dist; });
-  renderPuMap(results);
-  renderPuResults(results);
+  step1Mode = 'poi';
+  selectedPoiFromSearch = null;
+  renderPoiSearchResults(results);
+  clearSelectedPu();
 }
 
-function renderPuMap(list){
+// 第①步·第一步：关键词搜索 POI 结果（地图蓝点 + 列表卡片，无「步行到这里」按钮）
+function renderPoiSearchResults(list){
   var box = $('puMapBox');
   show('puMapBox');
-  // 清除旧的动态点位（保留 grid/legend/route）
+  hide('puContextBar');
+  // 更新图例
+  var legendDot1 = $('puMapLegendDot');
+  if(legendDot1 && legendDot1.parentNode) legendDot1.parentNode.innerHTML = '<i id="puMapLegendDot" style="background:#0669FF"></i>POI 点位';
+  // 清除旧点位
   box.querySelectorAll('.map-dot').forEach(function(el){ el.remove(); });
   var pts = [{lng: TOURIST.lng, lat: TOURIST.lat}];
   list.forEach(function(p){ pts.push({lng: p.lng, lat: p.lat}); });
   var XY = fitMap(box, pts);
   addMapDot(box, 'user', TOURIST.lng, TOURIST.lat, '用户定位', XY);
   list.forEach(function(p, i){
-    // POI 点位可点击，与列表联动
-    var dot = addMapDot(box, 'dst poi-click', p.lng, p.lat, 'POI' + (i+1) + ' · ' + p.zh, XY);
+    // POI 蓝点，标签=POI 中文名
+    var dot = addMapDot(box, 'poi-blue poi-click', p.lng, p.lat, p.zh, XY);
     dot.dataset.idx = i;
   });
-}
-
-function renderPuResults(list){
+  // 列表渲染
   show('puResultWrap');
-  $('puResultTitle').textContent = '搜索结果（点击选择上车点）';
+  $('puResultTitle').textContent = '搜索结果（点击选择 POI）';
   var wrap = $('puResultList');
   wrap.innerHTML = '';
   list.forEach(function(p){
@@ -817,11 +1068,157 @@ function renderPuResults(list){
     item.className = 'poi-item';
     item.__poi = p;
     item.innerHTML =
-      '<div class="poi-zh">' + esc(p.zh) + '<span class="poi-zh-en">' + esc(p.en) + '</span></div>' +
-      '<div class="poi-en">' + esc(POI_ADDR_ZH[p.key] || p.en) + ' · ' + esc(p.en) + '</div>' +
-      '<div class="poi-dist">📍 距用户 ' + fmtDist(p.dist) + '</div>';
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div class="poi-zh">' + esc(p.zh) + '</div>'
+      +     '<div class="poi-en" style="margin-top:1px">' + esc(p.en) + '</div>'
+      +     '<div class="poi-en" style="margin-top:4px;color:#595959">' + esc(POI_ADDR_ZH[p.key] || '') + '</div>'
+      +     '<div class="poi-en" style="margin-top:1px">' + esc(POI_ADDR_EN[p.key] || '') + '</div>'
+      +   '</div>'
+      +   (p.dist != null ? '<div class="poi-dist" style="flex:none;margin-top:2px">' + fmtDist(p.dist) + '</div>' : '')
+      + '</div>';
     wrap.appendChild(item);
   });
+}
+
+// 第①步·第二步：选中 POI 后，查询该 POI 附近的上车点（模拟曹操接口）
+function queryPickupPoints(poi){
+  selectedPoiFromSearch = poi;
+  step1Mode = 'pu-from-poi';
+  // 模拟曹操接口返回该 POI 附近 3~5 个上车点（从 TX_PLACES 里挑最近的几个）
+  var all = Object.entries(TX_PLACES).map(function(entry){
+    var k = entry[0], v = entry[1];
+    return { key: k, zh: v[0], en: v[1], lng: v[2], lat: v[3] };
+  });
+  all.forEach(function(p){
+    p.dist = calcDist(poi.lng, poi.lat, p.lng, p.lat);
+  });
+  all.sort(function(a, b){ return a.dist - b.dist; });
+  var pickupPoints = all.slice(0, 5);
+  renderPickupPointResults(pickupPoints, poi);
+}
+
+function renderPickupPointResults(list, fromPoi){
+  var box = $('puMapBox');
+  show('puMapBox');
+  show('puContextBar');
+  $('puContextName').textContent = fromPoi.zh + '（' + fromPoi.en + '）';
+  // 更新图例
+  var legendDot2 = $('puMapLegendDot');
+  if(legendDot2 && legendDot2.parentNode) legendDot2.parentNode.innerHTML = '<i id="puMapLegendDot" style="background:#52C41A"></i>附近上车点';
+  // 清除旧点位
+  box.querySelectorAll('.map-dot').forEach(function(el){ el.remove(); });
+  if(!list.length){
+    // 空态：该 POI 附近无上车点
+    $('puResultTitle').textContent = '附近上车点';
+    $('puResultList').innerHTML = '<div style="padding:24px 12px;text-align:center;color:#8C8C8C;font-size:.78rem">该地点附近暂无上车点，请返回重新选择</div>';
+    show('puResultWrap');
+    clearSelectedPu();
+    return;
+  }
+  var pts = list.map(function(p){ return {lng: p.lng, lat: p.lat}; });
+  var XY = fitMap(box, pts);
+  list.forEach(function(p, i){
+    // 上车点绿点，标签=上车点中文名
+    var dot = addMapDot(box, 'pu poi-click', p.lng, p.lat, p.zh, XY);
+    dot.dataset.idx = i;
+  });
+  // 列表渲染
+  show('puResultWrap');
+  $('puResultTitle').textContent = '附近上车点（点击选择）';
+  var wrap = $('puResultList');
+  wrap.innerHTML = '';
+  list.forEach(function(p){
+    var item = document.createElement('div');
+    item.className = 'poi-item';
+    item.__poi = p;
+    item.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div class="poi-zh">' + esc(p.zh) + '</div>'
+      +   '</div>'
+      +   (p.dist != null ? '<div class="poi-dist" style="flex:none;margin-top:2px">' + fmtDist(p.dist) + '</div>' : '')
+      + '</div>'
+      + '<button class="walk-btn" data-key="' + esc(p.key) + '">步行到这里</button>';
+    wrap.appendChild(item);
+  });
+}
+
+// 第①步：「修改」按钮（从「选上车点」回到「POI 搜索结果」）
+function bindPuCtxEditBtn(){
+  $('puCtxEditBtn').addEventListener('click', function(){
+    step1Mode = 'poi';
+    selectedPoiFromSearch = null;
+    hide('puContextBar');
+    // 重新渲染第一步 POI 搜索结果
+    var kwVal = $('puKeyword').value.trim();
+    if(kwVal){
+      var results = searchPlaces(kwVal);
+      if(results.length){
+        results.forEach(function(r){
+          r.dist = calcDist(TOURIST.lng, TOURIST.lat, r.lng, r.lat);
+        });
+        results.sort(function(a, b){ return a.dist - b.dist; });
+        renderPoiSearchResults(results);
+      }
+    }
+    clearSelectedPu();
+  });
+}
+
+function renderPuMap(list){
+  var box = $('puMapBox');
+  show('puMapBox');
+  // 更新图例为「附近上车点」
+  $('puMapLegendDot').style.background = '#52C41A';
+  var legendDot = $('puMapLegendDot');
+  if(legendDot && legendDot.parentNode) legendDot.parentNode.innerHTML = '<i id="puMapLegendDot" style="background:#52C41A"></i>附近上车点';
+  // 清除旧的动态点位（保留 grid/legend/route）
+  box.querySelectorAll('.map-dot').forEach(function(el){ el.remove(); });
+  var pts = [{lng: TOURIST.lng, lat: TOURIST.lat}];
+  list.forEach(function(p){ pts.push({lng: p.lng, lat: p.lat}); });
+  var XY = fitMap(box, pts);
+  addMapDot(box, 'user', TOURIST.lng, TOURIST.lat, '用户定位', XY);
+  list.forEach(function(p, i){
+    /* 第①步附近上车点：绿色可点击，标签=上车点中文名 */
+    var dot = addMapDot(box, 'pu poi-click', p.lng, p.lat, p.zh, XY);
+    dot.dataset.idx = i;
+  });
+}
+
+function renderPuResults(list){
+  show('puResultWrap');
+  $('puResultTitle').textContent = '附近上车点（点击选择）';
+  var wrap = $('puResultList');
+  wrap.innerHTML = '';
+  list.forEach(function(p){
+    var item = document.createElement('div');
+    item.className = 'poi-item';
+    item.__poi = p;
+    // 默认模式（用户定位附近上车点）：中文名 + 距离 + 步行到这里按钮
+    item.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+      +   '<div class="poi-zh" style="flex:1;min-width:0">' + esc(p.zh) + '</div>'
+      +   (p.dist != null ? '<div class="poi-dist" style="flex:none">' + fmtDist(p.dist) + '</div>' : '')
+      + '</div>'
+      + '<button class="walk-btn" data-key="' + esc(p.key) + '">步行到这里</button>';
+    wrap.appendChild(item);
+  });
+}
+
+// 根据用户经纬度，默认加载附近上车点（曹操接口）到地图+列表
+function loadDefaultPois(){
+  step1Mode = 'pu';
+  selectedPoiFromSearch = null;
+  hide('puContextBar');
+  var nearest = findNearest(TOURIST.lng, TOURIST.lat, 8);
+  if(!nearest.length){
+    hide('puMapBox'); hide('puResultWrap');
+    return;
+  }
+  renderPuMap(nearest);
+  renderPuResults(nearest);
+  $('puResultTitle').textContent = '附近上车点（点击选择）';
 }
 
 // ---------- 第②步：选终点 ----------
@@ -829,7 +1226,7 @@ function renderStep2Header(){
   // 控制「已选上车点」模块显隐：未选时整个模块隐藏，选中后才展示
   var bar = $('puSelectedBar');
   if(selectedPu){
-    $('puSelectedTxt').textContent = selectedPu.zh + '（' + selectedPu.en + '）';
+    $('puSelectedTxt').textContent = selectedPu.zh;
     bar.removeAttribute('hidden');
   } else {
     $('puSelectedTxt').textContent = '-';
@@ -837,10 +1234,62 @@ function renderStep2Header(){
   }
 }
 
-// 第③步顶部行程回显：上车点 + 终点
-function updateStep3Summary(){
-  $('sumPu').textContent = selectedPu ? selectedPu.zh : '-';
-  $('sumDst').textContent = selectedDst ? selectedDst.zh : '-';
+// 第③步顶部行程路线地图：SVG 画路线 + 气泡卡片（含修改按钮）
+function renderStep3RouteMap(){
+  var svg = $('routeMapSvg');
+  var bubblePu = $('routeBubblePu');
+  var bubbleDst = $('routeBubbleDst');
+
+  if(!selectedPu || !selectedDst){
+    svg.innerHTML = '';
+    bubblePu.style.display = 'none';
+    bubbleDst.style.display = 'none';
+    return;
+  }
+
+  // 计算时间 A：用户定位 → 上车点 步行分钟数
+  var distToPu = calcDist(TOURIST.lng, TOURIST.lat, selectedPu.lng, selectedPu.lat);
+  var distToPuM = Math.round(distToPu * 1000);
+  var walkTimeMin = Math.max(1, Math.round(distToPuM / 80));
+  var timeA = '步行 ' + walkTimeMin + ' 分钟';
+
+  // 计算时间 B：当前系统时间 + 曹操预估时长
+  var minutes = estimate ? estimate.minutes : 0;
+  var now = new Date();
+  var arriveTime = new Date(now.getTime() + minutes * 60000);
+  var hh = String(arriveTime.getHours()).padStart(2, '0');
+  var mm = String(arriveTime.getMinutes()).padStart(2, '0');
+  var timeB = '预计 ' + hh + ':' + mm + ' 到达';
+
+  // 填充气泡内容
+  $('rbPuZh').textContent = selectedPu.zh;
+  $('rbPuEn').textContent = selectedPu.en;
+  $('rbPuTime').textContent = timeA;
+  $('rbDstZh').textContent = selectedDst.zh;
+  $('rbDstEn').textContent = selectedDst.en;
+  $('rbDstTime').textContent = timeB;
+
+  // SVG 画绿色路线（上车点 → 终点），两点一线 + 一个微弯折
+  var puX = 70, puY = 140;
+  var dstX = 290, dstY = 50;
+  var midX = 180, midY = 95;
+
+  svg.innerHTML =
+    '<line x1="' + puX + '" y1="' + puY + '" x2="' + midX + '" y2="' + midY + '" stroke="#52C41A" stroke-width="3" stroke-linecap="round"/>'
+    + '<line x1="' + midX + '" y1="' + midY + '" x2="' + dstX + '" y2="' + dstY + '" stroke="#52C41A" stroke-width="3" stroke-linecap="round"/>'
+    + '<circle cx="' + puX + '" cy="' + puY + '" r="8" fill="#52C41A" stroke="#fff" stroke-width="2"/>'
+    + '<circle cx="' + dstX + '" cy="' + dstY + '" r="8" fill="#FA8C16" stroke="#fff" stroke-width="2"/>';
+
+  // 气泡定位（相对 .route-map 容器，容器高度 200px，viewBox 360x200）
+  // 上车点气泡：放在绿点上方偏右，避免被左边缘裁剪
+  bubblePu.style.display = 'block';
+  bubblePu.style.left = Math.max(4, (puX / 360 * 100) - 8) + '%';
+  bubblePu.style.top = Math.max(4, (puY / 200 * 100) - 52) + '%';
+
+  // 终点气泡：放在橙点下方偏左，避免被右边缘裁剪
+  bubbleDst.style.display = 'block';
+  bubbleDst.style.left = Math.min(72, (dstX / 360 * 100) - 18) + '%';
+  bubbleDst.style.top = Math.min(72, (dstY / 200 * 100) + 10) + '%';
 }
 
 function bindDstSearch(){
@@ -867,13 +1316,15 @@ function bindDstSearch(){
     calcEstimate();
   });
 
-  // 第③步顶部「更换」上车点：回第①步，保留已选状态便于微调
-  $('changePuBtn3').addEventListener('click', function(){
+  // 第③步地图气泡内「修改」按钮：回第①步修改上车点，保留已选状态便于微调
+  $('routeEditPu').addEventListener('click', function(e){
+    e.stopPropagation();
     goStep(1);
     if(puSync && selectedPu) puSync.restore(selectedPu);
   });
-  // 第③步顶部「更换」终点：回第②步，保留已选状态便于微调
-  $('changeDstBtn3').addEventListener('click', function(){
+  // 第③步地图气泡内「修改」按钮：回第②步修改终点，保留已选状态便于微调
+  $('routeEditDst').addEventListener('click', function(e){
+    e.stopPropagation();
     goStep(2);
     renderStep2Header();
     if(dstSync && selectedDst) dstSync.restore(selectedDst);
@@ -928,9 +1379,15 @@ function renderDstResults(list){
     item.className = 'poi-item';
     item.__poi = r;
     item.innerHTML =
-      '<div class="poi-zh">' + esc(r.zh) + '<span class="poi-zh-en">' + esc(r.en) + '</span></div>' +
-      '<div class="poi-en">' + esc(POI_ADDR_ZH[r.key] || r.en) + ' · ' + esc(r.en) + '</div>' +
-      '<div class="poi-dist">📍 距上车点 ' + fmtDist(r.dist) + '</div>';
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div class="poi-zh">' + esc(r.zh) + '</div>'
+      +     '<div class="poi-en" style="margin-top:1px">' + esc(r.en) + '</div>'
+      +     '<div class="poi-en" style="margin-top:4px;color:#595959">' + esc(POI_ADDR_ZH[r.key] || '') + '</div>'
+      +     '<div class="poi-en" style="margin-top:1px">' + esc(POI_ADDR_EN[r.key] || '') + '</div>'
+      +   '</div>'
+      +   (r.dist != null ? '<div class="poi-dist" style="flex:none;margin-top:2px">' + fmtDist(r.dist) + '</div>' : '')
+      + '</div>';
     wrap.appendChild(item);
   });
 }
@@ -973,14 +1430,15 @@ function calcEstimate(){
 
   // 显示卡片
   show('estimateCard');
-  $('tripSummary').innerHTML =
-    '<b>' + esc(selectedPu.zh) + '</b> → <b>' + esc(selectedDst.zh) + '</b><br>' +
-    '预估里程 ' + km + ' km · 约 ' + minutes + ' 分钟';
+  $('sumKm').textContent = km + ' km';
+  const min = Math.floor(minutes / 60);
+  const sec = minutes % 60;
+  $('sumMin').textContent = min + ' 分 ' + sec + ' 秒';
 
   renderCarOptions();
 
-  // 第③步顶部行程回显
-  updateStep3Summary();
+  // 第③步顶部行程路线地图
+  renderStep3RouteMap();
 
   // 启动倒计时：9分50秒
   estimateExpireAt = Date.now() + (9 * 60 + 50) * 1000;
@@ -1010,7 +1468,11 @@ function renderCarOptions(){
     div.addEventListener('click', function(){
       if(!c.ok){ toast('积分不足，无法选择该车档'); return; }
       if(selectedCars[c.car]) delete selectedCars[c.car];
-      else selectedCars[c.car] = true;
+      else {
+        const bal = parseFloat(TOURIST.balance);
+        if(c.total > bal){ toast('用户积分不足，该车档预估价 ' + money(c.total) + ' 超过用户积分 ' + bal + '分'); return; }
+        selectedCars[c.car] = true;
+      }
       renderCarOptions();
       updatePushBtn();
     });
@@ -1036,7 +1498,7 @@ function startEstimateTimer(){
     const expire = new Date(estimateExpireAt);
     const hh = ('0' + expire.getHours()).slice(-2);
     const mm = ('0' + expire.getMinutes()).slice(-2);
-    $('estimateTimer').textContent = '预估价格有效期至 ' + hh + ':' + mm + '（' + min + ' 分 ' + sec + ' 秒）';
+    $('estimateTimer').textContent = '预估价信息，请用户在 ' + hh + ':' + mm + ' 前确认(剩 ' + min + ' 分 ' + sec + ' 秒)';
   }
   tick();
   estimateTimerId = setInterval(tick, 1000);
@@ -1046,29 +1508,45 @@ function getSelectedCarCount(){
   return Object.keys(selectedCars).length;
 }
 
+/* 当前预估价剩余倒计时（格式：X 分 X 秒） */
+function estimateRemainStr(){
+  const remain = Math.max(0, estimateExpireAt - Date.now());
+  const totalSec = Math.floor(remain / 1000);
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
+  return m + ' 分 ' + s + ' 秒';
+}
+
 function updatePushBtn(){
   const btn = $('pushBtn');
   const n = getSelectedCarCount();
-  if(estimate && n > 0 && !orderPushed){
+  if(estimate && n > 0){
     btn.disabled = false;
-    $('pushBtnTxt').textContent = '推送打车订单给用户确认（已选 ' + n + ' 个车档）';
+    if(orderPushed){
+      $('pushBtnTxt').textContent = '重新推送预估价/车型信息给用户确认（已选 ' + n + ' 个车档）';
+    } else {
+      $('pushBtnTxt').textContent = '推送预估价/车型信息给用户确认（已选 ' + n + ' 个车档）';
+    }
   } else {
     btn.disabled = true;
-    $('pushBtnTxt').textContent = orderPushed ? '已推送，等待用户确认…' : '推送打车订单给用户确认';
+    $('pushBtnTxt').textContent = orderPushed ? '重新推送预估价/车型信息给用户确认' : '推送预估价/车型信息给用户确认';
   }
 }
 
 // ---------- 推送 ----------
 function bindPush(){
-  // 刷新预估价格：重置倒计时 + 重算车档
+  // 刷新预估价格：重置倒计时 + 重算车档（已推送也允许刷新）
   $('refreshEstimateBtn').addEventListener('click', function(){
     if(!selectedPu || !selectedDst){ toast('请先选择上车点和终点'); return; }
-    if(orderPushed){ toast('已推送，无法刷新'); return; }
     calcEstimate();
     toast('已刷新预估价格');
   });
   $('pushBtn').addEventListener('click', function(){
-    if(orderPushed) return;
+    /* 有效期校验：倒计时结束后不可推送 */
+    if(Date.now() > estimateExpireAt){
+      toast('有效期已过，请刷新后重新推送');
+      return;
+    }
+
     const n = getSelectedCarCount();
     if(n === 0){ toast('请至少勾选一个车档'); return; }
     if(!estimate){ toast('请先预估价格'); return; }
@@ -1080,7 +1558,7 @@ function bindPush(){
     setTimeout(function(){
       btn.classList.remove('busy');
       orderPushed = true;
-      toast('已推送打车订单（' + n + ' 个车档），等待用户确认');
+      toast('已推送预估价/车型信息给用户确认（剩余 ' + estimateRemainStr() + '）');
       addHwCard();
       updatePushBtn();
     }, 1200);
@@ -1119,6 +1597,17 @@ function addHwCard(){
 
   show('hwPanel3');
   const body = $('hwCards3');
+  // 已有待确认卡片 → 标记为「已失效」，移除操作按钮，避免重复确认
+  const existing = body.querySelector('.hw-card');
+  if(existing && orderCardId !== existing.id){
+    const st = $(existing.id + '_status');
+    if(st && !st.classList.contains('confirmed') && !st.classList.contains('rejected')){
+      st.textContent = '已失效';
+      st.classList.add('rejected');
+      const ops = existing.querySelector('.hw-card-ops');
+      if(ops) ops.style.display = 'none';
+    }
+  }
   // 移除空状态
   const empty = body.querySelector('.hw-empty');
   if(empty) empty.remove();
@@ -1127,6 +1616,11 @@ function addHwCard(){
 
 function hwConfirm(cardId){
   if(confirmMode) return;
+  // 只允许确认最新的待确认卡片
+  if(cardId !== orderCardId){
+    toast('该卡片已失效，无法确认');
+    return;
+  }
   confirmMode = true;
   const card = $(cardId);
   card.querySelector('.hw-card-ops').style.display = 'none';
@@ -1134,28 +1628,26 @@ function hwConfirm(cardId){
   st.textContent = '已确认';
   st.classList.add('confirmed');
 
-  // 构建订单摘要
-  const selectedCarList = estimate.cars.filter(function(c){ return selectedCars[c.car]; });
-  const svcSum = selectedCarList.reduce(function(s, c){ return s + c.svc; }, 0);
-  const totalSum = selectedCarList.reduce(function(s, c){ return s + c.total; }, 0);
-
-  const summaryHtml =
-    '<div class="row"><span class="rk">用户</span><span class="rv">' + esc(TOURIST.name) + '（' + esc(TOURIST.lang) + '）</span></div>' +
-    '<div class="row"><span class="rk">上车点</span><span class="rv">' + esc(selectedPu.zh) + '（' + esc(selectedPu.en) + '）</span></div>' +
-    '<div class="row"><span class="rk">目的地</span><span class="rv">' + esc(selectedDst.zh) + '（' + esc(selectedDst.en) + '）</span></div>' +
-    '<div class="row"><span class="rk">行程</span><span class="rv">约 ' + estimate.km + ' km · ' + estimate.minutes + ' 分钟</span></div>' +
-    selectedCarList.map(function(c){
-      return '<div class="row"><span class="rk">' + esc(c.car) + '</span><span class="rv">' + money(c.total) + '</span></div>';
-    }).join('') +
-    '<div class="row"><span class="rk">服务费</span><span class="rv money">合计 ' + money(svcSum) + '</span></div>' +
-    '<div class="row"><span class="rk">最高预估</span><span class="rv money">' + money(totalSum) + '</span></div>';
-
-  $('forceSummary').innerHTML = summaryHtml;
-  $('forceMask').classList.add('show');
+  // 用户已确认 → 不弹窗，直接重置流程，切换下一位用户
+  toast('用户已确认，订单已进入派单流程');
+  setTimeout(function(){
+    resetAll();
+    touristIdx = (touristIdx + 1) % TX_TOURISTS.length;
+    TOURIST = TX_TOURISTS[touristIdx];
+    renderTourist();
+    goStep(1);
+    loadDefaultPois();
+    toast('已切换至下一位用户：' + TOURIST.name);
+  }, 1200);
 }
 
 function hwReject(cardId){
   if(confirmMode) return;
+  // 只允许拒绝最新的待确认卡片
+  if(cardId !== orderCardId){
+    toast('该卡片已失效，无法操作');
+    return;
+  }
   const card = $(cardId);
   card.querySelector('.hw-card-ops').style.display = 'none';
   const st = $(cardId + '_status');
@@ -1165,19 +1657,6 @@ function hwReject(cardId){
   orderCardId = null;
   updatePushBtn();
   toast('用户已拒绝，客服可重新推送（或重新预估价格）');
-}
-
-function bindForceClose(){
-  $('forceCloseBtn').addEventListener('click', function(){
-    $('forceMask').classList.remove('show');
-    // 重置流程，自动选下一位用户，回到第①步重新选上车点
-    resetAll();
-    touristIdx = (touristIdx + 1) % TX_TOURISTS.length;
-    TOURIST = TX_TOURISTS[touristIdx];
-    renderTourist();
-    goStep(1);
-    toast('已切换至下一位用户：' + TOURIST.name);
-  });
 }
 
 function resetStep3(){
@@ -1205,9 +1684,10 @@ function resetAll(){
   // 重置「已选上车点」模块为隐藏占位（用户未选状态）
   $('puSelectedTxt').textContent = '-';
   $('puSelectedBar').setAttribute('hidden', '');
-  // 重置第③步顶部行程回显
-  $('sumPu').textContent = '-';
-  $('sumDst').textContent = '-';
+  // 重置第③步地图
+  renderStep3RouteMap();
+  $('sumKm').textContent = '- km';
+  $('sumMin').textContent = '- 分 - 秒';
 }
 
 // ---------- 初始化 ----------
@@ -1217,14 +1697,14 @@ function init(){
   bindPuSearch();
   bindDstSearch();
   bindPush();
-  bindForceClose();
 
   // 用户硬件端空状态
   $('hwCards2').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
   $('hwCards3').innerHTML = '<div class="hw-empty">暂无推送卡片</div>';
 
-  // 初始进入第①步：选上车点
+  // 初始进入第①步：选上车点，默认加载附近 POI
   goStep(1);
+  loadDefaultPois();
 }
 
 init();

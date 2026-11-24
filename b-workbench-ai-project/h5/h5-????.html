@@ -29,15 +29,15 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 
 /* ========== 搜索与筛选 ========== */
 .filter-wrap{position:sticky;top:0;z-index:19;background:#F7F8FA;padding:12px 12px 10px}
-.search-box{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #ECECF0;
-  border-radius:10px;padding:0 8px;height:38px;box-shadow:0 1px 4px rgba(0,0,0,.03);box-sizing:border-box;width:100%}
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #ECECF0;
+  border-radius:12px;padding:0 12px;height:44px;box-shadow:0 1px 4px rgba(0,0,0,.03)}
 .search-box svg{flex:none}
-.search-box input{flex:1;min-width:0;border:none;height:36px;font-size:.8rem;background:transparent}
-.search-btn{flex:none;height:28px;padding:0 10px;font-size:.72rem;color:#fff;background:#0669FF;
-  border:none;border-radius:7px;cursor:pointer;white-space:nowrap}
+.search-box input{flex:1;border:none;height:42px;font-size:.875rem;background:transparent}
+.search-btn{flex:none;height:32px;padding:0 14px;font-size:.78rem;color:#fff;background:#0669FF;
+  border:none;border-radius:8px;cursor:pointer;white-space:nowrap}
 .search-btn:active{opacity:.85}
-.filter-btn{flex:none;height:28px;padding:0 8px;font-size:.72rem;color:#0669FF;
-  border:1px solid #D6E9FF;border-radius:7px;background:#F0F7FF;display:flex;align-items:center;gap:3px;
+.filter-btn{flex:none;height:32px;padding:0 12px;font-size:.78rem;color:#0669FF;
+  border:1px solid #D6E9FF;border-radius:8px;background:#F0F7FF;display:flex;align-items:center;gap:4px;
   white-space:nowrap;cursor:pointer}
 .filter-btn:active{opacity:.85}
 .filter-btn .cnt{background:#0669FF;color:#fff;font-size:.62rem;min-width:15px;height:15px;
@@ -51,13 +51,14 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .drawer-mask{position:fixed;inset:0;z-index:58;background:rgba(0,0,0,.45);opacity:0;
   pointer-events:none;transition:opacity .25s}
 .drawer-mask.show{opacity:1;pointer-events:auto}
-.drawer{position:fixed;left:0;right:0;bottom:0;z-index:59;max-width:480px;margin:0 auto;
-  background:#fff;border-radius:18px 18px 0 0;
-  transform:translateY(105%);transition:transform .28s cubic-bezier(.32,.72,.35,1);
-  max-height:82vh;display:flex;flex-direction:column}
-.drawer.show{transform:translateY(0)}
-.drawer-body{flex:1;overflow-y:auto;padding:8px 16px 12px}
-.drawer-grip{width:36px;height:4px;border-radius:2px;background:#E5E6EB;margin:6px auto 14px}
+.drawer{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:59;
+  width:calc(100% - 32px);max-width:420px;margin:0 auto;
+  background:#fff;border-radius:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  max-height:80vh;display:flex;flex-direction:column}
+.drawer.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 16px 12px}
+.drawer-grip{display:none}
 .drawer-t{font-size:.95rem;font-weight:700;text-align:center;margin-bottom:12px}
 .drawer-sec{margin-bottom:16px}
 .drawer-sec-t{font-size:.78rem;font-weight:600;color:#262626;margin-bottom:8px}
@@ -69,7 +70,7 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .drawer-date input{flex:1;height:42px;padding:0 10px;font-size:.82rem;min-width:0}
 .drawer-date span{color:#8C8C8C;font-size:.78rem;flex:none}
 .drawer-reset{width:100%;min-height:42px;border-radius:10px;color:#8C8C8C;font-size:.8rem;margin-top:4px}
-.drawer-foot{display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));
+.drawer-foot{display:flex;gap:10px;padding:12px 16px 14px;
   border-top:1px solid #F0F0F0;background:#fff}
 .drawer-foot .cancel{flex:none;min-width:96px;min-height:46px;border-radius:12px;
   border:1px solid #E5E6EB;color:#595959;font-size:.85rem;background:#fff}
@@ -88,7 +89,7 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .oc-row4{display:flex;align-items:baseline;justify-content:space-between;margin-top:8px;gap:8px;flex-wrap:wrap}
 .oc-row4 .car{font-size:.72rem;color:#8C8C8C}
 .oc-row4 .car .plate{color:#0669FF;font-weight:600;margin-left:2px}
-.oc-row4 .amt{font-size:.95rem;font-weight:700;color:#0669FF}
+.oc-row4 .amt{font-size:1.1rem;font-weight:700;color:#0669FF}
 .oc-row4 .amt small{font-size:.68rem;font-weight:400;color:#8C8C8C;margin-left:4px}
 .oc-row4 .tm{font-size:.7rem;color:#B0B3B8;margin-left:auto}
 .oc-ops{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed #F0F0F0;flex-wrap:wrap}
@@ -102,6 +103,11 @@ input:focus,select:focus,textarea:focus{border-color:#0669FF}
 .btn-push.busy,.btn-refresh.busy{opacity:.7}
 .btn-push.done{background:#52C41A;border-color:#52C41A;color:#fff}
 button:disabled{opacity:.45;cursor:not-allowed}
+
+/* 打车列表突出展示 */
+.oc-route{font-size:.95rem;font-weight:700;color:#262626;display:flex;align-items:center;gap:6px}
+.oc-route .arrow{color:#8C8C8C;font-weight:400}
+.oc-route-en{font-size:.75rem;color:#8C8C8C;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 状态徽标 */
 .badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;
@@ -117,25 +123,31 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .list-empty{text-align:center;color:#B0B3B8;font-size:.82rem;padding:48px 0}
 
 /* ========== 详情 ========== */
-.detail-head{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #F0F0F0;
-  display:flex;align-items:center;gap:10px;padding:10px 12px;height:52px}
-.detail-head .back{width:44px;height:44px;margin-left:-8px;display:flex;align-items:center;justify-content:center}
-.detail-head .t{font-size:.95rem;font-weight:700}
 .detail-body{padding:12px;padding-bottom:150px}
 .card{background:#fff;border:1px solid #F0F0F0;border-radius:14px;padding:14px;
   margin-bottom:12px;box-shadow:0 2px 10px rgba(31,45,61,.04)}
 .card-t{font-size:.72rem;color:#8C8C8C;font-weight:600;margin-bottom:10px;
-  display:flex;align-items:center;gap:6px}
-.card-t::before{content:'';width:3px;height:12px;border-radius:2px;background:#0669FF}
+  display:flex;align-items:flex-start;gap:6px}
+.card-t::before{content:'';width:3px;height:12px;border-radius:2px;background:#0669FF;flex:none;margin-top:2px}
+.card-t-en{font-size:.66rem;color:#C0C3C8;font-weight:400;display:block;line-height:1.2}
 .kv{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;padding:5px 0}
 .kv .k{color:#8C8C8C;flex:none}
 .kv .v{color:#262626;text-align:right;word-break:break-all}
-.status-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-.status-card .oid{color:#595959;margin-top:2px}
-.status-card .meta-line{font-size:.72rem;color:#B0B3B8}
+.kv .k-en{font-size:.66rem;color:#C0C3C8;margin-top:1px}
+.kv .v-en{font-size:.66rem;color:#B0B3B8;margin-top:1px}
+.status-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+  border-radius:14px}
+.status-card .back{position:absolute;top:10px;left:10px;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.92);border:1px solid #F0F0F0;border-radius:50%;
+  cursor:pointer;z-index:21}
+.status-card .status-row{display:flex;align-items:center;justify-content:flex-end;
+  width:100%;min-height:32px;padding-left:36px}
+.status-card .oid{color:#595959;margin-top:2px;padding-left:36px}
+.status-card .meta-line{font-size:.72rem;color:#B0B3B8;padding-left:36px}
 
 /* 路线地图占位 */
-.map-box{position:relative;height:120px;background:linear-gradient(135deg,#EBF5FF 0%,#F0F9FF 100%);
+.map-box{position:relative;height:180px;background:linear-gradient(135deg,#EBF5FF 0%,#F0F9FF 100%);
   border:1px solid #D6E9FF;border-radius:12px;margin:10px 0;overflow:hidden}
 .map-grid{position:absolute;inset:0;
   background-image:linear-gradient(#D6E9FF 1px,transparent 1px),linear-gradient(90deg,#D6E9FF 1px,transparent 1px);
@@ -205,6 +217,23 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .pt-tag.debt{background:#FFF1F0;color:#FF4D4F;border-color:#FFA39E}
 .pt-tag.confirm{background:#F9F0FF;color:#722ED1;border-color:#D3ADF7}
 .pt-tag.pending{background:#FFFBE6;color:#D48806;border-color:#FFE58F}
+.comp-item{padding:10px 0;border-bottom:1px solid #F7F7F8;font-size:.78rem}
+.comp-item:last-child{border-bottom:none}
+.comp-item .comp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.comp-item .comp-flowno{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.68rem;color:#8C8C8C}
+.comp-item .comp-right{text-align:right;flex:none;margin-left:8px}
+.comp-item .p{color:#0669FF;font-weight:700;font-size:.9rem}
+.comp-row{display:flex;gap:6px;margin-top:4px;font-size:.72rem}
+.comp-row .comp-label{color:#B0B3B8;flex:none;min-width:56px}
+.comp-row .comp-val{color:#434343;word-break:break-all}
+.comp-status{font-size:.66rem;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.comp-status.pass{background:#F6FFED;color:#389E0D;border:1px solid #D9F7BE}
+.comp-status.reject{background:#FFF1F0;color:#FF4D4F;border:1px solid #FFA39E}
+.comp-status.pending{background:#FFFBE6;color:#D48806;border:1px solid #FFE58F}
+.comp-reject{margin-top:4px;font-size:.7rem;color:#FF4D4F;background:#FFF1F0;border:1px solid #FFA39E;border-radius:6px;padding:4px 8px}
+.comp-imgs{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.comp-img{width:48px;height:48px;border-radius:8px;border:1px solid #E5E6EB;background:#F7F8FA;
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer}
 .comp-empty{text-align:center;color:#B0B3B8;font-size:.76rem;padding:16px 0}
 
 /* 事件流水 */
@@ -216,12 +245,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .ev-tm{color:#B0B3B8;flex:none;font-size:.68rem;white-space:nowrap}
 
 /* 详情底部操作栏 */
-.detail-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;
-  max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #F0F0F0;
+.detail-bar{background:#fff;border-top:1px solid #F0F0F0;
   display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
 .detail-bar[hidden]{display:none}
 .detail-bar button{flex:1;min-height:44px;border-radius:10px;font-size:.82rem;font-weight:600}
-.detail-body{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
 
 /* ========== 居中弹窗 ========== */
 .sheet-mask{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);opacity:0;
@@ -315,6 +342,27 @@ button:disabled{opacity:.45;cursor:not-allowed}
   box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.ok{background:rgba(82,196,26,.95)}
+
+/* ========== 大图预览 ========== */
+.img-viewer-mask{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;padding:24px}
+.img-viewer-mask[hidden]{display:none}
+.img-viewer-close{position:absolute;top:12px;right:12px;z-index:91;width:32px;height:32px;
+  border-radius:50%;background:rgba(0,0,0,.06);color:#262626;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;border:none;cursor:pointer}
+.img-viewer-content{width:100%;max-width:432px;background:#fff;border-radius:16px;
+  position:relative;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.img-viewer-body{display:flex;align-items:center;justify-content:center;
+  font-size:5rem;line-height:1;min-height:200px;padding:24px 16px 8px}
+.img-viewer-bar{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px 14px;font-size:.85rem;color:#595959}
+.img-viewer-bar[hidden]{display:none}
+.img-viewer-nav{background:none;border:none;color:#1677ff;font-size:.85rem;
+  cursor:pointer;padding:4px 8px;border-radius:6px}
+.img-viewer-nav:disabled{color:#bfbfbf;cursor:not-allowed}
+.img-viewer-idx{color:#8c8c8c}
 </style>
 <script src="h5-shared-data.js"></script>
 </head>
@@ -326,7 +374,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div class="filter-wrap">
       <div class="search-box">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#B0B3B8" stroke-width="1.6"/><path d="M11 11l3.2 3.2" stroke="#B0B3B8" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <input id="q" type="search" placeholder="搜索曹操订单号 / 老外姓名 / 护照号 / 设备号" autocomplete="off">
+        <input id="q" type="search" placeholder="订单号" autocomplete="off">
         <button class="search-btn" id="qBtn">查询</button>
         <button class="filter-btn" id="fFilter">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 2h11l-4.2 4.7v4.1L6.7 12V6.7L1.5 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
@@ -342,17 +390,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
   <!-- 详情视图 -->
   <section id="viewDetail" hidden>
-    <div class="detail-head">
-      <button class="back" id="btnBack" aria-label="返回">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 4L6.5 10l6 6" stroke="#262626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="t">打车订单详情</div>
-    </div>
     <div class="detail-body" id="detailBody"></div>
+    <div class="detail-bar" id="detailBar" hidden></div>
   </section>
-
-  <!-- 详情底部操作栏 -->
-  <div class="detail-bar" id="detailBar" hidden></div>
 
   <!-- 筛选抽屉 -->
   <div class="drawer-mask" id="drawerMask"></div>
@@ -364,6 +404,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <div class="drawer-sec">
         <div class="drawer-sec-t">订单状态（可多选）</div>
         <div class="status-grid" id="dStatusGrid"></div>
+      </div>
+
+      <div class="drawer-sec">
+        <div class="drawer-sec-t">订单来源</div>
+        <div class="status-grid" id="dSourceGrid"></div>
       </div>
 
       <div class="drawer-sec">
@@ -387,6 +432,19 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div class="sheet-mask" id="sheetMask"></div>
   <div class="sheet" id="sheet"></div>
 
+  <!-- 大图预览 -->
+  <div class="img-viewer-mask" id="imgViewerMask" hidden>
+    <div class="img-viewer-content" id="imgViewerContent">
+      <button class="img-viewer-close" id="imgViewerClose" aria-label="关闭">✕</button>
+      <div class="img-viewer-body" id="imgViewerBody"></div>
+      <div class="img-viewer-bar" id="imgViewerBar" hidden>
+        <button class="img-viewer-nav" id="imgViewerPrev">‹ 上一张</button>
+        <span class="img-viewer-idx" id="imgViewerIdx">1/1</span>
+        <button class="img-viewer-nav" id="imgViewerNext">下一张 ›</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 </div>
@@ -397,7 +455,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
  * ================================================================ */
 
 /* ---------- 常量 ---------- */
-var PAGE_SIZE = 50;
+var PAGE_SIZE = 1;
 var CURRENT_CS = '当前客服 13800138018';
 var CANCEL_OK = {1:1, 9:1, 12:1};
 var COMP_OK = {7:1, 13:1};
@@ -437,11 +495,11 @@ var TX_FLAG = window.TX_CAR_FLAGFALL || {'舒适型':10,'新能源':9,'优选':1
 
 /* ---------- 状态 ---------- */
 var state = {
-  q:'', statuses:[], dateFrom:'', dateTo:'',
+  q:'', statuses:[], sources:[], dateFrom:'', dateTo:'',
   page:1, detailId:null,
   sheetOrderId:null, sheetMode:'',
   destSel:null, compOrderId:null,
-  drawerStatuses:[], drawerFrom:'', drawerTo:''
+  drawerStatuses:[], drawerSources:[], drawerFrom:'', drawerTo:''
 };
 
 /* ---------- 工具 ---------- */
@@ -460,6 +518,41 @@ function toast(msg, ok){
   clearTimeout(t._tm);
   t._tm = setTimeout(function(){ t.className = 'toast'; }, 2400);
 }
+
+/* ---------- 大图预览 ---------- */
+/* ---------- 大图预览 ---------- */
+var _viewerImgs = [];
+var _viewerIdx = 0;
+
+function openImgViewer(el){
+  _viewerImgs = JSON.parse(el.getAttribute('data-imgs')) || [];
+  _viewerIdx = parseInt(el.getAttribute('data-idx'), 10) || 0;
+  $('imgViewerBar').hidden = !(_viewerImgs.length > 1);
+  renderImgViewer();
+  $('imgViewerMask').hidden = false;
+}
+function stepImgViewer(d){
+  var n = _viewerIdx + d;
+  if(n < 0 || n > _viewerImgs.length - 1) return;
+  _viewerIdx = n;
+  renderImgViewer();
+}
+function renderImgViewer(){
+  $('imgViewerBody').textContent = _viewerImgs[_viewerIdx] || '';
+  $('imgViewerIdx').textContent = (_viewerIdx + 1) + '/' + _viewerImgs.length;
+  $('imgViewerPrev').disabled = (_viewerIdx <= 0);
+  $('imgViewerNext').disabled = (_viewerIdx >= _viewerImgs.length - 1);
+}
+function closeImgViewer(){
+  $('imgViewerMask').hidden = true;
+}
+$('imgViewerClose').addEventListener('click', closeImgViewer);
+$('imgViewerPrev').addEventListener('click', function(){ stepImgViewer(-1); });
+$('imgViewerNext').addEventListener('click', function(){ stepImgViewer(1); });
+$('imgViewerMask').addEventListener('click', function(e){
+  if(e.target === this) closeImgViewer();
+});
+
 function getOrder(id){ return TAXI_ORDERS[id]; }
 function orderStatusLabel(o){ return TX_STATUS[o.tCaoStatus] || o.status || '未知'; }
 function orderSummary(o){
@@ -467,7 +560,7 @@ function orderSummary(o){
   return (o.tPickup && o.tPickup.zh || '') + ' → ' + (o.tDest && o.tDest.zh || '');
 }
 function canCancel(o){ return CANCEL_OK[o.tCaoStatus] && !o.tDestPending; }
-function canChangeDest(o){ return DEST_OK[o.tCaoStatus] && !o.tCancelPending && !o.tDestPending; }
+function canChangeDest(o){ return DEST_OK[o.tCaoStatus] && !o.tDestPending; }
 
 /* ---------- 补偿积分 ---------- */
 var compImages = [];
@@ -680,8 +773,26 @@ function estimateNew(pu, dst, carType){
   });
 })();
 
+(function initSourceChips(){
+  var grid = $('dSourceGrid');
+  ['AI对话','客服代下单'].forEach(function(src){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'status-chip';
+    b.setAttribute('data-code', src);
+    b.textContent = src;
+    b.addEventListener('click', function(){
+      var i = state.drawerSources.indexOf(src);
+      if(i >= 0) state.drawerSources.splice(i, 1);
+      else state.drawerSources.push(src);
+      b.classList.toggle('on', i < 0);
+    });
+    grid.appendChild(b);
+  });
+})();
+
 function chipCount(){
-  var n = state.statuses.length;
+  var n = state.statuses.length + state.sources.length;
   if(state.dateFrom) n++;
   if(state.dateTo) n++;
   return n;
@@ -691,6 +802,9 @@ function renderFilterChips(){
   var parts = [];
   state.statuses.forEach(function(code){
     parts.push({label: TX_STATUS[code] || code, k:'st', v:code});
+  });
+  state.sources.forEach(function(s){
+    parts.push({label: s, k:'src', v:s});
   });
   if(state.dateFrom || state.dateTo){
     parts.push({label:(state.dateFrom || '…') + ' ~ ' + (state.dateTo || '…'), k:'dt', v:''});
@@ -710,6 +824,8 @@ $('chipRow').addEventListener('click', function(e){
   var k = btn.getAttribute('data-k'), v = btn.getAttribute('data-v');
   if(k === 'st'){
     state.statuses = state.statuses.filter(function(c){ return c !== v; });
+  }else if(k === 'src'){
+    state.sources = state.sources.filter(function(s){ return s !== v; });
   }else if(k === 'dt'){
     state.dateFrom = ''; state.dateTo = '';
   }
@@ -720,11 +836,16 @@ $('chipRow').addEventListener('click', function(e){
 
 function openFilterDrawer(){
   state.drawerStatuses = state.statuses.slice();
+  state.drawerSources = state.sources.slice();
   state.drawerFrom = state.dateFrom;
   state.drawerTo = state.dateTo;
   var chips = $('dStatusGrid').children;
   for(var i = 0; i < chips.length; i++){
     chips[i].classList.toggle('on', state.drawerStatuses.indexOf(chips[i].getAttribute('data-code')) >= 0);
+  }
+  var srcChips = $('dSourceGrid').children;
+  for(var j = 0; j < srcChips.length; j++){
+    srcChips[j].classList.toggle('on', state.drawerSources.indexOf(srcChips[j].getAttribute('data-code')) >= 0);
   }
   $('dDateFrom').value = state.drawerFrom;
   $('dDateTo').value = state.drawerTo;
@@ -737,6 +858,7 @@ function closeFilterDrawer(){
 }
 function applyFilterDrawer(){
   state.statuses = state.drawerStatuses.slice();
+  state.sources = state.drawerSources.slice();
   state.dateFrom = state.drawerFrom;
   state.dateTo = state.drawerTo;
   state.page = 1;
@@ -751,9 +873,11 @@ $('dOk').addEventListener('click', applyFilterDrawer);
 $('dDateFrom').addEventListener('change', function(){ state.drawerFrom = this.value; });
 $('dDateTo').addEventListener('change', function(){ state.drawerTo = this.value; });
 $('dReset').addEventListener('click', function(){
-  state.drawerStatuses = []; state.drawerFrom = ''; state.drawerTo = '';
+  state.drawerStatuses = []; state.drawerSources = []; state.drawerFrom = ''; state.drawerTo = '';
   var chips = $('dStatusGrid').children;
   for(var i = 0; i < chips.length; i++) chips[i].classList.remove('on');
+  var srcChips = $('dSourceGrid').children;
+  for(var j = 0; j < srcChips.length; j++) srcChips[j].classList.remove('on');
   $('dDateFrom').value = ''; $('dDateTo').value = '';
 });
 
@@ -766,10 +890,11 @@ function filtered(){
   var q = state.q.trim().toLowerCase();
   return allOrders().filter(function(o){
     if(q){
-      var hay = [o.tCaoNo, o.name, o.passport, o.deviceNo].join(' ').toLowerCase();
-      if(hay.indexOf(q) < 0) return false;
+      /* 仅支持订单号精确搜索 */
+      if(o.id.toLowerCase() !== q) return false;
     }
     if(state.statuses.length && state.statuses.indexOf(String(o.tCaoStatus)) < 0) return false;
+    if(state.sources.length && state.sources.indexOf(o.tSource) < 0) return false;
     var d = orderDate(o);
     if(state.dateFrom && d && d < state.dateFrom) return false;
     if(state.dateTo && d && d > state.dateTo) return false;
@@ -790,27 +915,24 @@ function renderList(){
       var st = orderStatusLabel(o);
       var showCancel = canCancel(o);
       var showDest = canChangeDest(o);
-      var amtHtml = o.tBill
-        ? '<span class="amt">' + fmtMoney(o.tBill.cao + o.tBill.svc) + '<small>实付 · ' + fmtPoints(o.tBill.cao + o.tBill.svc) + '</small></span>'
-        : '<span class="amt">' + fmtMoney(o.tEst.cao + o.tEst.svc) + '<small>预估 · ' + fmtPoints(o.tEst.cao + o.tEst.svc) + '</small></span>';
+      var amt = o.tBill ? (o.tBill.cao + o.tBill.svc) : (o.tEst.cao + o.tEst.svc);
       html += '' +
       '<div class="order-card" data-id="' + esc(o.id) + '">' +
         '<div class="oc-row1">' +
-          '<span class="oid mono">' + esc(o.tCaoNo) + '</span>' +
+          '<div class="oc-route">' +
+            '<span>' + esc(o.tPickup.zh) + '</span>' +
+            '<span class="arrow">→</span>' +
+            '<span>' + esc(o.tDest.zh) + '</span>' +
+          '</div>' +
           badge(st) +
         '</div>' +
-        '<div class="oc-row2">' + esc(o.name) + ' · ' + esc(o.lang) + ' · ' +
-          esc(maskPassport(o.passport)) + ' · ' + esc(maskPhone(o.phone)) + '</div>' +
-        '<div class="oc-row3">' + esc(orderSummary(o)) + '</div>' +
+        '<div class="oc-route-en">' + esc(o.tPickup.en || '') + ' → ' + esc(o.tDest.en || '') + '</div>' +
         '<div class="oc-row4">' +
-          '<span class="car">' + esc(o.tCarType) + ' · ' + esc(o.tCity) +
-          (o.tDriver ? ' · <b class="plate">' + esc(o.tDriver.plate) + '</b>' : '') + '</span>' +
-          amtHtml +
+          '<span class="amt">' + fmtMoney(amt) + '</span>' +
           '<span class="tm">' + esc(o.tCreated) + '</span>' +
         '</div>' +
         '<div class="oc-ops">' +
           (showCancel ? '<button class="btn-danger" data-act="cancel">取消</button>' : '') +
-          (showDest ? '<button class="btn-change" data-act="dest">改目的地</button>' : '') +
           (canComp(o) ? '<button class="btn-comp" data-act="comp">补偿积分</button>' :
             (hasPendingComp(o) ? '<button class="btn-comp" disabled title="该订单有补偿申请待审核，暂不可再次发起">补偿积分（待审核中）</button>' : '')
           ) +
@@ -824,7 +946,7 @@ function renderList(){
   var btn = $('loadMore');
   if(show.length < data.length){
     btn.hidden = false;
-    btn.innerHTML = '加载更多（还有 <b>' + (data.length - show.length) + '</b> 笔）';
+    btn.innerHTML = '查看更多（还有 <b>' + (data.length - show.length) + '</b> 笔）';
   }else{
     btn.hidden = true;
   }
@@ -840,7 +962,6 @@ $('orderList').addEventListener('click', function(e){
     e.stopPropagation();
     var act = actBtn.getAttribute('data-act');
     if(act === 'cancel') openCancelSheet(id);
-    else if(act === 'dest') openDestSheet(id);
     else if(act === 'comp') openCompSheet(id);
     else if(act === 'push') doPush(actBtn);
     return;
@@ -849,7 +970,7 @@ $('orderList').addEventListener('click', function(e){
 });
 
 $('loadMore').addEventListener('click', function(){
-  state.page++;
+  state.page += 10;
   renderList();
 });
 
@@ -914,13 +1035,10 @@ function openCancelSheet(id){
         '乘客 ' + esc(o.name) + '（' + esc(maskPassport(o.passport)) + '）' +
       '</div>';
 
-  if(o.tCancelPending){
-    h += '<div class="fee-tip warn">⏳ 已推送用户确认取消（取消费 <b>' +
-      fmtPoints(o.tCancelMsg.fee) + '</b>），等待用户端确认</div>';
-  }else if(hasFee){
+  if(hasFee){
     h += '<div class="fee-tip warn">' +
-      '⚠️ 本单取消将收取取消费 <b>' + fmtPoints(o.tCancelFee) + '</b><br>' +
-      '<span style="font-size:.7rem;opacity:.85">曹操侧已开启计费 / 超过免费取消时长，需推送用户确认</span></div>';
+      '⚠️ 本单已产生取消费 <b>' + fmtPoints(o.tCancelFee) + '</b>，将由平台承担<br>' +
+      '<span style="font-size:.7rem;opacity:.85">老外预扣的 ' + fmtPoints(o.tFrozen) + ' 积分将原路退回，取消费不向老外收取</span></div>';
   }else{
     h += '<div class="fee-tip ok">✅ 当前处于免费取消时长内，取消后冻结积分 <b>' +
       fmtPoints(o.tFrozen) + '</b> 将全额解冻，系统取消后无需用户确认</div>';
@@ -928,49 +1046,34 @@ function openCancelSheet(id){
   h += '</div>';
 
   h += '<div class="sheet-foot">';
-  if(o.tCancelPending){
-    h += '<button class="cancel" id="cancelClose" style="margin-top:0">关闭</button>' +
-      '<button class="submit" id="cancelSubmit" disabled>已推送用户确认，等待用户决定</button>';
-  }else{
-    h += '<button class="cancel" id="cancelClose" style="margin-top:0">关闭</button>' +
-      '<button class="submit' + (hasFee ? ' danger' : '') + '" id="cancelSubmit">' +
-        (hasFee ? '发起并推送给用户确认（将扣 ' + fmtPoints(o.tCancelFee) + '）' : '确认取消订单') +
-      '</button>';
-  }
+  h += '<button class="cancel" id="cancelClose" style="margin-top:0">关闭</button>' +
+    '<button class="submit' + (hasFee ? ' danger' : '') + '" id="cancelSubmit">确认取消订单</button>';
   h += '</div>';
 
   $('sheet').innerHTML = h;
   showSheet();
 
   $('cancelClose').onclick = hideSheet;
-  if(!o.tCancelPending){
-    $('cancelSubmit').onclick = function(){ submitCancel(hasFee); };
-  }
+  $('cancelSubmit').onclick = function(){ submitCancel(hasFee); };
 }
 
 function submitCancel(hasFee){
   var o = getOrder(state.sheetOrderId);
   if(!o) { hideSheet(); return; }
 
-  if(!hasFee){
-    /* 直接取消 */
-    o.tCaoStatus = 20;
-    o.status = '用户取消';
-    o.tCancelReason = '';
-    o.tCancelPending = false;
-    o.tCancelMsg = null;
-    txBuildStreams(o);
-    o.tLogs.push({tm: nowStr(), operator:'客服', action:'客服取消订单（免费取消，系统自动取消）'});
-    hideSheet();
-    toast('已取消：冻结积分全额解冻', true);
+  /* 统一走曹操侧 status=20（用户取消），有取消费时由平台承担 */
+  o.tCaoStatus = 20;
+  o.status = '用户取消';
+  o.tCancelReason = hasFee ? '客服取消（平台承担取消费）' : '';
+  o.tCancelCover = hasFee ? 'platform' : 'user';
+  txBuildStreams(o);
+  if(hasFee){
+    o.tLogs.push({tm: nowStr(), operator:'客服', action:'客服取消订单（平台承担取消费 ' + fmtPoints(o.tCancelFee) + '，老外预扣积分全额退回）'});
   }else{
-    /* 推送用户确认 */
-    o.tCancelPending = true;
-    o.tCancelMsg = {reason: '', fee: o.tCancelFee, tm: nowStr()};
-    o.tLogs.push({tm: nowStr(), operator:'客服', action:'发起取消并推送用户确认（将扣取消费 ' + fmtPoints(o.tCancelFee) + '）'});
-    hideSheet();
-    toast('已推送用户确认取消（将扣 ' + fmtPoints(o.tCancelFee) + '），等待用户端确认', true);
+    o.tLogs.push({tm: nowStr(), operator:'客服', action:'客服取消订单（免费取消，系统自动取消）'});
   }
+  hideSheet();
+  toast(hasFee ? '已取消：老外预扣积分全额退回，平台承担取消费 ' + fmtPoints(o.tCancelFee) : '已取消：冻结积分全额解冻', true);
   renderList();
   if(state.detailId === o.id) renderDetail(o.id);
 }
@@ -1052,8 +1155,8 @@ function renderDestMap(kw){
     if(p.lat > maxLat) maxLat = p.lat;
   });
   // 确保地图有一个合理的缩放范围，避免点位过于密集
-  var MIN_LNG_SPAN = 0.02;  // 约 2km
-  var MIN_LAT_SPAN = 0.015; // 约 1.7km
+  var MIN_LNG_SPAN = 0.035;  // 约 3.5km
+  var MIN_LAT_SPAN = 0.025;  // 约 2.8km
   var lngSpan = maxLng - minLng;
   var latSpan = maxLat - minLat;
   if(lngSpan < MIN_LNG_SPAN){
@@ -1303,16 +1406,12 @@ function openDetail(id){
   $('detailBar').hidden = false;
   window.scrollTo(0, 0);
 }
-$('btnBack').addEventListener('click', function(){
-  state.detailId = null;
-  $('viewDetail').hidden = true;
-  $('detailBar').hidden = true;
-  $('viewList').hidden = false;
-  renderList();
-});
 
-function kv(k, v){
-  return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>';
+/* kv：key 和 value 各支持中文+外文两行展示 */
+function kv(k, v, kEn, vEn){
+  var kHtml = kEn ? '<span class="k">' + k + '<br><span class="k-en">' + esc(kEn) + '</span></span>' : '<span class="k">' + k + '</span>';
+  var vHtml = vEn ? '<span class="v">' + v + '<br><span class="v-en">' + esc(vEn) + '</span></span>' : '<span class="v">' + v + '</span>';
+  return '<div class="kv">' + kHtml + vHtml + '</div>';
 }
 
 /* 路线 SVG · 按订单状态渲染不同要素 */
@@ -1422,40 +1521,47 @@ function renderDetail(id){
 
   /* 状态卡片 */
   h += '<div class="card status-card">' +
-    badge(st, true) +
-    '<span class="oid mono">曹操订单号 ' + esc(o.tCaoNo) + '</span>' +
-    '<span class="meta-line">来源：' + esc(o.tSource) + ' · 下单 ' + esc(o.tCreated) +
-      ' · ' + esc(o.tCity) + '（' + esc(o.tCityCode) + '）</span>' +
+    '<button class="back" id="btnBack" aria-label="返回">' +
+      '<svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 4L6.5 10l6 6" stroke="#262626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+    '</button>' +
+    '<div class="status-row">' +
+      badge(st, true) +
+    '</div>' +
+    '<span class="oid mono">订单号 ' + esc(o.tCaoNo) + '</span>' +
+    '<span class="meta-line">来源：' + esc(o.tSource) + ' · 下单时间 ' + esc(o.tCreated) + '</span>' +
   '</div>';
 
-  /* 用户信息 */
-  h += '<div class="card"><div class="card-t">用户信息</div>' +
-    kv('姓名', esc(o.name)) +
-    kv('语言', esc(o.lang)) +
-    kv('护照号', '<b class="mono">' + esc(o.passport) + '</b>') +
-    kv('手机号', '<b class="mono">' + esc(o.phone) + '</b>') +
-    kv('设备号', esc(o.deviceNo)) +
-    kv('当前积分余额', esc(o.balance)) +
-  '</div>';
+  /* 失败原因：参考外卖，红色高亮，放到状态卡片下方 */
+  if(o.tCancelReason){
+    h += '<div class="card"><div class="card-t">失败原因<span class="card-t-en">Failure Reason</span></div>' +
+      '<div style="font-size:.8rem;color:#D4380D;background:#FFF2F0;border:1px solid #FFCCC7;border-radius:10px;padding:10px 12px">' +
+        esc(o.tCancelReason) + '</div></div>';
+  }
+
+  /* 用户信息：已按要求移除（用户指令 #2） */
 
   /* 客服代下单 */
   if(o.tSource === '客服代下单' && o.cs){
     h += '<div class="card"><div class="card-t">客服代下单信息</div>' +
       kv('客服姓名', esc(o.cs.name)) +
       kv('客服账号', '<b class="mono">' + esc(o.cs.account) + '</b>') +
+      kv('推送时间', esc(o.cs.push)) +
+      kv('确认时间', esc(o.cs.confirm)) +
     '</div>';
   }
 
   /* 行程信息（车型字段并入司机信息卡） */
-  h += '<div class="card"><div class="card-t">行程信息</div>' +
+  h += '<div class="card"><div class="card-t">行程信息<span class="card-t-en">Trip Info</span></div>' +
     routeSvg(o) +
+    kv('起点', esc(o.tPickup.zh), 'Pickup', esc(o.tPickup.en || '')) +
+    kv('终点', esc(o.tDest.zh), 'Destination', esc(o.tDest.en || '')) +
   '</div>';
 
   /* 司机信息 */
   if(o.tDriver){
     var d = o.tDriver;
     var carLabel = esc(o.tCarType) + '（' + esc(d.model) + ' · ' + esc(d.color) + '）';
-    h += '<div class="card"><div class="card-t">司机信息</div>' +
+    h += '<div class="card"><div class="card-t">司机信息<span class="card-t-en">Driver Info</span></div>' +
       '<div class="driver-card">' +
         '<div class="driver-avatar">' + esc(d.name.charAt(0)) + '</div>' +
         '<div class="driver-info">' +
@@ -1468,27 +1574,27 @@ function renderDetail(id){
           '</div>' +
         '</div>' +
       '</div>' +
-      kv('车牌号', '<b class="mono">' + esc(d.plate) + '</b>') +
-      kv('虚拟号', '<b class="mono">' + esc(d.virtualPhone) + '</b>') +
+      kv('车牌号', '<b class="mono">' + esc(d.plate) + '</b>', 'Plate No.') +
+      kv('虚拟号', '<b class="mono">' + esc(d.virtualPhone) + '</b>', 'Virtual Phone') +
     '</div>';
   }
 
   /* 费用明细 */
   var estTotal = +(o.tEst.cao + o.tEst.svc).toFixed(1);
-  h += '<div class="card"><div class="card-t">费用明细</div>' +
-    '<div class="fee-row"><span>曹操预估价</span><span class="v">' + fmtMoney(o.tEst.cao) + '</span></div>' +
-    '<div class="fee-row"><span>平台服务费</span><span class="v">' + fmtMoney(o.tEst.svc) + '</span></div>' +
-    '<div class="fee-row total"><span>预估总价</span><span class="v">' + fmtMoney(estTotal) + '（' + fmtPoints(estTotal) + '）</span></div>';
+  h += '<div class="card"><div class="card-t">费用明细<span class="card-t-en">Fee Breakdown</span></div>' +
+    '<div class="fee-row"><span>曹操预估价<span class="card-t-en">Est. Fare</span></span><span class="v">' + fmtMoney(o.tEst.cao) + '</span></div>' +
+    '<div class="fee-row"><span>平台服务费<span class="card-t-en">Service Fee</span></span><span class="v">' + fmtMoney(o.tEst.svc) + '</span></div>' +
+    '<div class="fee-row total"><span>预估总价<span class="card-t-en">Est. Total</span></span><span class="v">' + fmtMoney(estTotal) + '（' + fmtPoints(estTotal) + '）</span></div>';
   if(o.tBill){
     var billTotal = +(o.tBill.cao + o.tBill.svc).toFixed(1);
-    h += '<div class="fee-row"><span>曹操实际账单</span><span class="v">' + fmtMoney(o.tBill.cao) + '</span></div>' +
-      '<div class="fee-row"><span>平台服务费（实）</span><span class="v">' + fmtMoney(o.tBill.svc) + '</span></div>' +
-      '<div class="fee-row total"><span>实付总价</span><span class="v">' + fmtMoney(billTotal) + '（' + fmtPoints(billTotal) + '）</span></div>';
+    h += '<div class="fee-row"><span>曹操实际账单<span class="card-t-en">Actual Fare</span></span><span class="v">' + fmtMoney(o.tBill.cao) + '</span></div>' +
+      '<div class="fee-row"><span>平台服务费（实）<span class="card-t-en">Service Fee (Act.)</span></span><span class="v">' + fmtMoney(o.tBill.svc) + '</span></div>' +
+      '<div class="fee-row total"><span>实付总价<span class="card-t-en">Actual Total</span></span><span class="v">' + fmtMoney(billTotal) + '（' + fmtPoints(billTotal) + '）</span></div>';
   }
-  h += '<div class="fee-row"><span>冻结积分</span><span class="v">' + fmtPoints(o.tFrozen) + '</span></div>';
-  if(o.tDeducted) h += '<div class="fee-row"><span>实扣积分</span><span class="v" style="color:#D4380D">' + fmtPoints(o.tDeducted) + '</span></div>';
-  if(o.tReleased) h += '<div class="fee-row"><span>已解冻</span><span class="v" style="color:#389E0D">+' + fmtPoints(o.tReleased) + '</span></div>';
-  if(o.tDebt) h += '<div class="fee-row"><span>挂欠账</span><span class="v" style="color:#FF4D4F">' + fmtPoints(o.tDebt) + '</span></div>';
+  h += '<div class="fee-row"><span>冻结积分<span class="card-t-en">Frozen Points</span></span><span class="v">' + fmtPoints(o.tFrozen) + '</span></div>';
+  if(o.tDeducted) h += '<div class="fee-row"><span>实扣积分<span class="card-t-en">Deducted Points</span></span><span class="v" style="color:#D4380D">' + fmtPoints(o.tDeducted) + '</span></div>';
+  if(o.tReleased) h += '<div class="fee-row"><span>已解冻<span class="card-t-en">Released</span></span><span class="v" style="color:#389E0D">+' + fmtPoints(o.tReleased) + '</span></div>';
+  if(o.tDebt) h += '<div class="fee-row"><span>挂欠账<span class="card-t-en">Debt</span></span><span class="v" style="color:#FF4D4F">' + fmtPoints(o.tDebt) + '</span></div>';
   h += '<div class="fee-note freeze">下单时按所选车型最高报价冻结 ' + fmtPoints(o.tFrozen) + '</div>';
   if(o.tDebt > 0) h += '<div class="fee-note debt">实付超出冻结，差额 ' + fmtPoints(o.tDebt) + ' 挂欠账（下次充值抵扣）</div>';
   if(o.tCancelFee > 0){
@@ -1496,67 +1602,41 @@ function renderDetail(id){
   }
   h += '</div>';
 
-  /* 积分流水 */
-  h += '<div class="card"><div class="card-t">积分流水</div>';
-  if(o.tPointLogs && o.tPointLogs.length){
-    o.tPointLogs.forEach(function(p){
-      var tag = PT_TYPE_TAG[p.type] || {cls:'freeze', sign:0};
-      var signTxt = tag.sign > 0 ? '+' : tag.sign < 0 ? '-' : '';
-      h += '<div class="log-item">' +
-        '<span class="log-tm" style="width:auto;font-size:.68rem;white-space:nowrap">' + esc(p.tm) + '</span>' +
-        '<span class="pt-tag ' + tag.cls + '">' + esc(p.type) + '</span>' +
-        '<span class="log-txt"><b>' + signTxt + fmtPoints(p.amount) + '</b><br>' + esc(p.note) + '</span>' +
-        '<span class="log-op">' + esc(p.operator) + '</span>' +
-      '</div>';
+  /* 积分流水、曹操事件流水、操作日志：已按要求移除（用户指令 #4） */
+
+  /* 补偿积分流水 */
+  h += '<div class="card"><div class="card-t">补偿积分流水</div>';
+  if(o.compensations && o.compensations.length){
+    o.compensations.forEach(function(c){
+      var statusHtml = '';
+      if(c.status === '审核通过') statusHtml = '<span class="comp-status pass">审核通过</span>';
+      else if(c.status === '审核驳回') statusHtml = '<span class="comp-status reject">审核驳回</span>';
+      else if(c.status === '待审核') statusHtml = '<span class="comp-status pending">待审核</span>';
+      var imgsHtml = (c.images && c.images.length) ?
+        '<div class="comp-imgs">' + c.images.map(function(img,idx){
+          return '<div class="comp-img" onclick="openImgViewer(this)" data-idx="' + idx + '" data-imgs=\'' + esc(JSON.stringify(c.images)) + '\'>' + esc(img) + '</div>';
+        }).join('') + '</div>' : '';
+      var reviewerHtml = c.reviewer ?
+        '<div class="comp-row"><span class="comp-label">审核人</span><span class="comp-val">' + esc(c.reviewer) + '</span></div>' +
+        '<div class="comp-row"><span class="comp-label">审核时间</span><span class="comp-val">' + esc(c.reviewTime) + '</span></div>' : '';
+      var rejectHtml = (c.status === '审核驳回' && c.rejectReason) ?
+        '<div class="comp-reject">驳回原因：' + esc(c.rejectReason) + '</div>' : '';
+      h += '<div class="comp-item">' +
+        '<div class="comp-head"><span class="comp-flowno">' + esc(c.flowNo) + '</span>' +
+        '<span class="comp-right"><span class="p">+' + fmtPoints(c.points) + '</span>' + statusHtml + '</span></div>' +
+        '<div class="comp-row"><span class="comp-label">发起人</span><span class="comp-val">' + esc(c.applicant) + '</span></div>' +
+        '<div class="comp-row"><span class="comp-label">申请时间</span><span class="comp-val">' + esc(c.tm) + '</span></div>' +
+        '<div class="comp-row"><span class="comp-label">申请原因</span><span class="comp-val">' + esc(c.reason) + '</span></div>' +
+        '<div class="comp-row"><span class="comp-label">凭证图片</span></div>' + imgsHtml +
+        reviewerHtml + rejectHtml +
+        '</div>';
     });
   }else{
-    h += '<div class="comp-empty">暂无积分流水</div>';
+    h += '<div class="comp-empty">暂无补偿记录</div>';
   }
   h += '</div>';
 
-  /* 曹操事件流水 */
-  h += '<div class="card"><div class="card-t">曹操事件流水</div>';
-  if(o.tEvents && o.tEvents.length){
-    o.tEvents.forEach(function(ev){
-      h += '<div class="ev-item">' +
-        '<span class="ev-code">' + esc(String(ev.code)) + '</span>' +
-        '<span class="ev-txt">' + esc(ev.label) + '</span>' +
-        '<span class="ev-tm">' + esc(ev.tm) + '</span>' +
-      '</div>';
-    });
-  }else{
-    h += '<div class="comp-empty">暂无事件</div>';
-  }
-  h += '</div>';
-
-  /* 操作日志 */
-  h += '<div class="card"><div class="card-t">操作日志</div>';
-  if(o.tLogs && o.tLogs.length){
-    o.tLogs.forEach(function(l){
-      h += '<div class="log-item">' +
-        '<span class="log-tm" style="width:auto;font-size:.68rem;white-space:nowrap">' + esc(l.tm) + '</span>' +
-        '<span class="log-txt">' + esc(l.action) + '</span>' +
-        '<span class="log-op">' + esc(l.operator) + '</span>' +
-      '</div>';
-    });
-  }else{
-    h += '<div class="comp-empty">暂无操作日志</div>';
-  }
-  h += '</div>';
-
-  /* 取消原因 */
-  if(o.tCancelReason){
-    h += '<div class="card"><div class="card-t">取消原因</div>' +
-      '<div style="font-size:.8rem;color:#595959;background:#FAFAFA;border:1px solid #F0F0F0;border-radius:10px;padding:10px 12px">' +
-        esc(o.tCancelReason) + '</div></div>';
-  }
-
-  /* 待确认提示 */
-  if(o.tCancelPending && o.tCancelMsg){
-    h += '<div class="card"><div class="card-t">待用户确认</div>' +
-      '<div class="pending-box">⏳ <b>取消订单待用户确认</b>' +
-      '<br>取消费：<b>' + fmtPoints(o.tCancelMsg.fee) + '</b></div></div>';
-  }
+  /* 改目的地待确认提示 */
   if(o.tDestPending && o.tDestMsg){
     h += '<div class="card"><div class="card-t">待老外确认</div>' +
       '<div class="pending-box">⏳ <b>改目的地待老外确认</b><br>新目的地：' + esc(o.tDestMsg.dest.zh) +
@@ -1565,6 +1645,13 @@ function renderDetail(id){
 
   $('detailBody').innerHTML = h;
   renderDetailBar(o);
+  $('btnBack').addEventListener('click', function(){
+    state.detailId = null;
+    $('viewDetail').hidden = true;
+    $('detailBar').hidden = true;
+    $('viewList').hidden = false;
+    renderList();
+  });
 }
 
 /* 详情底部操作栏 */
@@ -1576,9 +1663,6 @@ function renderDetailBar(o){
     '<button class="btn-ghost" id="dRefresh">刷新状态</button>';
   if(showCancel){
     html += '<button class="btn-danger" id="dCancel">取消</button>';
-  }
-  if(showDest){
-    html += '<button class="btn-change" id="dDest">改目的地</button>';
   }
   if(canComp(o)){
     html += '<button class="btn-comp" id="dComp">补偿积分</button>';
@@ -1599,15 +1683,12 @@ function renderDetailBar(o){
       btn.classList.remove('busy');
       btn.textContent = old;
       btn._busy = false;
-      toast('订单状态已刷新', true);
+      toast('已请求曹操出行查询最新订单信息', true);
       if(state.detailId) renderDetail(state.detailId);
     }, 1200);
   });
   if(showCancel){
     $('dCancel').addEventListener('click', function(){ openCancelSheet(o.id); });
-  }
-  if(showDest){
-    $('dDest').addEventListener('click', function(){ openDestSheet(o.id); });
   }
   if(canComp(o)){
     $('dComp').addEventListener('click', function(){ openCompSheet(o.id); });

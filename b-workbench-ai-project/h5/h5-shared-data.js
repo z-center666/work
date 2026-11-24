@@ -9,12 +9,7 @@ const ORDERS = {
     id:'SG20260907140212', tenant:'杭州趣游科技', name:'John Smith', lang:'英语', passport:'E12345678', phone:'13812346620', deviceNo:'DEV-2026-0001',
     source:'AI对话', status:'已支付', meta:'下单 2026-10-20 14:02:12', balance:'326.2',
     sgUrl:'https://g.clawdot.ai/DdFJI',
-    merchant:'海底捞火锅(西湖店)',summary:'麻辣锅底 + 酸梅汤 · 2 件',category:'火锅',
-    rider:{name:'王骑手',phone:'13857123456',score:'4.8',trips:'1,234'},
-    pointLogs:[
-      {tm:'2026-09-07 14:02:11',type:'冻结',amount:74.8,note:'下单预占冻结',operator:'系统'},
-      {tm:'2026-09-07 14:02:15',type:'实扣',amount:74.8,note:'支付完成实际扣减',operator:'系统'}
-    ],
+    merchant:'海底捞火锅(西湖店)',summary:'麻辣锅底 + 酸梅汤 · 2 件',
     addr:{label:'杭州君悦酒店 1212 房',detail:'杭州市西湖区湖滨路 28 号',contact:'John / 13812346620',note:'放前台，到了打电话'},
     money:{goods:68.00,delivery:0,service:6.80,total:74.80},
     items:[{name:'麻辣火锅锅底',spec:'中辣·加麻',qty:1,price:58.00,sub:58.00},{name:'酸梅汤',spec:'常规',qty:1,price:10.00,sub:10.00}],
@@ -28,12 +23,7 @@ const ORDERS = {
     id:'SG20260907112543', tenant:'杭州趣游科技', name:'佐藤健', lang:'日语', passport:'T12345678', phone:'13712342210', deviceNo:'DEV-2026-0002',
     source:'AI对话', status:'商家备餐中', meta:'下单 2026-10-15 11:25:43', balance:'412.5',
     sgUrl:'https://g.clawdot.ai/DdFJI',
-    merchant:'沙县小吃(湖滨店)',summary:'蒸饺 + 拌面 · 2 件',category:'快餐',
-    rider:{name:'李骑手',phone:'13958056789',score:'4.9',trips:'2,345'},
-    pointLogs:[
-      {tm:'2026-09-07 11:25:40',type:'冻结',amount:31.5,note:'下单预占冻结',operator:'系统'},
-      {tm:'2026-09-07 11:25:43',type:'实扣',amount:31.5,note:'支付完成实际扣减',operator:'系统'}
-    ],
+    merchant:'沙县小吃(湖滨店)',summary:'蒸饺 + 拌面 · 2 件',
     addr:{label:'杭州柏悦酒店 808 房',detail:'杭州市西湖区长生路 27 号',contact:'佐藤健 / 13712342210',note:'不要香菜'},
     money:{goods:28.60,delivery:0,service:2.90,total:31.50},
     items:[{name:'蒸饺',spec:'常规',qty:1,price:16.00,sub:16.00},{name:'拌面',spec:'常规',qty:1,price:12.60,sub:12.60}],
@@ -47,13 +37,8 @@ const ORDERS = {
   'SG20260907112055':{
     id:'SG20260907112055', tenant:'浙江文投数媒', name:'Emma Wilson', lang:'英语', passport:'G76543210', phone:'15912343381', deviceNo:'DEV-2026-0003',
     source:'客服代下单', status:'配送中', meta:'下单 2026-09-07 11:20:55', eta:'11:50', balance:'158.0',
-    merchant:'麦当劳(武林店)',summary:'麦辣鸡腿堡套餐 · 1 件',category:'快餐',
+    merchant:'麦当劳(武林店)',summary:'麦辣鸡腿堡套餐 · 1 件',
     cs:{name:'张敏',account:'13900139032',push:'11:20:30',confirm:'11:21:05'},
-    rider:{name:'赵骑手',phone:'13738190123',score:'4.7',trips:'3,456'},
-    pointLogs:[
-      {tm:'2026-09-07 11:20:55',type:'冻结',amount:42.0,note:'下单预占冻结',operator:'系统'},
-      {tm:'2026-09-07 11:21:06',type:'实扣',amount:42.0,note:'支付完成实际扣减',operator:'系统'}
-    ],
     addr:{label:'杭州温德姆酒店 1506 房',detail:'杭州市下城区武林广场 1 号',contact:'Emma / 15912343381',note:'放房间门口'},
     money:{goods:38.20,delivery:0,service:3.80,total:42.00},
     items:[{name:'麦辣鸡腿堡套餐',spec:'中杯可乐',qty:1,price:38.20,sub:38.20}],
@@ -68,12 +53,7 @@ const ORDERS = {
   'SG20260906190533':{
     id:'SG20260906190533', tenant:'浙江文投数媒', name:'佐藤健', lang:'日语', passport:'T12345678', phone:'13712342210', deviceNo:'DEV-2026-0002',
     source:'AI对话', status:'已完成', meta:'下单 2026-09-06 19:05:33', balance:'412.5',
-    merchant:'沙县小吃(湖滨店)',summary:'蒸饺 + 拌面 · 2 件',category:'快餐',
-    rider:{name:'陈骑手',phone:'13606534567',score:'5.0',trips:'4,567'},
-    pointLogs:[
-      {tm:'2026-09-06 19:05:40',type:'冻结',amount:31.5,note:'下单预占冻结',operator:'系统'},
-      {tm:'2026-09-06 19:05:43',type:'实扣',amount:31.5,note:'支付完成实际扣减',operator:'系统'}
-    ],
+    merchant:'沙县小吃(湖滨店)',summary:'蒸饺 + 拌面 · 2 件',
     addr:{label:'杭州柏悦酒店 808 房',detail:'杭州市西湖区长生路 27 号',contact:'佐藤健 / 13712342210',note:'不要香菜'},
     money:{goods:28.60,delivery:0,service:2.90,total:31.50},
     items:[{name:'蒸饺',spec:'常规',qty:1,price:16.00,sub:16.00},{name:'拌面',spec:'常规',qty:1,price:12.60,sub:12.60}],
@@ -87,12 +67,8 @@ const ORDERS = {
   'SG20260906170010':{
     id:'SG20260906170010', tenant:'杭州趣游科技', name:'Kim Min-jun', lang:'韩语', passport:'M12345678', phone:'18612349045', deviceNo:'DEV-2026-0004',
     source:'客服代下单', status:'已取消', meta:'下单 2026-09-06 17:00:10', balance:'220.0',
-    merchant:'星巴克(西湖天地)',summary:'燕麦拿铁 · 1 件',category:'咖啡',
+    merchant:'星巴克(西湖天地)',summary:'燕麦拿铁 · 1 件',
     cs:{name:'李娜',account:'13800138018',push:'17:00:02',confirm:'—'},
-    pointLogs:[
-      {tm:'2026-09-06 17:00:20',type:'冻结',amount:32.0,note:'下单预占冻结',operator:'系统'},
-      {tm:'2026-09-06 17:02:16',type:'解冻',amount:32.0,note:'订单取消，积分解冻',operator:'系统'}
-    ],
     addr:{label:'杭州湖滨大酒店 602 房',detail:'杭州市上城区湖滨路 15 号',contact:'Kim / 18612349045',note:'联系前台'},
     money:{goods:29.10,delivery:0,service:2.90,total:32.00},
     items:[{name:'燕麦拿铁',spec:'大杯·热',qty:1,price:29.10,sub:29.10}],
@@ -104,12 +80,8 @@ const ORDERS = {
   'SG20260906143008':{
     id:'SG20260906143008', tenant:'上海入境通', name:'Kim Min-jun', lang:'韩语', passport:'M12345678', phone:'18612349045', deviceNo:'DEV-2026-0004',
     source:'客服代下单', status:'下单或履约失败', meta:'下单 2026-09-06 14:30:08', balance:'220.0（未扣减）',
-    merchant:'星巴克(西湖天地)',summary:'燕麦拿铁 · 1 件',category:'咖啡',
+    merchant:'星巴克(西湖天地)',summary:'燕麦拿铁 · 1 件',
     cs:{name:'李娜',account:'13800138018',push:'14:30:02',confirm:'14:30:20'},
-    pointLogs:[
-      {tm:'2026-09-06 14:30:20',type:'冻结',amount:32.0,note:'老外确认支付，积分冻结',operator:'系统'},
-      {tm:'2026-09-06 14:30:52',type:'解冻',amount:32.0,note:'create_order 超时关单，积分解冻',operator:'系统'}
-    ],
     addr:{label:'杭州湖滨大酒店 602 房',detail:'杭州市上城区湖滨路 15 号',contact:'Kim / 18612349045',note:'联系前台'},
     money:{goods:29.10,delivery:0,service:2.90,total:32.00},
     items:[{name:'燕麦拿铁',spec:'大杯·热',qty:1,price:29.10,sub:29.10}],
@@ -122,12 +94,7 @@ const ORDERS = {
   'SG20260905183044':{
     id:'SG20260905183044', tenant:'上海入境通', name:'John Smith', lang:'英语', passport:'E12345678', phone:'13812346620', deviceNo:'DEV-2026-0001',
     source:'AI对话', status:'已退款', meta:'下单 2026-09-05 18:30:44', balance:'326.2',
-    merchant:'肯德基(湖滨店)',summary:'劲脆鸡腿堡 · 1 件',category:'快餐',
-    pointLogs:[
-      {tm:'2026-09-05 18:30:40',type:'冻结',amount:28.0,note:'老外确认支付，积分冻结',operator:'硬件'},
-      {tm:'2026-09-05 18:30:41',type:'实扣',amount:28.0,note:'create_order 成功，扣减积分',operator:'系统'},
-      {tm:'2026-09-05 18:31:03',type:'解冻',amount:28.0,note:'商家接单失败，自动退款',operator:'系统'}
-    ],
+    merchant:'肯德基(湖滨店)',summary:'劲脆鸡腿堡 · 1 件',
     addr:{label:'杭州君悦酒店 1212 房',detail:'杭州市西湖区湖滨路 28 号',contact:'John / 13812346620',note:'放前台，到了打电话'},
     money:{goods:25.50,delivery:0,service:2.50,total:28.00},
     refund:{points:28.0,complete:'2026-09-05 18:33:10',status:'退款成功'},
@@ -220,45 +187,45 @@ const TOURISTS = [
   {id:'T001', userId:'U346620', name:'John Smith', lang:'英语', passport:'E12345678', phone:'13812346620', deviceNo:'DEV-2026-0001', city:'杭州', lng:120.1551, lat:30.2741, balance:'412.5', loc:'杭州湖滨银泰 in77',
    diet:'不吃辣；忌花生、香菜', pref:'少油少盐；餐具要 2 份，送到前台请致电',
    addrs:[
-    {label:'杭州君悦酒店 1212 房', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'放前台，到了打电话', lng:120.1622, lat:30.2490, distance:'350m'},
-    {label:'杭州君悦酒店 行政酒廊 8F', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'送至 8 层行政酒廊', lng:120.1622, lat:30.2490, distance:'350m'},
-    {label:'杭州西子湖四季酒店 3205 房', detail:'杭州市西湖区灵隐路 5 号', contact:'John / 13812346620', note:'前次入住，备用地址', lng:120.1288, lat:30.2570, distance:'3.2km'},
-    {label:'杭州东站维也纳酒店 706 房', detail:'杭州市上城区东站西广场 1 号', contact:'John / 13812346620', note:'备用地址', lng:120.2130, lat:30.2885, distance:'6.8km'},
-    {label:'杭州湖滨银泰 in77 公寓 1806', detail:'杭州市上城区延安路 98 号', contact:'John / 13812346620', note:'楼下有门禁，到了请致电', lng:120.1655, lat:30.2488, distance:'280m'},
-    {label:'杭州黄龙饭店 1508 房', detail:'杭州市西湖区曙光路 120 号', contact:'John / 13812346620', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
-    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'John / 13812346620', note:'周末度假住址', lng:120.1305, lat:30.2385, distance:'4.5km'},
-    {label:'杭州城站汉庭酒店 512 房', detail:'杭州市上城区清泰街 152 号', contact:'John / 13812346620', note:'临时住一晚', lng:120.1802, lat:30.2436, distance:'3.6km'},
-    {label:'杭州萧山机场亚朵酒店 908 房', detail:'杭州市萧山区机场路 66 号', contact:'John / 13812346620', note:'次日早班机，送前台', lng:120.4341, lat:30.2361, distance:'27km'}
+    {label:'杭州君悦酒店 1212 房', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'放前台，到了打电话', lng:120.1622, lat:30.2490},
+    {label:'杭州君悦酒店 行政酒廊 8F', detail:'杭州市西湖区湖滨路 28 号', contact:'John / 13812346620', note:'送至 8 层行政酒廊', lng:120.1622, lat:30.2490},
+    {label:'杭州西子湖四季酒店 3205 房', detail:'杭州市西湖区灵隐路 5 号', contact:'John / 13812346620', note:'前次入住，备用地址', lng:120.1288, lat:30.2570},
+    {label:'杭州东站维也纳酒店 706 房', detail:'杭州市上城区东站西广场 1 号', contact:'John / 13812346620', note:'备用地址', lng:120.2130, lat:30.2885},
+    {label:'杭州湖滨银泰 in77 公寓 1806', detail:'杭州市上城区延安路 98 号', contact:'John / 13812346620', note:'楼下有门禁，到了请致电', lng:120.1655, lat:30.2488},
+    {label:'杭州黄龙饭店 1508 房', detail:'杭州市西湖区曙光路 120 号', contact:'John / 13812346620', note:'备用地址', lng:120.1349, lat:30.2686},
+    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'John / 13812346620', note:'周末度假住址', lng:120.1305, lat:30.2385},
+    {label:'杭州城站汉庭酒店 512 房', detail:'杭州市上城区清泰街 152 号', contact:'John / 13812346620', note:'临时住一晚', lng:120.1802, lat:30.2436},
+    {label:'杭州萧山机场亚朵酒店 908 房', detail:'杭州市萧山区机场路 66 号', contact:'John / 13812346620', note:'次日早班机，送前台', lng:120.4341, lat:30.2361}
   ]},
   {id:'T002', userId:'U342210', name:'佐藤健', lang:'日语', passport:'T12345678', phone:'13712342210', deviceNo:'DEV-2026-0002', city:'杭州', lng:120.1551, lat:30.2741, balance:'704.8', loc:'杭州湖滨银泰 in77',
    diet:'不吃香菜、不吃动物内脏', pref:'口味清淡；不要放味精；需要一次性筷子',
    addrs:[
-    {label:'杭州柏悦酒店 808 房', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'不要香菜', lng:120.1640, lat:30.2521, distance:'520m'},
-    {label:'杭州柏悦酒店 37F 会所', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'送至 37 层会所前台', lng:120.1640, lat:30.2521, distance:'520m'},
-    {label:'杭州城中香格里拉 1501 房', detail:'杭州市下城区长寿路 6 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1637, lat:30.2673, distance:'1.1km'},
-    {label:'杭州黄龙饭店 508 房', detail:'杭州市西湖区曙光路 120 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
-    {label:'杭州湖滨银泰 in77 服务中心', detail:'杭州市上城区延安路 98 号', contact:'佐藤健 / 13712342210', note:'送至 1 层服务中心', lng:120.1655, lat:30.2488, distance:'280m'},
-    {label:'杭州萧山机场希尔顿 2201 房', detail:'杭州市萧山区机场路 88 号', contact:'佐藤健 / 13712342210', note:'转机过夜', lng:120.4341, lat:30.2361, distance:'27km'}
+    {label:'杭州柏悦酒店 808 房', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'不要香菜', lng:120.1640, lat:30.2521},
+    {label:'杭州柏悦酒店 37F 会所', detail:'杭州市西湖区长生路 27 号', contact:'佐藤健 / 13712342210', note:'送至 37 层会所前台', lng:120.1640, lat:30.2521},
+    {label:'杭州城中香格里拉 1501 房', detail:'杭州市下城区长寿路 6 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1637, lat:30.2673},
+    {label:'杭州黄龙饭店 508 房', detail:'杭州市西湖区曙光路 120 号', contact:'佐藤健 / 13712342210', note:'备用地址', lng:120.1349, lat:30.2686},
+    {label:'杭州湖滨银泰 in77 服务中心', detail:'杭州市上城区延安路 98 号', contact:'佐藤健 / 13712342210', note:'送至 1 层服务中心', lng:120.1655, lat:30.2488},
+    {label:'杭州萧山机场希尔顿 2201 房', detail:'杭州市萧山区机场路 88 号', contact:'佐藤健 / 13712342210', note:'转机过夜', lng:120.4341, lat:30.2361}
   ]},
   {id:'T003', userId:'U343381', name:'Emma Wilson', lang:'英语', passport:'G76543210', phone:'15912343381', deviceNo:'DEV-2026-0003', city:'杭州', lng:120.1551, lat:30.2741, balance:'186.2', loc:'杭州湖滨银泰 in77',
    diet:'素食（不吃任何肉类）', pref:'偏好甜口；不要葱姜蒜；送到房间门口即可',
    addrs:[
-    {label:'杭州温德姆酒店 1506 房', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'放房间门口', lng:120.1685, lat:30.2748, distance:'950m'},
-    {label:'杭州温德姆酒店 2F 大堂吧', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'送至大堂吧', lng:120.1685, lat:30.2748, distance:'950m'},
-    {label:'杭州武林万怡酒店 2108 房', detail:'杭州市拱墅区体育场路 333 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.1620, lat:30.2790, distance:'1.3km'},
-    {label:'杭州湖滨银泰附近民宿', detail:'杭州市上城区平海路 124 号', contact:'Emma / 15912343381', note:'备用地址，需提前电话', lng:120.1660, lat:30.2500, distance:'310m'},
-    {label:'杭州西子湖四季酒店 2208 房', detail:'杭州市西湖区灵隐路 5 号', contact:'Emma / 15912343381', note:'朋友代收', lng:120.1288, lat:30.2570, distance:'3.2km'},
-    {label:'杭州城站维也纳 903 房', detail:'杭州市上城区东站西广场 1 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.2130, lat:30.2885, distance:'6.8km'}
+    {label:'杭州温德姆酒店 1506 房', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'放房间门口', lng:120.1685, lat:30.2748},
+    {label:'杭州温德姆酒店 2F 大堂吧', detail:'杭州市下城区武林广场 1 号', contact:'Emma / 15912343381', note:'送至大堂吧', lng:120.1685, lat:30.2748},
+    {label:'杭州武林万怡酒店 2108 房', detail:'杭州市拱墅区体育场路 333 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.1620, lat:30.2790},
+    {label:'杭州湖滨银泰附近民宿', detail:'杭州市上城区平海路 124 号', contact:'Emma / 15912343381', note:'备用地址，需提前电话', lng:120.1660, lat:30.2500},
+    {label:'杭州西子湖四季酒店 2208 房', detail:'杭州市西湖区灵隐路 5 号', contact:'Emma / 15912343381', note:'朋友代收', lng:120.1288, lat:30.2570},
+    {label:'杭州城站维也纳 903 房', detail:'杭州市上城区东站西广场 1 号', contact:'Emma / 15912343381', note:'备用地址', lng:120.2130, lat:30.2885}
   ]},
   {id:'T004', userId:'U349045', name:'Kim Min-jun', lang:'韩语', passport:'M12345678', phone:'18612349045', deviceNo:'DEV-2026-0004', city:'杭州', lng:120.1551, lat:30.2741, balance:'258.0', loc:'杭州湖滨银泰 in77',
    diet:'忌海鲜（含虾蟹贝类）', pref:'偏辣；需要湿巾；联系前台转房间',
    addrs:[
-    {label:'杭州湖滨大酒店 602 房', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'联系前台', lng:120.1601, lat:30.2503, distance:'420m'},
-    {label:'杭州湖滨大酒店 1F 商务中心', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'送至商务中心', lng:120.1601, lat:30.2503, distance:'420m'},
-    {label:'杭州索菲特西湖大酒店 1203 房', detail:'杭州市上城区西湖大道 333 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1655, lat:30.2455, distance:'1.8km'},
-    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1305, lat:30.2385, distance:'4.5km'},
-    {label:'杭州黄龙饭店 1206 房', detail:'杭州市西湖区曙光路 120 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1349, lat:30.2686, distance:'2.4km'},
-    {label:'杭州东站维也纳酒店 508 房', detail:'杭州市上城区东站西广场 1 号', contact:'Kim / 18612349045', note:'返程前住址', lng:120.2130, lat:30.2885, distance:'6.8km'}
+    {label:'杭州湖滨大酒店 602 房', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'联系前台', lng:120.1601, lat:30.2503},
+    {label:'杭州湖滨大酒店 1F 商务中心', detail:'杭州市上城区湖滨路 15 号', contact:'Kim / 18612349045', note:'送至商务中心', lng:120.1601, lat:30.2503},
+    {label:'杭州索菲特西湖大酒店 1203 房', detail:'杭州市上城区西湖大道 333 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1655, lat:30.2455},
+    {label:'杭州西湖国宾馆 8 号楼 201', detail:'杭州市西湖区杨公堤 18 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1305, lat:30.2385},
+    {label:'杭州黄龙饭店 1206 房', detail:'杭州市西湖区曙光路 120 号', contact:'Kim / 18612349045', note:'备用地址', lng:120.1349, lat:30.2686},
+    {label:'杭州东站维也纳酒店 508 房', detail:'杭州市上城区东站西广场 1 号', contact:'Kim / 18612349045', note:'返程前住址', lng:120.2130, lat:30.2885}
   ]}
 ];
 
@@ -401,20 +368,20 @@ const TX_SEED = [
   {id:'CC20261014091001', pu:'杭州君悦酒店', dst:'萧山国际机场', cno:'1140671095002201', cao:1,  s:'未派单',   tenant:'杭州趣游科技', name:'James Miller',  lang:'英语', passport:'US8812001', phone:'13901120001', dev:'DEV-2026-0101', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-14 09:10:01', est:[38.0,3.8],  bill:null,        fee:0,    bal:412.5, driver:-1},
   {id:'CC20261014091802', pu:'西子湖四季酒店', dst:'杭州东站', cno:'1140671095002202', cao:9,  s:'开始服务',   tenant:'杭州趣游科技', name:'Sofia Rossi',   lang:'意大利语', passport:'IT4451202', phone:'13901120002', dev:'DEV-2026-0102', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-14 09:18:02', est:[46.0,4.6],  bill:null,        fee:0,    bal:298.0, driver:0},
   {id:'CC20261014090303', pu:'杭州柏悦酒店', dst:'灵隐寺', cno:'1140671095002203', cao:12, s:'司机已到达',   tenant:'浙江文投数媒', name:'Hans Weber',    lang:'德语', passport:'DE2231003', phone:'13901120003', dev:'DEV-2026-0103', src:'AI对话',      car:'商务型', city:'杭州', cc:'0571', tm:'2026-10-14 09:03:03', est:[88.0,8.8],  bill:null,        fee:8.8,   bal:560.4, driver:1},
-  {id:'CC20261014084604', pu:'灵隐寺', dst:'西湖景区', cno:'1140671095002204', cao:3,  s:'乘客上车·计费开始',   tenant:'杭州趣游科技', name:'Emma Wilson',   lang:'英语', passport:'GB7765404', phone:'13901120004', dev:'DEV-2026-0104', src:'客服代下单',  car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-14 08:46:04', est:[52.0,5.2],  bill:null,        fee:0,    bal:186.2, driver:2, cs:{name:'张敏',account:'13900139032'}},
-  {id:'CC20261014092905', pu:'外滩', dst:'浦东国际机场', cno:'1140671095002205', cao:9,  s:'开始服务',   tenant:'上海入境通',   name:'佐藤健太',      lang:'日语', passport:'JP3312005', phone:'13901120005', dev:'DEV-2026-0105', src:'客服代下单',  car:'豪华型', city:'上海', cc:'021',  tm:'2026-10-14 09:29:05', est:[132.0,13.2],bill:null,        fee:0,    bal:704.8, driver:3, cs:{name:'王芳',account:'13700137021'}},
+  {id:'CC20261014084604', pu:'灵隐寺', dst:'西湖景区', cno:'1140671095002204', cao:3,  s:'乘客上车·计费开始',   tenant:'杭州趣游科技', name:'Emma Wilson',   lang:'英语', passport:'GB7765404', phone:'13901120004', dev:'DEV-2026-0104', src:'客服代下单',  car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-14 08:46:04', est:[52.0,5.2],  bill:null,        fee:0,    bal:186.2, driver:2},
+  {id:'CC20261014092905', pu:'外滩', dst:'浦东国际机场', cno:'1140671095002205', cao:9,  s:'开始服务',   tenant:'上海入境通',   name:'佐藤健太',      lang:'日语', passport:'JP3312005', phone:'13901120005', dev:'DEV-2026-0105', src:'客服代下单',  car:'豪华型', city:'上海', cc:'021',  tm:'2026-10-14 09:29:05', est:[132.0,13.2],bill:null,        fee:0,    bal:704.8, driver:3},
   {id:'CC20261014093306', pu:'武林广场', dst:'西湖景区', cno:'1140671095002206', cao:12, s:'司机已到达',   tenant:'杭州趣游科技', name:'Lucas Martin',  lang:'法语', passport:'FR9901206', phone:'13901120006', dev:'DEV-2026-0106', src:'AI对话',      car:'新能源', city:'杭州', cc:'0571', tm:'2026-10-14 09:33:06', est:[29.0,2.9],  bill:null,        fee:0,    bal:97.4,  driver:4},
   {id:'CC20261014082007', pu:'河坊街', dst:'杭州东站', cno:'1140671095002207', cao:5,  s:'订单待支付',   tenant:'杭州趣游科技', name:'Anna Schmidt',  lang:'德语', passport:'DE1122007', phone:'13901120007', dev:'DEV-2026-0107', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-14 08:20:07', est:[44.0,4.4],  bill:[47.0,4.7],  fee:0,    bal:233.9, driver:2},
   {id:'CC20261014075508', pu:'西湖文化广场', dst:'城站火车站', cno:'1140671095002208', cao:8,  s:'行程结束·计费结束',   tenant:'浙江文投数媒', name:'Kim Min-jun',   lang:'韩语', passport:'KR5567008', phone:'13901120008', dev:'DEV-2026-0108', src:'AI对话',      car:'优选', city:'杭州', cc:'0571', tm:'2026-10-14 07:55:08', est:[36.0,3.6],  bill:[36.0,3.6],  fee:0,    bal:150.0, driver:5},
   {id:'CC20261014073809', pu:'西湖景区', dst:'萧山国际机场', cno:'1140671095002209', cao:7,  s:'订单已支付',   tenant:'杭州趣游科技', name:'John Smith',    lang:'英语', passport:'US6642009', phone:'13901120009', dev:'DEV-2026-0109', src:'AI对话',      car:'豪华型', city:'杭州', cc:'0571', tm:'2026-10-14 07:38:09', est:[126.0,12.6],bill:[118.0,11.8],fee:0,    bal:389.6, driver:1},
-  {id:'CC20261013210510', pu:'杭州柏悦酒店', dst:'萧山国际机场', cno:'1140671095002210', cao:7,  s:'订单已支付',   tenant:'浙江文投数媒', name:'Maria Garcia',  lang:'西班牙语', passport:'ES7788010', phone:'13901120010', dev:'DEV-2026-0110', src:'客服代下单',  car:'商务型', city:'杭州', cc:'0571', tm:'2026-10-13 21:05:10', est:[96.0,9.6],  bill:[108.0,10.8],fee:0,    bal:64.3,  driver:0, debt:11.2, cs:{name:'李娜',account:'13800138018'}},
+  {id:'CC20261013210510', pu:'杭州柏悦酒店', dst:'萧山国际机场', cno:'1140671095002210', cao:7,  s:'订单已支付',   tenant:'浙江文投数媒', name:'Maria Garcia',  lang:'西班牙语', passport:'ES7788010', phone:'13901120010', dev:'DEV-2026-0110', src:'客服代下单',  car:'商务型', city:'杭州', cc:'0571', tm:'2026-10-13 21:05:10', est:[96.0,9.6],  bill:[108.0,10.8],fee:0,    bal:64.3,  driver:0, debt:11.2},
   {id:'CC20261013184211', pu:'南京路步行街', dst:'静安寺', cno:'1140671095002211', cao:7,  s:'订单已支付',   tenant:'上海入境通',   name:'Pierre Dubois', lang:'法语', passport:'FR2233011', phone:'13901120011', dev:'DEV-2026-0111', src:'AI对话',      car:'舒适型', city:'上海', cc:'021',  tm:'2026-10-13 18:42:11', est:[61.0,6.1],  bill:[61.0,6.1],  fee:0,    bal:275.8, driver:3},
   {id:'CC20261013163012', pu:'杭州东站', dst:'西湖景区', cno:'1140671095002212', cao:4,  s:'订单系统取消',   tenant:'杭州趣游科技', name:'Olga Petrova',  lang:'俄语', passport:'RU4455012', phone:'13901120012', dev:'DEV-2026-0112', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-13 16:30:12', est:[42.0,4.2],  bill:null,        fee:0,    bal:318.0, driver:-1, cancel:'无车接单：120s 内附近无司机接单，订单被曹操系统撤销'},
   {id:'CC20261013154513', pu:'湖滨银泰', dst:'西溪湿地', cno:'1140671095002213', cao:10, s:'订单取消·待付款',   tenant:'浙江文投数媒', name:'David Chen',    lang:'英语', passport:'CA8877013', phone:'13901120013', dev:'DEV-2026-0113', src:'AI对话',      car:'优选', city:'杭州', cc:'0571', tm:'2026-10-13 15:45:13', est:[33.0,3.3],  bill:null,        fee:8.0,  bal:204.6, driver:5, cancel:'用户取消（已过免费取消时长，需支付取消费 8.0 积分）'},
   {id:'CC20261013150214', pu:'城站火车站', dst:'灵隐寺', cno:'1140671095002214', cao:13, s:'订单取消·已支付',   tenant:'杭州趣游科技', name:'Elena Novak',   lang:'捷克语', passport:'CZ1144014', phone:'13901120014', dev:'DEV-2026-0114', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-13 15:02:14', est:[39.0,3.9],  bill:null,        fee:9.0,  bal:266.1, driver:2, cancel:'用户取消，取消费 9.0 积分已支付'},
-  {id:'CC20261013142815', pu:'陆家嘴', dst:'虹桥火车站', cno:'1140671095002215', cao:14, s:'订单取消已免责取消费',   tenant:'上海入境通',   name:'Thomas Müller', lang:'德语', passport:'DE5533015', phone:'13901120015', dev:'DEV-2026-0115', src:'客服代下单',  car:'新能源', city:'上海', cc:'021',  tm:'2026-10-13 14:28:15', est:[26.0,2.6],  bill:null,        fee:0,    bal:501.2, driver:4, cancel:'客服免责：司机长时间未到达，客服申请免除取消费', cs:{name:'王芳',account:'13700137021'}},
+  {id:'CC20261013142815', pu:'陆家嘴', dst:'虹桥火车站', cno:'1140671095002215', cao:14, s:'订单取消已免责取消费',   tenant:'上海入境通',   name:'Thomas Müller', lang:'德语', passport:'DE5533015', phone:'13901120015', dev:'DEV-2026-0115', src:'客服代下单',  car:'新能源', city:'上海', cc:'021',  tm:'2026-10-13 14:28:15', est:[26.0,2.6],  bill:null,        fee:0,    bal:501.2, driver:4, cancel:'客服免责：司机长时间未到达，客服申请免除取消费'},
   {id:'CC20261013135016', pu:'西湖景区', dst:'河坊街', cno:'1140671095002216', cao:20, s:'用户取消',   tenant:'杭州趣游科技', name:'Yuki Tanaka',   lang:'日语', passport:'JP6677016', phone:'13901120016', dev:'DEV-2026-0116', src:'AI对话',      car:'优选', city:'杭州', cc:'0571', tm:'2026-10-13 13:50:16', est:[31.0,3.1],  bill:null,        fee:0,    bal:412.9, driver:5, cancel:'用户取消（免费取消时长内，无取消费）'},
-  {id:'CC20261013125517', pu:'西溪湿地', dst:'武林广场', cno:'1140671095002217', cao:20, s:'用户取消',   tenant:'浙江文投数媒', name:'Marco Bianchi', lang:'意大利语', passport:'IT2233017', phone:'13901120017', dev:'DEV-2026-0117', src:'客服代下单',  car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-13 12:55:17', est:[37.0,3.7],  bill:null,        fee:0,    bal:158.7, driver:1, cancel:'客服协助老外取消（按乘客原因码提交）', cs:{name:'李娜',account:'13800138018'}},
+  {id:'CC20261013125517', pu:'西溪湿地', dst:'武林广场', cno:'1140671095002217', cao:20, s:'用户取消',   tenant:'浙江文投数媒', name:'Marco Bianchi', lang:'意大利语', passport:'IT2233017', phone:'13901120017', dev:'DEV-2026-0117', src:'客服代下单',  car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-13 12:55:17', est:[37.0,3.7],  bill:null,        fee:0,    bal:158.7, driver:1, cancel:'客服协助老外取消（按乘客原因码提交）'},
   {id:'CC20261013114018', pu:'杭州君悦酒店', dst:'杭州东站', cno:'1140671095002218', cao:21, s:'曹操客服取消',   tenant:'杭州趣游科技', name:'Sarah Johnson', lang:'英语', passport:'US3344018', phone:'13901120018', dev:'DEV-2026-0118', src:'AI对话',      car:'豪华型', city:'杭州', cc:'0571', tm:'2026-10-13 11:40:18', est:[124.0,12.4],bill:null,        fee:0,    bal:620.5, driver:3, cancel:'客服取消：司机车辆故障无法到场，曹操客服侧发起取消'},
   {id:'CC20261013101519', pu:'上海环球金融中心', dst:'浦东国际机场', cno:'1140671095002219', cao:26, s:'司机取消',   tenant:'上海入境通',   name:'Ahmed Hassan',  lang:'阿拉伯语', passport:'EG1122019', phone:'13901120019', dev:'DEV-2026-0119', src:'AI对话',      car:'商务型', city:'上海', cc:'021',  tm:'2026-10-13 10:15:19', est:[92.0,9.2],  bill:null,        fee:0,    bal:377.3, driver:0, cancel:'司机取消（司机到达后超最大等待时间，免费取消）'},
   {id:'CC20261013094820', pu:'西湖景区', dst:'湖滨银泰', cno:'1140671095002220', cao:7,  s:'订单已支付',   tenant:'杭州趣游科技', name:'Nina Kowalski', lang:'波兰语', passport:'PL9988020', phone:'13901120020', dev:'DEV-2026-0120', src:'AI对话',      car:'舒适型', city:'杭州', cc:'0571', tm:'2026-10-13 09:48:20', est:[28.0,2.8],  bill:[28.0,2.8],  fee:0,    bal:145.0, driver:4}
@@ -486,8 +453,7 @@ TX_SEED.forEach(s => {
     tDeducted: 0, tReleased: 0, tDebt: s.debt || 0,
     tCancelPending: false, tCancelMsg: null,
     tDestPending: false, tDestProposal: null, tDestMsg: null, tDestPendingAt: null,
-    src: s.src, tCancelReason: s.cancel || '',
-    cs: s.cs || null
+    src: s.src, tCancelReason: s.cancel || ''
   };
   if(s.bill){
     const act = s.bill[0] + s.bill[1];
